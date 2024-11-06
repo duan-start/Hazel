@@ -3,7 +3,7 @@
 
 #include "Hazel/Core.h"
 #include "Hazel/Events/Event.h"
-
+//和平台无关的抽象的window声明
 namespace Hazel {
 	struct WindowProps {
 		std::string Title;

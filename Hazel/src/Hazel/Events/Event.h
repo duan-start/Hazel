@@ -1,6 +1,6 @@
 #pragma once
 
-    //#include"Core.h"
+//#include"Core.h"
 
 namespace Hazel {
 	//时间在Hazel里面是一个实时堵塞的，意味着当一个事件发生时，将会立刻得到处理

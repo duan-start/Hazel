@@ -6,7 +6,7 @@
 namespace Hazel {
 	class HAZEL_API MouseMovedEvent :public Event {
 	public:
-		MouseMoveEvent(float x, float y)
+		MouseMovedEvent(float x, float y)
 			:m_MouseX(x), m_MouseY(y) {}
 		inline float GetX() const { return m_MouseX; }
 		inline float GetY() const { return m_MouseY; }
@@ -14,10 +14,11 @@ namespace Hazel {
 		std::string ToString()const override {
 			std::stringstream ss;
 			ss << "MouseMovedEvent: " << m_MouseX << "," << m_MouseY;
-			return ss.str;
+			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	private:
 		int m_MouseX;
 		int m_MouseY;
@@ -25,19 +26,20 @@ namespace Hazel {
 
 	class HAZEL_API MouseScrolledEvent :public Event {
 	public:
-		MouseScrolledEvent(float xOffset,float yOffset)
-			:m_XOffset(xOffset),m_YOffset(yOffset){}
+		MouseScrolledEvent(float xOffset, float yOffset)
+			:m_XOffset(xOffset), m_YOffset(yOffset) {}
 
-		inline float GetXOffset{ return m_XOffset; }
-		inline float GetYOffset{ return m_YOffset; }
+		float GetXOffset() const { return m_XOffset; }
+		float GetYOffset() const { return m_YOffset; }
 
 			std::string ToString() const override {
 			std::stringstream ss;
 			ss << "MouseScrolledEvent: " << m_XOffset << "," << m_YOffset;
-			return ss.str;
+			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
 		float m_XOffset;
@@ -50,7 +52,7 @@ namespace Hazel {
 		inline int GetMouseButton() const { return m_Button; }
 
 		//类型分类
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput | EventCategoryMouseButton)
 	protected:
 		//仅供子类构造
 		MouseButtonEvent(int button)
@@ -59,9 +61,9 @@ namespace Hazel {
 		int m_Button;
 	};
 
-	class HAZEL_API MouseButtonPressed : public MouseButtonEvent {
+	class HAZEL_API MouseButtonPressedEvent : public MouseButtonEvent {
 	public:
-		MouseButtonPressed(int button)
+		MouseButtonPressedEvent(int button)
 			:MouseButtonEvent(button){}
 
 	//	inline int GetButton() {return m_Button}
@@ -75,9 +77,9 @@ namespace Hazel {
 
 	};
 
-	class HAZEL_API MouseButtonReleased : public MouseButtonEvent {
+	class HAZEL_API MouseButtonReleasedEvent : public MouseButtonEvent {
 	public:
-		MouseButtonReleased(int button)
+		MouseButtonReleasedEvent(int button)
 			:MouseButtonEvent(button) {}
 
 		//	inline int GetButton() {return m_Button}
