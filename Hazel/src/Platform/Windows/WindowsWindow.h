@@ -33,7 +33,6 @@ namespace Hazel {
 			bool VSync;
 
 			EventCallbackFn EventCallback;
-
 		};
 		WindowData m_Data;
 

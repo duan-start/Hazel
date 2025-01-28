@@ -34,7 +34,6 @@ namespace Hazel {
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 	
-
 		glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
@@ -44,8 +43,8 @@ namespace Hazel {
 		glfwDestroyWindow(m_Window);
 	}
 	void WindowsWindow::OnUpdate() {
-		glfwPollEvents();
 		glfwSwapBuffers(m_Window);
+		glfwPollEvents();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled) {
