@@ -32,6 +32,7 @@ namespace Hazel {
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync()const = 0;
 
+		//将在特定平台实现的
 		static Window* Create(const WindowProps& props = WindowProps());
 	};
 }
