@@ -20,6 +20,7 @@ namespace Hazel {
 
 	class HAZEL_API Window {
 	public:
+		//设置回调函数
 		using EventCallbackFn = std::function<void(Event&)>;
 
 		virtual ~Window()=default;
