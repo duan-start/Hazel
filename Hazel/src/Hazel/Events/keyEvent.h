@@ -12,14 +12,14 @@ namespace Hazel {
 	protected:
 		//构造函数在这个地方，表明这个抽象只允许在子类中进行构建
 		KeyEvent(int keycode)
-			:m_KeyCode(keycode){}
+			:m_KeyCode(keycode) {}
 
 		int m_KeyCode;
 	};
 	class HAZEL_API KeyPressedEvent :public KeyEvent {
 	public:
 		KeyPressedEvent(int keycode, int repeatCount)
-			:keyEvent(keycode), m_RepeatCount(repeatCount) {}
+			:KeyEvent(keycode), m_RepeatCount(repeatCount) {}
 
 		inline int GetRepeatCount() const { return m_RepeatCount; }
 
@@ -42,7 +42,7 @@ namespace Hazel {
 		std::string ToString() const override {
 			std::stringstream ss;
 			ss << "KeyReleasedEvent: " << m_KeyCode;
-			return ss.str;
+			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(KeyReleased)
