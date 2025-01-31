@@ -62,14 +62,17 @@ project "Hazel"
     filter "configurations:Debug"  
         defines{"HZ_DEBUG"}  
         symbols"On"  
+        buildoptions"/MDd"
 
     filter "configurations:Release"  
         defines{"HZ_RELEASE"}  
         optimize"On"  
+        buildoptions"/Md"
 
     filter "configurations:Dist"  
         defines{"HZ_DIST"}  
         optimize"On"  
+        buildoptions"/Md"
 
 project "Sandbox"  
     location "Sandbox"  
