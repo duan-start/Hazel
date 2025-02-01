@@ -1,8 +1,8 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include "Hazel/Window.h"  // 确保 WindowProps 被定义
 
+struct GLFWwindow;
 
 namespace Hazel {
 	class WindowsWindow :public Window {
