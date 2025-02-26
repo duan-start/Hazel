@@ -14,6 +14,7 @@
 namespace Hazel {
 	static bool s_GLFWInitialized = false;
 
+	//这个设计模式是工厂模式
 	Window* Window::Create(const WindowProps& props) {
 		return new WindowsWindow(props);
 	}
@@ -51,11 +52,14 @@ namespace Hazel {
 
 		//使用断言完成是否加载成功
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		
+		//将我们的数据指针传递给glfw
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
     //利用glfw里面的回调函数绑定我们自己的事件处理函数
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) {
+	
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			data.Width = width;
 			data.Height = height;
@@ -65,6 +69,7 @@ namespace Hazel {
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
+			//这里是我们的数据指针
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			WindowClose event;
 			data.EventCallback(event);

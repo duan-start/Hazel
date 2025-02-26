@@ -8,6 +8,8 @@
 #include "Hazel/Layer.h"
 #include "Hazel/LayerStack.h"
 
+#include "Hazel/Input.h"
+
 namespace Hazel {
 class HAZEL_API Application {
 public:	
