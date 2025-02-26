@@ -1,6 +1,7 @@
 workspace "Hazel"  
     architecture "x64"  
-
+    startproject "Sandbox"
+    
     configurations{  
         "Debug",  
         "Release",  
@@ -18,6 +19,8 @@ IncludeDir["Imgui"] = "Hazel/vendor/imgui"
 include "Hazel/vendor/GLFW"  
 include "Hazel/vendor/Glad"  
 include "Hazel/vendor/imgui"
+
+
 
 project "Hazel"  
     location "Hazel"  
@@ -62,7 +65,7 @@ project "Hazel"
             "HZ_BUILD_DLL"  
         }
         postbuildcommands{  
-            ("{COPYFILE} %{cfg.buildtarget.relpath} ../bin/" ..outputdir.. "/Sandbox")  
+            ("{COPYFILE} %{cfg.buildtarget.relpath} \"../bin/" ..outputdir.. "/Sandbox\"")  
         }
 
           
