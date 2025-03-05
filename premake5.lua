@@ -14,12 +14,16 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"  
 IncludeDir["Glad"] = "Hazel/vendor/Glad/include"  
 IncludeDir["Imgui"] = "Hazel/vendor/imgui"
+IncludeDir["glm"] = "Hazel/vendor/glm"
 
 -- Include directories relative to root folder (Solution directory)  
 include "Hazel/vendor/GLFW"  
 include "Hazel/vendor/Glad"  
 include "Hazel/vendor/imgui"
+--这是工程文件啊，下面的是在干嘛啊，肯定不能加啊，有没有premakefile文件，肯定不行
+--include "./Hazel/vendor/glm"
 
+--print("GLM Include Directory: " .. IncludeDir["glm"])
 
 
 project "Hazel"  
@@ -38,7 +42,9 @@ project "Hazel"
 
     files{  
         "%{prj.name}/src/**.h",  
-        "%{prj.name}/src/**.cpp"  
+        "%{prj.name}/src/**.cpp",
+        "%{IncludeDir.glm}/glm/**.hpp",
+        "%{IncludeDir.glm}/glm/**.inl"
     }  
 
     includedirs{  
@@ -46,7 +52,8 @@ project "Hazel"
         "Hazel/src",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.Imgui}"
+        "%{IncludeDir.Imgui}",
+        "%{IncludeDir.glm}"
     }
 
     links{
@@ -64,10 +71,13 @@ project "Hazel"
             "HZ_PLATFORM_WINDOWS",  
             "HZ_BUILD_DLL"  
         }
-        postbuildcommands{  
-            ("{COPYFILE} %{cfg.buildtarget.relpath} \"../bin/" ..outputdir.. "/Sandbox\"")  
-        }
 
+        postbuildcommands{
+            -- 创建目标文件夹（如果不存在）
+            ("{MKDIR} \"../bin/" .. outputdir .. "/Sandbox\""),
+            -- 复制 Hazel.dll 到 Sandbox 的输出目录
+            ("{COPYFILE} %{cfg.buildtarget.abspath} \"../bin/" .. outputdir .. "/Sandbox\"")
+        }
           
 
     filter "configurations:Debug"  
@@ -105,6 +115,7 @@ project "Sandbox"
     includedirs{  
         "Hazel/vendor/spdlog/include",  
         "Hazel/vendor/imgui",
+        "Hazel/vendor/glm",
         "Hazel/src"  
     }  
     
