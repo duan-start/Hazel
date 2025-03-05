@@ -9,6 +9,8 @@
 #include "Hazel/LayerStack.h"
 
 #include "Hazel/Input.h"
+#include "Hazel/Imgui/ImguiLayer.h"
+
 
 namespace Hazel {
 class HAZEL_API Application {
@@ -26,6 +28,7 @@ private:
 	std::unique_ptr<Window> m_Window;
 	bool m_Running = true;
 	LayerStack m_LayerStack;
+	ImguiLayer* m_ImGuiLayer;
 
 private:
 	static Application* s_Instance;
