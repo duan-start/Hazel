@@ -30,7 +30,7 @@ private:
 #define HZ_CORE_FATAL(...)	::Hazel::Log::GetsCoreLogger()->fatal(__VA_ARGS__)
 
 //客户端状态下的日志宏
-#define HZ_ERROR(...)		::Hazel::Log::GetsClientlogger()->error(__VA_ARGS__)
+#define HZ_ERROR(...)		::Hazel::Log::GetsClientLogger()->error(__VA_ARGS__)
 #define HZ_WARN(...)		::Hazel::Log::GetsClientLogger()->warn(__VA_ARGS__)
 #define HZ_INFO(...)		::Hazel::Log::GetsClientLogger()->info(__VA_ARGS__)
 #define HZ_TRACE(...)		::Hazel::Log::GetsClientLogger()->trace(__VA_ARGS__)

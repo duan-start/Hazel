@@ -5,7 +5,8 @@
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
-#include "glad/glad.h"
+#include "Platform/OpenGL/OpenGLContext.h"
+
 #include <GLFW/glfw3.h>
 
 
@@ -47,11 +48,13 @@ namespace Hazel {
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 	
-		glfwMakeContextCurrent(m_Window);
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-
-		//使用断言完成是否加载成功
-		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
+		//把这个具象的东西放到抽象的接口
+		//glfwMakeContextCurrent(m_Window);
+		//int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		////使用断言完成是否加载成功
+		//HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 		
 		//将我们的数据指针传递给glfw
 		glfwSetWindowUserPointer(m_Window, &m_Data);
@@ -66,6 +69,8 @@ namespace Hazel {
 
 			WindowResizeEvent event(width, height);
 			data.EventCallback(event);
+			//实际上这个事件应该是所有层栈共用的回调事件，按理渲染的层栈是专门放在渲染的ui中，但是所有的都是glfw ，所以我感觉放这里关系也不大
+			glViewport(0, 0, width, height);
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
@@ -142,8 +147,10 @@ namespace Hazel {
 		glfwDestroyWindow(m_Window);
 	}
 	void WindowsWindow::OnUpdate() {
-		glfwSwapBuffers(m_Window);
 		glfwPollEvents();
+		m_Context->SwapBuffers();
+		//glfwSwapBuffers(m_Window);
+		
 	}
 
 	void WindowsWindow::SetVSync(bool enabled) {
