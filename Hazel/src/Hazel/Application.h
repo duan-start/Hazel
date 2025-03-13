@@ -11,6 +11,9 @@
 #include "Hazel/Input.h"
 #include "Hazel/Imgui/ImguiLayer.h"
 
+#include "Hazel/Renderer/Buffer.h"
+#include "Hazel/Renderer/Shader.h"
+
 
 namespace Hazel {
 class HAZEL_API Application {
@@ -29,6 +32,12 @@ private:
 	bool m_Running = true;
 	LayerStack m_LayerStack;
 	ImguiLayer* m_ImGuiLayer;
+
+	//快速hack实现的三角形绘制
+	unsigned int m_vertexarray;
+	std::unique_ptr<Shader> m_Shader;
+	std::unique_ptr<VerTexBuffer> m_VertexBuffer;
+	std::unique_ptr<IndexBuffer> m_IndexBuffer;
 
 private:
 	static Application* s_Instance;

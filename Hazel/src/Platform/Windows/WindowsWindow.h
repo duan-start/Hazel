@@ -2,6 +2,7 @@
 
 #include "Hazel/Window.h"  // 确保 WindowProps 被定义
 
+#include "Hazel/Renderer/GraphicsContext.h"
 struct GLFWwindow;
 
 namespace Hazel {
@@ -27,7 +28,7 @@ namespace Hazel {
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
-		
+		GraphicsContext* m_Context;
 		struct WindowData {
 			std::string Title;
 			unsigned int Width, Height;
