@@ -24,6 +24,7 @@ namespace Hazel {
 
 
 
+
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count)
 	{
 		glCreateBuffers(1, &m_RenderID);

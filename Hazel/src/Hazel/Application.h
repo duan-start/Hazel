@@ -38,6 +38,7 @@ private:
 	std::unique_ptr<Shader> m_Shader;
 	std::unique_ptr<VerTexBuffer> m_VertexBuffer;
 	std::unique_ptr<IndexBuffer> m_IndexBuffer;
+	//std::unique_ptr<BufferLayout> m_BufferLayout;
 
 private:
 	static Application* s_Instance;

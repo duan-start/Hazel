@@ -49,7 +49,7 @@ namespace Hazel {
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 	
 		m_Context = new OpenGLContext(m_Window);
-		m_Context->Init();
+		//我突然发现我已经把这个扔到了初始化中了 m_Context->Init();
 		//把这个具象的东西放到抽象的接口
 		//glfwMakeContextCurrent(m_Window);
 		//int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
