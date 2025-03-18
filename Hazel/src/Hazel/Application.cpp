@@ -9,10 +9,30 @@
 
 namespace Hazel {
 
+
+
 	//这个的用法
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
+
+	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type) {
+		switch (type) {
+			case ShaderDataType::Float:		return GL_FLOAT;
+			case ShaderDataType::Float2:	return GL_FLOAT;
+			case ShaderDataType::Float3:	return GL_FLOAT;
+			case ShaderDataType::Float4:	return GL_FLOAT;
+			case ShaderDataType::Mat3:		return GL_FLOAT;
+			case ShaderDataType::Mat4:		return GL_FLOAT;
+			case ShaderDataType::Int:		return GL_INT;
+			case ShaderDataType::Int2:		return GL_INT;
+			case ShaderDataType::Int3:		return GL_INT;
+			case ShaderDataType::Int4:		return GL_INT;
+			case ShaderDataType::Bool:		return GL_BOOL;
+		}
+		HZ_CORE_ASSERT(false, "Unknowen ShaderDataType");
+		return 0;
+	}
 
 	Application::Application() {
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
@@ -27,16 +47,34 @@ namespace Hazel {
 		glGenVertexArrays(1, &m_vertexarray);
 		glBindVertexArray(m_vertexarray);
 	
-		float vertices[3 * 3] = {
-			-0.5f,-0.5f,0.f,
-			0.f,0.5f,0.f,
-			.5,-.5,0.f
+		float vertices[3 * 7] = {
+			-0.5f, -0.5f, 0.f , .8f,0.2f,.8f,1.0f,
+			 0.f,  0.5f,  0.0f ,0.2f,0.3f,1.0f,1.0f,
+			.5	,  -.5,   0.f,  .8f,.8f,.2f, 1.0f
 		};
 		m_VertexBuffer.reset(VerTexBuffer::Creat(vertices, sizeof(vertices)));
-
-		glEnableVertexArrayAttrib(m_vertexarray,0);
-		glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
-
+		
+		//把不要的东西全部都销毁掉
+		{
+			BufferLayout layout = {
+				//"addd"是const std::string& 类型或是std::string 也行，但就是千万别std::string&
+				{ ShaderDataType::Float3, "a_Pos"},
+				{ ShaderDataType::Float4,"a_Color"},
+			};
+			m_VertexBuffer->SetLayout(layout);
+		}
+		
+		uint32_t index = 0;
+		//const ，然后后面是获得bufferlayout的迭代器，所以一定要有const类型的返回迭代器
+		//所以这个begin 和end还不是随便写的，主要是这个循环是用迭代器的，虽然隐藏了部分信息
+		for (const auto& element : m_VertexBuffer->GetLayout()) {
+			glEnableVertexArrayAttrib(m_vertexarray,index);
+			glVertexAttribPointer(index,element.GetComponentCount(),
+				ShaderDataTypeToOpenGLBaseType(element.Type), 
+			element.Normalized ? GL_TRUE:GL_FALSE, m_VertexBuffer->GetLayout().GetStride(),
+				(const void*)element.Offset);
+			index++;
+		}
 		//indexbuffer
 
 		uint32_t Index[] = { 0,1,2 };
@@ -46,18 +84,22 @@ namespace Hazel {
 		std::string VertexSrc = R"(
 		#version 330 core
 		layout(location=0) in vec3 a_Pos;
+		layout(location=1) in vec4 a_Color;
 		out vec3 as;
+		out vec4 aV;
 		void main(){
 		gl_Position=vec4(a_Pos,1.0f);
 		as=a_Pos;
+		aV=a_Color;
 	}
 )";
 		std::string FragmentSrc = R"(
 		#version 330 core
 		out vec4 a_color;
 		in vec3 as;
+		in vec4 aV;
 		void main(){
-		a_color=vec4(as*0.5+0.5,1.0f);
+		a_color=vec4(aV);
 	}
 )";
 
