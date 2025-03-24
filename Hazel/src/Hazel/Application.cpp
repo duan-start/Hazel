@@ -16,24 +16,6 @@ namespace Hazel {
 
 	Application* Application::s_Instance = nullptr;
 
-	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type) {
-		switch (type) {
-			case ShaderDataType::Float:		return GL_FLOAT;
-			case ShaderDataType::Float2:	return GL_FLOAT;
-			case ShaderDataType::Float3:	return GL_FLOAT;
-			case ShaderDataType::Float4:	return GL_FLOAT;
-			case ShaderDataType::Mat3:		return GL_FLOAT;
-			case ShaderDataType::Mat4:		return GL_FLOAT;
-			case ShaderDataType::Int:		return GL_INT;
-			case ShaderDataType::Int2:		return GL_INT;
-			case ShaderDataType::Int3:		return GL_INT;
-			case ShaderDataType::Int4:		return GL_INT;
-			case ShaderDataType::Bool:		return GL_BOOL;
-		}
-		HZ_CORE_ASSERT(false, "Unknowen ShaderDataType");
-		return 0;
-	}
-
 	Application::Application() {
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
 		s_Instance = this;
@@ -43,67 +25,159 @@ namespace Hazel {
 		m_ImGuiLayer = new ImguiLayer();
 		PushOverlay(m_ImGuiLayer);
 
-		//快速hack生成三角形
-		glGenVertexArrays(1, &m_vertexarray);
-		glBindVertexArray(m_vertexarray);
+		m_VertexArray.reset(VerTexArray::Create());
 	
-		float vertices[3 * 7] = {
-			-0.5f, -0.5f, 0.f , .8f,0.2f,.8f,1.0f,
-			 0.f,  0.5f,  0.0f ,0.2f,0.3f,1.0f,1.0f,
-			.5	,  -.5,   0.f,  .8f,.8f,.2f, 1.0f
+		float vertices[3 * 4] = {
+		 -.9,-.9,0,//左下
+		-.9,.9,0,//左上
+		.9,-.9,0,//you xia
+		.9,.9,0//you shang
 		};
+
 		m_VertexBuffer.reset(VerTexBuffer::Creat(vertices, sizeof(vertices)));
 		
-		//把不要的东西全部都销毁掉
-		{
+
+		{//把不要的东西全部都销毁
 			BufferLayout layout = {
-				//"addd"是const std::string& 类型或是std::string 也行，但就是千万别std::string&
+				//"addv"是const std::string& 类型或是std::string 也行，但就是千万别std::string&
 				{ ShaderDataType::Float3, "a_Pos"},
-				{ ShaderDataType::Float4,"a_Color"},
 			};
+			//设置缓冲布局
 			m_VertexBuffer->SetLayout(layout);
 		}
 		
-		uint32_t index = 0;
-		//const ，然后后面是获得bufferlayout的迭代器，所以一定要有const类型的返回迭代器
-		//所以这个begin 和end还不是随便写的，主要是这个循环是用迭代器的，虽然隐藏了部分信息
-		for (const auto& element : m_VertexBuffer->GetLayout()) {
-			glEnableVertexArrayAttrib(m_vertexarray,index);
-			glVertexAttribPointer(index,element.GetComponentCount(),
-				ShaderDataTypeToOpenGLBaseType(element.Type), 
-			element.Normalized ? GL_TRUE:GL_FALSE, m_VertexBuffer->GetLayout().GetStride(),
-				(const void*)element.Offset);
-			index++;
-		}
+		//设置属性
+		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
+
 		//indexbuffer
 
-		uint32_t Index[] = { 0,1,2 };
+		uint32_t Index[] = { 0, 1, 2,   // first triangle
+		1, 2, 3    // second triangle
+		};
 		m_IndexBuffer.reset(IndexBuffer::Creat(Index, sizeof(Index) / sizeof(uint32_t)));
-		
+		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
+		//绑定第二个状态
+		m_SquareVA.reset(VerTexArray::Create());
+		float bluevertices[3 * 4] = {
+		 -1.,-1.,0,//左下
+		-1.,1.,0,//左上
+		1.,-1.,0,//you xia
+		1.,1.,0//you shang
+		};
+
+		//虽然这里是创建智能指针，但是也是创建类，也是实例化，注意构造函数,不是，没搞懂这个make_shared的用法
+		std::shared_ptr<VerTexBuffer> squareVB;
+		squareVB.reset(VerTexBuffer::Creat(bluevertices, sizeof(bluevertices)));
+
+		{//把不要的东西全部都销毁
+			BufferLayout layout = {
+				//"addv"是const std::string& 类型或是std::string 也行，但就是千万别std::string&
+				{ ShaderDataType::Float3, "a_Pos"},
+			};
+			//设置缓冲布局
+			squareVB->SetLayout(layout);
+		}
+
+		//设置属性
+		m_SquareVA->AddVertexBuffer(squareVB);
+		m_SquareVA->SetIndexBuffer(m_IndexBuffer);
+
+		//shader
 		std::string VertexSrc = R"(
 		#version 330 core
-		layout(location=0) in vec3 a_Pos;
-		layout(location=1) in vec4 a_Color;
-		out vec3 as;
-		out vec4 aV;
-		void main(){
-		gl_Position=vec4(a_Pos,1.0f);
-		as=a_Pos;
-		aV=a_Color;
-	}
+		
+		// 输入顶点数据
+		layout(location = 0) in vec3 aPos;      // 顶点位置
+		// 输出到片段着色器的变量
+		out vec2 Pos;
+		out vec2 stand;
+		uniform vec2 iResolution;
+		out vec2 screen;
+		
+		// 顶点着色器主函数
+		void main() {
+		    // 设置顶点位置
+		    gl_Position = vec4(aPos, 1.0);
+		
+		    // 将纹理坐标传递到片段着色器
+		
+		    Pos = vec2((aPos.x+1)*iResolution.x/2,(aPos.y+1)*iResolution.y/2);
+		    stand=vec2(aPos.x,aPos.y);
+		    screen=iResolution;
+		}
 )";
 		std::string FragmentSrc = R"(
 		#version 330 core
-		out vec4 a_color;
-		in vec3 as;
-		in vec4 aV;
-		void main(){
-		a_color=vec4(aV);
-	}
+			out vec4 FragColor;
+			in vec2 Pos;
+			in vec2 stand;
+			in vec2 screen;
+			uniform float iTime;
+			
+			#define t iTime
+			#define r screen.xy
+			
+			vec3 palette(float t){
+				vec3 a=vec3 (.5,.5,.5);
+				vec3 b=vec3 (.5,.5,.5);
+				vec3 c=vec3 (1.,1.,1.);
+				vec3 d=vec3 (0.263,.416,.557);
+			    return a+b*cos( 6.28318*(c*t+d));
+			    }
+			
+			void main(){
+				vec2 uv =stand;
+				uv.x*=screen.x/screen.y;
+				vec2 uv0=uv;
+				vec3 final=vec3(0.,0.,0.);
+				
+				for(float i=0.;i<4.;i++){
+				  uv=fract(uv*1.5)-0.5;
+				  float d=length(uv)*exp(-length(uv0));
+				  
+				  vec3 col=palette(length(uv0)+i*.4+t*.4);
+				  d = sin(d*8.+t)/8.;
+				  d=abs(d);
+				  //d=step(0.1,d);
+				  
+				  //smoothstep 函数，数值之间的平滑过度
+				  // d=smoothstep(0.,0.1,d);
+		
+				  d=pow(0.01/d,1.2);
+				  final+=col*d;
+			}
+			
+			
+			FragColor=vec4(final,0.);
+			
+			}
+	
+)";
+
+		std::string m_BlueVertexSrc = R"(
+		#version 330 core
+		
+		// 输入顶点数据
+		layout(location = 0) in vec3 aPos;      // 顶点位置
+
+
+		// 顶点着色器主函数
+		void main() {
+		    // 设置顶点位置
+		    gl_Position = vec4(aPos, 1.0);
+		}
+)";
+		std::string m_BuleFragmentSrc = R"(
+		#version 330 core
+			out vec4 FragColor;	
+			void main(){
+			FragColor=vec4(0.2f,0.2f,0.6f,0.f);	
+			}
 )";
 
 		m_Shader.reset(new Shader(VertexSrc,FragmentSrc));
+		m_BlueShader.reset(new Shader(m_BlueVertexSrc, m_BuleFragmentSrc));
 
 	}
 
@@ -147,10 +221,21 @@ namespace Hazel {
 		while (m_Running) {
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			float currentTime = glfwGetTime();
+
+			m_BlueShader->Bind();
+			m_SquareVA->Bind();
+			glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+
 			m_Shader->Bind();
-			glBindVertexArray(m_vertexarray);
+			m_Shader->setFloat("iTime", currentTime);
+			m_Shader->setVec2("iResolution", glm::vec2(m_Window->GetWidth(), m_Window->GetHeight()));
+			m_VertexArray->Bind();
 			//glDrawArrays(GL_TRIANGLES, 0, 3);
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT,nullptr);
+			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+
+			
 
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate();
