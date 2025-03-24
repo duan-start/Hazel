@@ -126,5 +126,34 @@ namespace Hazel {
 	{
 		glDeleteProgram(m_RenderID);
 	}
+
+
+	void Shader::setBool(const std::string& name, bool value) const {
+		glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), (int)value);
+	}
+
+	void Shader::setInt(const std::string& name, int value) const {
+		glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), value);
+	}
+
+	void Shader::setFloat(const std::string& name, float value) const {
+		glUniform1f(glGetUniformLocation(m_RenderID, name.c_str()), value);
+	}
+
+	void Shader::setVec2(const std::string& name, glm::vec2 value) const
+	{
+		glUniform2f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y);
+	}
+
+	void Shader::setVec3(const std::string& name, glm::vec3 value) const
+	{
+		glUniform3f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y, value.z);
+	}
+
+	void Shader::setMatrix4fv(const std::string& name, glm::mat4 value) const {
+
+		glUniformMatrix4fv(glGetUniformLocation(m_RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+	}
+
 	
 }
