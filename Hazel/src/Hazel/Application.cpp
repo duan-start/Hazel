@@ -16,6 +16,7 @@ namespace Hazel {
 
 	Application* Application::s_Instance = nullptr;
 
+
 	Application::Application() {
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
 		s_Instance = this;
@@ -24,6 +25,11 @@ namespace Hazel {
 		//按理是要在析构函数中delete掉的，
 		m_ImGuiLayer = new ImguiLayer();
 		PushOverlay(m_ImGuiLayer);
+
+		
+		m_Camera.reset(Camera::Create(-2.0,2.0,-2,2));
+		//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
+		m_Camera->SetRotation(glm::vec4(0., 0., 1., 45.));
 
 		m_VertexArray.reset(VerTexArray::Create());
 	
@@ -60,10 +66,10 @@ namespace Hazel {
 		//绑定第二个状态
 		m_SquareVA.reset(VerTexArray::Create());
 		float bluevertices[3 * 4] = {
-		 -1.,-1.,0,//左下
-		-1.,1.,0,//左上
-		1.,-1.,0,//you xia
-		1.,1.,0//you shang
+		 -.5,-.5,0,//左下
+		-.5,.5,0,//左上
+		.5,-.5,0,//you xia
+		.5,.5,0//you shang
 		};
 
 		//虽然这里是创建智能指针，但是也是创建类，也是实例化，注意构造函数,不是，没搞懂这个make_shared的用法
@@ -94,16 +100,17 @@ namespace Hazel {
 		out vec2 stand;
 		uniform vec2 iResolution;
 		out vec2 screen;
+		uniform mat4 u_ViewProjection;
 		
 		// 顶点着色器主函数
 		void main() {
 		    // 设置顶点位置
-		    gl_Position = vec4(aPos, 1.0);
-		
+		    gl_Position = u_ViewProjection * vec4(aPos, 1.0);
+			vec4 m_Pos = gl_Position;
 		    // 将纹理坐标传递到片段着色器
 		
-		    Pos = vec2((aPos.x+1)*iResolution.x/2,(aPos.y+1)*iResolution.y/2);
-		    stand=vec2(aPos.x,aPos.y);
+		    Pos = vec2((m_Pos.x+1)*iResolution.x/2,(m_Pos.y+1)*iResolution.y/2);
+		    stand=vec2(m_Pos.x,m_Pos.y);
 		    screen=iResolution;
 		}
 )";
@@ -160,16 +167,19 @@ namespace Hazel {
 		
 		// 输入顶点数据
 		layout(location = 0) in vec3 aPos;      // 顶点位置
+		uniform vec2 iResolution;
+		uniform mat4 u_ViewProjection;
 
 
 		// 顶点着色器主函数
 		void main() {
 		    // 设置顶点位置
-		    gl_Position = vec4(aPos, 1.0);
+		    gl_Position = u_ViewProjection*vec4(aPos, 1.0);
 		}
 )";
 		std::string m_BuleFragmentSrc = R"(
 		#version 330 core
+			uniform float iTime;
 			out vec4 FragColor;	
 			void main(){
 			FragColor=vec4(0.2f,0.2f,0.6f,0.f);	
@@ -220,19 +230,20 @@ namespace Hazel {
 
 		while (m_Running) {
 			
-			float currentTime = glfwGetTime();
-
-			RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
+			float ScreenRatio = ((float)m_Window->GetHeight()) / ((float)m_Window->GetWidth());
+			m_Camera->SetProjection({ -2.,2.,-2 * ScreenRatio ,2 * ScreenRatio });
+		/*	glClearColor(0.6f, 0.1f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);*/
+			RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
 			RenderCommand::Clear();
 
-			Renderer::BeginScene();
-			m_BlueShader->Bind();
-			Renderer::Submit(m_SquareVA);
+			//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
+			m_Camera->SetRotation(glm::vec4(0., 0., 1., 45.));
 
-			m_Shader->Bind();
-			m_Shader->setFloat("iTime", currentTime);
-			m_Shader->setVec2("iResolution", glm::vec2(m_Window->GetWidth(), m_Window->GetHeight()));
-			Renderer::Submit(m_VertexArray);
+			Renderer::BeginScene(m_Camera,m_Window);
+			Renderer::Submit(m_BlueShader,m_SquareVA );
+			
+			Renderer::Submit(m_Shader,m_VertexArray );
 
 			Renderer::EndScene();
 
@@ -243,8 +254,8 @@ namespace Hazel {
 			for (Layer* layer : m_LayerStack)
 				layer->OnImGuiRender();
 			m_ImGuiLayer->End();
-			//	auto [mx, my] = Input::GetMousePosition();
-			//	HZ_CORE_TRACE("{0}, {1}", mx, my);
+				//auto [mx, my] = Input::GetMousePosition();
+				//HZ_CORE_TRACE("{0}, {1}", mx, my);
 
 				
 			m_Window->OnUpdate();

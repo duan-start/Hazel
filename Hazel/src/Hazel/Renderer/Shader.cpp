@@ -2,6 +2,10 @@
 #include "Shader.h"
 #include "glad/glad.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
 namespace Hazel {
 	Shader::Shader(const std::string& vertexsrc, const std::string& fragmentsrc)
 	{// Read our shaders into the appropriate buffers

@@ -6,12 +6,12 @@ namespace Hazel {
 
 	void OpenGLRendererAPI::Clear()
 	{
-		glClear(GL_COLOR_BUFFER_BIT || GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT );
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
 	{
-		glClearColor(color.r, color.g, color.b, color.a);
+		glClearColor(color.x, color.y, color.z, color.w);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<VerTexArray>& vertexArray)

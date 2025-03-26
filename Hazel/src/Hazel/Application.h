@@ -16,6 +16,8 @@
 
 #include "Hazel/Renderer/VertexArray.h"
 
+#include "Hazel/Renderer/Camera.h"
+
 namespace Hazel {
 class HAZEL_API Application {
 public:	
@@ -47,6 +49,8 @@ private:
 	std::shared_ptr<VerTexArray> m_SquareVA;
 	//std::unique_ptr<BufferLayout> m_BufferLayout;
 
+	std::shared_ptr<Camera> m_Camera;
+ 
 private:
 	static Application* s_Instance;
 };
