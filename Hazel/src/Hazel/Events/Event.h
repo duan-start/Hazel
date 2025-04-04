@@ -62,9 +62,11 @@ namespace Hazel {
 		EventDispatcher(Event& event)
 			:m_Event(event){}
 
-	//
+
+		//虽然有函数的实参推导，但是这里的使用通过EventFn绑定对应类型的类，后面应用的时候能看出来
 		template<typename T>
 		bool Dispatch(EventFn<T> func) {
+			if (m_Event.Handled) return false;
 			if (m_Event.GetEventType() == T::GetStaticType()) {
 				m_Event.m_Handled = func(*(T*)&m_Event);
 				return true;

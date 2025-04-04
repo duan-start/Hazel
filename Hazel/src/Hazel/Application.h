@@ -36,20 +36,6 @@ private:
 	LayerStack m_LayerStack;
 	ImguiLayer* m_ImGuiLayer;
 
-
-	std::shared_ptr<Shader> m_Shader;
-	std::shared_ptr<Shader> m_BlueShader;
-
-	//每个vao 表示一个渲染流程
-	std::shared_ptr<VerTexBuffer> m_VertexBuffer;
-	std::shared_ptr<IndexBuffer> m_IndexBuffer;
-	std::shared_ptr<VerTexArray> m_VertexArray;
-
-	//多个vao
-	std::shared_ptr<VerTexArray> m_SquareVA;
-	//std::unique_ptr<BufferLayout> m_BufferLayout;
-
-	std::shared_ptr<Camera> m_Camera;
  
 private:
 	static Application* s_Instance;

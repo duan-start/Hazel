@@ -16,6 +16,10 @@ namespace Hazel {
 		inline std::vector<Layer*>::iterator begin() { return m_Layers.begin(); }
 		inline std::vector<Layer*>::iterator end() { return m_Layers.end(); }
 
+		// 反向迭代器（修正返回类型）
+		inline std::vector<Layer*>::reverse_iterator rbegin() { return m_Layers.rbegin(); }
+		inline std::vector<Layer*>::reverse_iterator rend() { return m_Layers.rend(); }
+
 	private:
 		std::vector<Layer*> m_Layers;
 		unsigned int m_LayerInsertIndex=0;

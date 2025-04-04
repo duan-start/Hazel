@@ -25,170 +25,7 @@ namespace Hazel {
 		//按理是要在析构函数中delete掉的，
 		m_ImGuiLayer = new ImguiLayer();
 		PushOverlay(m_ImGuiLayer);
-
-		
-		m_Camera.reset(Camera::Create(-2.0,2.0,-2,2));
-		//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
-		m_Camera->SetRotation(glm::vec4(0., 0., 1., 45.));
-
-		m_VertexArray.reset(VerTexArray::Create());
-	
-		float vertices[3 * 4] = {
-		 -.9,-.9,0,//左下
-		-.9,.9,0,//左上
-		.9,-.9,0,//you xia
-		.9,.9,0//you shang
-		};
-
-		m_VertexBuffer.reset(VerTexBuffer::Creat(vertices, sizeof(vertices)));
-		
-
-		{//把不要的东西全部都销毁
-			BufferLayout layout = {
-				//"addv"是const std::string& 类型或是std::string 也行，但就是千万别std::string&
-				{ ShaderDataType::Float3, "a_Pos"},
-			};
-			//设置缓冲布局
-			m_VertexBuffer->SetLayout(layout);
-		}
-		
-		//设置属性
-		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
-
-		//indexbuffer
-
-		uint32_t Index[] = { 0, 1, 2,   // first triangle
-		1, 2, 3    // second triangle
-		};
-		m_IndexBuffer.reset(IndexBuffer::Creat(Index, sizeof(Index) / sizeof(uint32_t)));
-		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
-
-		//绑定第二个状态
-		m_SquareVA.reset(VerTexArray::Create());
-		float bluevertices[3 * 4] = {
-		 -.5,-.5,0,//左下
-		-.5,.5,0,//左上
-		.5,-.5,0,//you xia
-		.5,.5,0//you shang
-		};
-
-		//虽然这里是创建智能指针，但是也是创建类，也是实例化，注意构造函数,不是，没搞懂这个make_shared的用法
-		std::shared_ptr<VerTexBuffer> squareVB;
-		squareVB.reset(VerTexBuffer::Creat(bluevertices, sizeof(bluevertices)));
-
-		{//把不要的东西全部都销毁
-			BufferLayout layout = {
-				//"addv"是const std::string& 类型或是std::string 也行，但就是千万别std::string&
-				{ ShaderDataType::Float3, "a_Pos"},
-			};
-			//设置缓冲布局
-			squareVB->SetLayout(layout);
-		}
-
-		//设置属性
-		m_SquareVA->AddVertexBuffer(squareVB);
-		m_SquareVA->SetIndexBuffer(m_IndexBuffer);
-
-		//shader
-		std::string VertexSrc = R"(
-		#version 330 core
-		
-		// 输入顶点数据
-		layout(location = 0) in vec3 aPos;      // 顶点位置
-		// 输出到片段着色器的变量
-		out vec2 Pos;
-		out vec2 stand;
-		uniform vec2 iResolution;
-		out vec2 screen;
-		uniform mat4 u_ViewProjection;
-		
-		// 顶点着色器主函数
-		void main() {
-		    // 设置顶点位置
-		    gl_Position = u_ViewProjection * vec4(aPos, 1.0);
-			vec4 m_Pos = gl_Position;
-		    // 将纹理坐标传递到片段着色器
-		
-		    Pos = vec2((m_Pos.x+1)*iResolution.x/2,(m_Pos.y+1)*iResolution.y/2);
-		    stand=vec2(m_Pos.x,m_Pos.y);
-		    screen=iResolution;
-		}
-)";
-		std::string FragmentSrc = R"(
-		#version 330 core
-			out vec4 FragColor;
-			in vec2 Pos;
-			in vec2 stand;
-			in vec2 screen;
-			uniform float iTime;
-			
-			#define t iTime
-			#define r screen.xy
-			
-			vec3 palette(float t){
-				vec3 a=vec3 (.5,.5,.5);
-				vec3 b=vec3 (.5,.5,.5);
-				vec3 c=vec3 (1.,1.,1.);
-				vec3 d=vec3 (0.263,.416,.557);
-			    return a+b*cos( 6.28318*(c*t+d));
-			    }
-			
-			void main(){
-				vec2 uv =stand;
-				uv.x*=screen.x/screen.y;
-				vec2 uv0=uv;
-				vec3 final=vec3(0.,0.,0.);
-				
-				for(float i=0.;i<4.;i++){
-				  uv=fract(uv*1.5)-0.5;
-				  float d=length(uv)*exp(-length(uv0));
-				  
-				  vec3 col=palette(length(uv0)+i*.4+t*.4);
-				  d = sin(d*8.+t)/8.;
-				  d=abs(d);
-				  //d=step(0.1,d);
-				  
-				  //smoothstep 函数，数值之间的平滑过度
-				  // d=smoothstep(0.,0.1,d);
-		
-				  d=pow(0.01/d,1.2);
-				  final+=col*d;
-			}
-			
-			
-			FragColor=vec4(final,0.);
-			
-			}
-	
-)";
-
-		std::string m_BlueVertexSrc = R"(
-		#version 330 core
-		
-		// 输入顶点数据
-		layout(location = 0) in vec3 aPos;      // 顶点位置
-		uniform vec2 iResolution;
-		uniform mat4 u_ViewProjection;
-
-
-		// 顶点着色器主函数
-		void main() {
-		    // 设置顶点位置
-		    gl_Position = u_ViewProjection*vec4(aPos, 1.0);
-		}
-)";
-		std::string m_BuleFragmentSrc = R"(
-		#version 330 core
-			uniform float iTime;
-			out vec4 FragColor;	
-			void main(){
-			FragColor=vec4(0.2f,0.2f,0.6f,0.f);	
-			}
-)";
-
-		m_Shader.reset(new Shader(VertexSrc,FragmentSrc));
-		m_BlueShader.reset(new Shader(m_BlueVertexSrc, m_BuleFragmentSrc));
-
+		std::cout << "m_ImGuiLayer\n";
 	}
 
 	Application:: ~Application() {
@@ -201,10 +38,11 @@ namespace Hazel {
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowClose>(BIND_EVENT_FN(Application::OnWindowClose));
 		//HZ_CORE_TRACE("{0}", e);
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); ) {
-			(*--it)->OnEvent(e);
-			if (e.Handled)
-				break;
+		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it) {
+			HZ_CORE_TRACE("Layer order: {}", (*it)->GetName());
+			(*it)->OnEvent(e);
+			HZ_CORE_TRACE("event: {} ", e.Handled);
+			if (e.Handled) break;  // 关键：立即终止
 		}
 	}
 
@@ -229,23 +67,6 @@ namespace Hazel {
 	void Application::Run() {
 
 		while (m_Running) {
-			
-			float ScreenRatio = ((float)m_Window->GetHeight()) / ((float)m_Window->GetWidth());
-			m_Camera->SetProjection({ -2.,2.,-2 * ScreenRatio ,2 * ScreenRatio });
-		/*	glClearColor(0.6f, 0.1f, 0.1f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);*/
-			RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
-			RenderCommand::Clear();
-
-			//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
-			m_Camera->SetRotation(glm::vec4(0., 0., 1., 45.));
-
-			Renderer::BeginScene(m_Camera,m_Window);
-			Renderer::Submit(m_BlueShader,m_SquareVA );
-			
-			Renderer::Submit(m_Shader,m_VertexArray );
-
-			Renderer::EndScene();
 
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate();
