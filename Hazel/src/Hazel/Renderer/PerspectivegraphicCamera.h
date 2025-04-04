@@ -5,15 +5,17 @@
 namespace Hazel {
 	class PerspectivegraphicCamera : public Camera{
 	public:
-		PerspectivegraphicCamera(float fov,float aspect,float zNear,float zFar);
+		PerspectivegraphicCamera(float fov,float aspect,float zNear=0.1,float zFar=100.f);
+
 		virtual const glm::vec3& GetPosition()const override {
 			return m_Position;
 		}
 		virtual const glm::vec4& GetRotation()const override { return m_Rotation; }
 
-		virtual void SetProjection(const glm::vec4& screen)override {};
+		virtual void SetProjection(const glm::vec4& screen)override ;
+
 		virtual void SetRotation(const glm::vec4& rotation)override;
-		virtual void SetPosition(const glm::vec3& position) override{};
+		virtual void SetPosition(const glm::vec3& position) override;
 
 		virtual const glm::mat4& GetViewMatrix() const override {
 			return m_ViewMatrix
@@ -34,8 +36,8 @@ namespace Hazel {
 
 		glm::mat4 m_ViewProjectionMatrix;
 
-		glm::vec3 m_Position;
-		glm::vec4 m_Rotation;
+		glm::vec3 m_Position=glm::vec3(0.f,0.f,0.f);
+		glm::vec4 m_Rotation=glm::vec4(0.f,0.f,1.0f,0.f);
 
 		};
 }

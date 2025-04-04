@@ -4,13 +4,13 @@
 
 namespace Hazel {
 	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData;
-	void Renderer::BeginScene(const std::shared_ptr<Camera>& camera, const std::unique_ptr<Window>& m_Window)
+	void Renderer::BeginScene(const std::shared_ptr<Camera>& camera,const std::pair<int,int>& aspect)
 	{
 		
 		m_SceneData->ViewProjection = camera->GetViewProjectionMatrix();
 		m_SceneData->CurrentTime = glfwGetTime();
-		m_SceneData->SCR_Height = m_Window->GetHeight();
-		m_SceneData->SCR_Width = m_Window->GetWidth(); 
+		m_SceneData->SCR_Height = aspect.second;
+		m_SceneData->SCR_Width = aspect.first; 
 	}
 	void Renderer::EndScene()
 	{

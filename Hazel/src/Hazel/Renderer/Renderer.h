@@ -11,7 +11,7 @@ namespace Hazel {
 
 	class Renderer {
 	public:
-		static void BeginScene(const std::shared_ptr<Camera>& camera,const std::unique_ptr<Window>& m_Window);
+		static void BeginScene(const std::shared_ptr<Camera>& camera, const std::pair<int, int>& aspect);
 		static void EndScene();
 
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VerTexArray>& vertexArray);
