@@ -8,7 +8,7 @@
 class ExampleLayer : public Hazel::Layer {
 public:
 	ExampleLayer()
-		: Layer("Example") {
+		: Layer("Example") ,m_ModelPos(0.f){
 		
 		m_Camera.reset(Hazel::Camera::Create(-2.0, 2.0, -2, 2));
 		//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
@@ -17,10 +17,10 @@ public:
 		m_VertexArray.reset(Hazel::VerTexArray::Create());
 
 		float vertices[3 * 4] = {
-		 -.9,-.9,-.5,//左下
-		-.9,.9,-.5,//左上
-		.9,-.9,-.5,//you xia
-		.9,.9,-.5//you shang
+		 -0.5f,-0.5f,0.f,//左下
+		 -0.5f,0.5f,0.f,//左上
+		 0.5f,-0.5f,0.f,//you xia
+		 0.5f,0.5f,0.f//you shang
 		};
 
 		m_VertexBuffer.reset(Hazel::VerTexBuffer::Creat(vertices, sizeof(vertices)));
@@ -49,10 +49,10 @@ public:
 		//绑定第二个状态
 		m_SquareVA.reset(Hazel::VerTexArray::Create());
 		float bluevertices[3 * 4] = {
-		 -.5,-.5,-.50,//左下
-		-.5,.5,-.50,//左上
-		.5,-.5,-.50,//you xia
-		.5,.5,-.50//you shang
+		 -.5f,-.5f,-.5f,//左下
+		-.5f,.5f,-.5f,//左上
+		.5f,-.5f,-.5f,//you xia
+		.5f,.5f,-.5f//you shang
 		};
 
 		//虽然这里是创建智能指针，但是也是创建类，也是实例化，注意构造函数,不是，没搞懂这个make_shared的用法
@@ -82,13 +82,14 @@ public:
 		out vec2 Pos;
 		out vec2 stand;
 		uniform vec2 iResolution;
+		uniform mat4 u_Transform;
 		out vec2 screen;
 		uniform mat4 u_ViewProjection;
 		
 		// 顶点着色器主函数
 		void main() {
 		    // 设置顶点位置
-		    gl_Position = u_ViewProjection * vec4(aPos, 1.0);
+		    gl_Position = u_ViewProjection *u_Transform* vec4(aPos, 1.0);
 			vec4 m_Pos = gl_Position;
 		    // 将纹理坐标传递到片段着色器
 		
@@ -135,7 +136,7 @@ public:
 				  // d=smoothstep(0.,0.1,d);
 		
 				  d=pow(0.01/d,1.2);
-				  final+=col*d;
+				  final+=col * d;
 			}
 			
 			
@@ -152,12 +153,12 @@ public:
 		layout(location = 0) in vec3 aPos;      // 顶点位置
 		uniform vec2 iResolution;
 		uniform mat4 u_ViewProjection;
-
+		uniform mat4 u_Transform;
 
 		// 顶点着色器主函数
 		void main() {
 		    // 设置顶点位置
-		    gl_Position = u_ViewProjection*vec4(aPos, 1.0);
+		    gl_Position = u_ViewProjection * u_Transform * vec4(aPos, 1.0);
 		}
 )";
 		std::string m_BuleFragmentSrc = R"(
@@ -169,49 +170,58 @@ public:
 			}
 )";
 
-		m_Shader.reset(new Hazel::Shader(VertexSrc, FragmentSrc));
-		m_BlueShader.reset(new Hazel::Shader(m_BlueVertexSrc, m_BuleFragmentSrc));
+		m_Shader.reset(Hazel::Shader::Create(VertexSrc, FragmentSrc));
+		m_BlueShader.reset(Hazel::Shader::Create(m_BlueVertexSrc, m_BuleFragmentSrc));
 	}
 
-	void OnUpdate() override {
+	void OnUpdate(Hazel::Timestep ts) override {
+		
 		float width  = (float)Hazel::Application::Get().GetWindow().GetWidth();
 		float height = (float)Hazel::Application::Get().GetWindow().GetHeight();
+		
+		float aspctaio = width / height;
+		m_Camera.reset(Hazel::Camera::Create(-aspctaio, aspctaio, -1, 1));
 
+		//HZ_TRACE("{0}", ts.GetSeconds());
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_S)) {
-			m_Position.y += m_CameraSpeed;
+			m_Position.y += m_CameraSpeed * ts;
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_W)) {
-			m_Position.y -= m_CameraSpeed;
+			m_Position.y -= m_CameraSpeed * ts;
 		}
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_A)) {
-			m_Position.x += m_CameraSpeed;
+			m_Position.x += m_CameraSpeed * ts;
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_D)) {
-			m_Position.x -= m_CameraSpeed;
+			m_Position.x -= m_CameraSpeed * ts;
 		}
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_E)) {
-			m_Rotation += m_RotationSpeed;
+			m_Rotation += m_RotationSpeed *ts;
 		}
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_Q)) {
-			m_Rotation -= m_RotationSpeed;
+			m_Rotation -= m_RotationSpeed *ts;
 		}
-
-
-		//	m_Camera->SetProjection({ 45.f,ScreenRatio,0.1,100 });
 
 		Hazel::RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
 		Hazel::RenderCommand::Clear();
 
 		m_Camera->SetPosition(m_Position);
 		m_Camera->SetRotation(glm::vec4(0.f, 0.f, 1.f, m_Rotation));
-
+		//HZ_TRACE("{}", m_Rotation);
 		Hazel::Renderer::BeginScene(m_Camera,{width,height});
 
-		Hazel::Renderer::Submit(m_Shader, m_VertexArray);
-		Hazel::Renderer::Submit(m_BlueShader, m_SquareVA);
-	
+		glm::mat4 scale = glm::scale(glm::mat4 (1.0f), glm::vec3(0.1f));
+		for (int y = 0; y < 20; y++) {
+			for (int x = 0; x < 20; x++) {
+				glm::vec3 Pos(x * 0.11, y*0.11, 0);
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), Pos) * scale;
+				Hazel::Renderer::Submit(m_Shader, m_VertexArray,transform);
 
+			}
+		}
+
+		Hazel::Renderer::Submit(m_BlueShader, m_SquareVA);
 		Hazel::Renderer::EndScene();
 	}
 
@@ -223,7 +233,7 @@ public:
 			Hazel::KeyPressedEvent& e = (Hazel::KeyPressedEvent&)event;
 			//if (e.GetKeyCode() == HZ_KEY_TAB)
 			//HZ_TRACE("Tab key is pressed (event)!");
-		    HZ_TRACE("{0}", (char)e.GetKeyCode());
+		  //  HZ_TRACE("{0}", (char)e.GetKeyCode());
 			e.Handled = true;
 		}
 
@@ -248,10 +258,14 @@ private:
 
 	std::shared_ptr<Hazel::Camera> m_Camera;
 
-	glm::vec3 m_Position{ 0.5f };
-	float m_CameraSpeed = 0.1f;
-	float m_RotationSpeed = 3.f;
+
+	//z轴的初始化导致旋转的时候的精度会出现问题，就会出现有些时候渲染帧失败
+	glm::vec3 m_Position{ 0.5f,0.5f,0.0f };
+	float m_CameraSpeed = 5.f;
+	float m_RotationSpeed = 180.f;
 	float m_Rotation = 0.f;
+	glm::vec3 m_ModelPos;
+
 };
 
 class Sandbox : public Hazel::Application {

@@ -2,6 +2,8 @@
 #include"Hazel/Core.h"
 #include "Window.h"
 
+#include "Hazel/Core/Timestep.h"
+
 #include"Events/Event.h"
 #include"Events/ApplicationEvent.h"
 
@@ -31,12 +33,13 @@ public:
 	inline Window& GetWindow(){ return  *m_Window; }
 private:
 	bool OnWindowClose(WindowClose& e);
+private:
 	std::unique_ptr<Window> m_Window;
 	bool m_Running = true;
 	LayerStack m_LayerStack;
 	ImguiLayer* m_ImGuiLayer;
 
- 
+	float m_LastFrameTime = 0.f;
 private:
 	static Application* s_Instance;
 };
