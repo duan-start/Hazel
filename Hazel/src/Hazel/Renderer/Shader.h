@@ -1,7 +1,7 @@
 #pragma once
 #include "Hazel/Core.h"
-#include <string>
 
+#include <string>
 #include <glm/glm.hpp>
 
 
@@ -10,21 +10,11 @@ namespace Hazel {
 	class Shader
 	{
 	public:
-		Shader(const std::string& vertexsrc, const std::string& fragmentsrc);
-		void Bind()const;
-		void Unbind()const;
-		~Shader();
-
-		//偷的自己别的项目里面的
-		void setBool(const std::string& name, bool value) const;
-		void setInt(const std::string& name, int  value) const;
-		void setFloat(const std::string& name, float value) const;
-		void setMatrix4fv(const std::string& name, glm::mat4 value) const;
-		void setVec2(const std::string& name, glm::vec2 value) const;
-		void setVec3(const std::string& name, glm::vec3 value) const;
-
-	private:
-		 uint32_t m_RenderID;
+		Shader() {};
+		virtual void Bind() const = 0;  // 纯虚函数，声明为const
+		virtual void UnBind() const = 0;  // 纯虚函数，声明为const
+		virtual ~Shader() ;
+		static Shader* Create(const std::string& vertexsrc, const std::string& fragmentsrc);
 	};
 }
 

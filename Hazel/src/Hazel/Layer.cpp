@@ -17,7 +17,7 @@ namespace Hazel {
 	{
 	}
 
-	void Layer::OnUpdate()
+	void Layer::OnUpdate(Timestep ts)
 	{
 	}
 

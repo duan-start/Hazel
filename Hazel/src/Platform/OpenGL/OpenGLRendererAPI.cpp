@@ -7,6 +7,7 @@ namespace Hazel {
 	void OpenGLRendererAPI::Clear()
 	{
 		glClear(GL_COLOR_BUFFER_BIT );
+		
 	}
 
 	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)

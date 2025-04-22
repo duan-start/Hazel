@@ -41,7 +41,7 @@ namespace Hazel {
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it) {
 			HZ_CORE_TRACE("Layer order: {}", (*it)->GetName());
 			(*it)->OnEvent(e);
-			HZ_CORE_TRACE("event: {} ", e.Handled);
+		//	HZ_CORE_TRACE("event: {} ", e.Handled);
 			if (e.Handled) break;  // ¹Ø¼ü£ºÁ¢¼´ÖÕÖ¹
 		}
 	}
@@ -68,8 +68,12 @@ namespace Hazel {
 
 		while (m_Running) {
 
+			float time = glfwGetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+
 			for (Layer* layer : m_LayerStack) 
-				layer->OnUpdate();
+				layer->OnUpdate(timestep);
 
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)

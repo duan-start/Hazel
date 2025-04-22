@@ -2,6 +2,8 @@
 
 //for used by hazel application
 
+#include "Hazel/Core/Timestep.h"
+
 #include "Hazel/Application.h"
 #include "Hazel/Log.h"
 #include "Hazel/Layer.h"
@@ -20,6 +22,9 @@
 
 #include "Hazel/Renderer/OrthographicCamera.h"
 #include "Hazel/Renderer/PerspectivegraphicCamera.h"
+
+//my_add
+#include <glm/gtc/matrix_transform.hpp >
 
 //---Entity Point-------------
 #include"Hazel/EntryPoint.h"
