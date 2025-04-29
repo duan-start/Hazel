@@ -29,6 +29,14 @@ namespace Hazel {
 
 
 	struct BufferElements {
+		//因为设置一种顶点属性，我们需要
+		//1. index：顶点属性的索引，通常对应于顶点着色器中的 layout(location = index)。
+		//2. size：每个顶点属性的组件数量，可以是1、2、3或4。
+		//3. type：数据类型，如 GL_FLOAT、GL_INT 等。
+		//4. normalized：是否将整数数据归一化到[0, 1] 或[-1, 1] 范围。
+		//5. stride：每个顶点之间的字节偏移量。如果所有顶点属性紧密排列，可以设置为0。
+		//5. pointer：数据在缓冲区中的偏移量，通常是一个字节偏移量。
+		//然后由于index没有必要，Size大小实际是给下一个elements用的
 		BufferElements() {};
 
 		//这种struct 里面的成员和枚举的都是首字母大写
@@ -65,6 +73,7 @@ namespace Hazel {
 	class BufferLayout {
 	public:
 		BufferLayout() {};
+
 		//这个好像是c++11开头的那个新特性
 		BufferLayout(const std::initializer_list<BufferElements>& BufferElements) :m_BufferElements(BufferElements) {
 			CalculateOffsetAndStride();
@@ -97,6 +106,8 @@ namespace Hazel {
 			m_Stride = 0;
 			//计算偏移量和字符
 			for (auto& element : m_BufferElements) {
+				//偏移量就是直接记录到上次的对应的(所以单独记录了offset和element.offset)，
+				// 至于这个stride就是必须得加上所有的Size()
 				element.Offset = offset;
 				offset += element.Size;
 				m_Stride += element.Size;

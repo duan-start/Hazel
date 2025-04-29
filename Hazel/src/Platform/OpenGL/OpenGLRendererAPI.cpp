@@ -3,7 +3,13 @@
 #include <glad/glad.h>
 
 namespace Hazel {
-
+	void OpenGLRendererAPI::Init()
+	{
+		glEnable(GL_BLEND);
+		//为什么这里加上这个函数反而导致显示不正常
+		//因为这个函数设置了如何混合的具体参数（最终是依赖你的pixelshader的a值进行设定的，所以）
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
 	void OpenGLRendererAPI::Clear()
 	{
 		glClear(GL_COLOR_BUFFER_BIT );
@@ -15,7 +21,7 @@ namespace Hazel {
 		glClearColor(color.x, color.y, color.z, color.w);
 	}
 
-	void OpenGLRendererAPI::DrawIndexed(const std::shared_ptr<VerTexArray>& vertexArray)
+	void OpenGLRendererAPI::DrawIndexed(const Ref<VerTexArray>& vertexArray)
 	{
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}

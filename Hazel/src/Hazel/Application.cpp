@@ -24,6 +24,8 @@ namespace Hazel {
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 		//按理是要在析构函数中delete掉的，
 		m_ImGuiLayer = new ImguiLayer();
+
+		Renderer::Init();
 		PushOverlay(m_ImGuiLayer);
 		std::cout << "m_ImGuiLayer\n";
 	}
@@ -39,7 +41,7 @@ namespace Hazel {
 		dispatcher.Dispatch<WindowClose>(BIND_EVENT_FN(Application::OnWindowClose));
 		//HZ_CORE_TRACE("{0}", e);
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it) {
-			HZ_CORE_TRACE("Layer order: {}", (*it)->GetName());
+		//	HZ_CORE_TRACE("Layer order: {}", (*it)->GetName());
 			(*it)->OnEvent(e);
 		//	HZ_CORE_TRACE("event: {} ", e.Handled);
 			if (e.Handled) break;  // 关键：立即终止
