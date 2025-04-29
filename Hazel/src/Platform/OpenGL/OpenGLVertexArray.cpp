@@ -41,7 +41,7 @@ namespace Hazel {
 		glBindVertexArray(0);
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VerTexBuffer>& vertexBuffer)
+	void OpenGLVertexArray::AddVertexBuffer(const Ref<VerTexBuffer>& vertexBuffer)
 	{
 
 		//先确定有layout布局
@@ -52,8 +52,8 @@ namespace Hazel {
 		//调用自己的会显得更加简洁
 		vertexBuffer->Bind();
 
-
-		uint32_t index = 0;
+		//我改了一下这里，方便真正绑定多个vbo的情况
+		uint32_t index = m_VertexBuffers.size();
 		//const ，然后后面是获得bufferlayout的迭代器，所以一定要有const类型的返回迭代器
 		//所以这个begin 和end还不是随便写的，主要是这个循环是用迭代器的，虽然隐藏了部分信息
 		for (const auto& element : vertexBuffer->GetLayout()) {
@@ -67,7 +67,7 @@ namespace Hazel {
 		m_VertexBuffers.push_back(vertexBuffer);
 	}
 
-	void OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
+	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 	{
 		glBindVertexArray(m_RendererID);
 		indexBuffer->Bind();

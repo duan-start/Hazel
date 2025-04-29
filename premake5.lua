@@ -15,6 +15,7 @@ IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"
 IncludeDir["Glad"] = "Hazel/vendor/Glad/include"  
 IncludeDir["Imgui"] = "Hazel/vendor/imgui"
 IncludeDir["glm"] = "Hazel/vendor/glm"
+IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 
 -- Include directories relative to root folder (Solution directory)  
 include "Hazel/vendor/GLFW"  
@@ -45,7 +46,9 @@ project "Hazel"
         "%{prj.name}/src/**.h",  
         "%{prj.name}/src/**.cpp",
         "%{IncludeDir.glm}/glm/**.hpp",
-        "%{IncludeDir.glm}/glm/**.inl"
+        "%{IncludeDir.glm}/glm/**.inl",
+        "%{IncludeDir.stb_image}/**.h",
+        "%{IncludeDir.stb_image}/**.cpp"
     }  
 
     includedirs{  
@@ -54,7 +57,8 @@ project "Hazel"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.Imgui}",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.stb_image}"
     }
 
     links{
@@ -112,6 +116,7 @@ project "Sandbox"
         "Hazel/vendor/spdlog/include",  
         "Hazel/vendor/imgui",
         "Hazel/vendor/glm",
+        "Hazel/vendor/stb_image",
         "Hazel/src"  
     }  
     

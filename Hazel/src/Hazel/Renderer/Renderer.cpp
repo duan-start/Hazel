@@ -4,7 +4,11 @@
 #include "Platform/OpenGL/OpenGLShader.h"
 namespace Hazel {
 	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData;
-	void Renderer::BeginScene(const std::shared_ptr<Camera>& camera,const std::pair<int,int>& aspect)
+	void Renderer::Init()
+	{
+		RenderCommand::Init();
+	}
+	void Renderer::BeginScene(const Ref<Camera>& camera,const std::pair<int,int>& aspect)
 	{
 		
 		m_SceneData->ViewProjection = camera->GetViewProjectionMatrix();
@@ -15,7 +19,7 @@ namespace Hazel {
 	void Renderer::EndScene()
 	{
 	}
-	void Renderer::Submit(const std::shared_ptr<Shader>& shader,const std::shared_ptr<VerTexArray>& vertexArray,const glm::mat4& transform)
+	void Renderer::Submit(const Ref<Shader>& shader,const Ref<VerTexArray>& vertexArray,const glm::mat4& transform)
 	{	
 		shader->Bind();
 		vertexArray->Bind();
