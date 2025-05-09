@@ -1,7 +1,7 @@
 #pragma once
-#include"Hazel/Core.h"
-#include"spdlog/spdlog.h"
-#include"spdlog/fmt/ostr.h"
+#include "Hazel/Core/Core.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 
 namespace Hazel {
 

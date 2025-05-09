@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Hazel/Window.h"  // 确保 WindowProps 被定义
+#include "Hazel/Core/Window.h"  // 确保 WindowProps 被定义
 
 #include "Hazel/Renderer/GraphicsContext.h"
 struct GLFWwindow;

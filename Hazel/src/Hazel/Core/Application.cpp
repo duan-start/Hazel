@@ -1,7 +1,7 @@
 #include "hzpch.h"
 
 #include "Application.h"
-#include"Events/ApplicationEvent.h"
+#include "Hazel/Events/ApplicationEvent.h"
 #include"Log.h"
 
 #include "Hazel/Renderer/Renderer.h"
@@ -38,7 +38,11 @@ namespace Hazel {
 	//设置事件回调函数
 	void Application::OnEvent(Event& e) {
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowClose>(BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
+
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
+
+		
 		//HZ_CORE_TRACE("{0}", e);
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it) {
 		//	HZ_CORE_TRACE("Layer order: {}", (*it)->GetName());
@@ -59,10 +63,22 @@ namespace Hazel {
 		overlay->OnAttach();
 	}
 
-	bool Application::OnWindowClose(WindowClose& e)
+	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
 		m_Running = false;
 		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		if (e.GetWidth() == 0 || e.GetHeight() == 0) {
+			m_Minimized = true;
+			return false;
+		}
+
+		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		m_Minimized = false;
+		return false;
 	}
 
 
@@ -74,9 +90,12 @@ namespace Hazel {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
+			//自定义的层栈的更新
+			if (!m_Minimized) {
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate(timestep);
-
+			}
+			//ImGui的更新
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)
 				layer->OnImGuiRender();
@@ -84,7 +103,8 @@ namespace Hazel {
 				//auto [mx, my] = Input::GetMousePosition();
 				//HZ_CORE_TRACE("{0}, {1}", mx, my);
 
-				
+
+			//窗口画面的更新
 			m_Window->OnUpdate();
 
 		}

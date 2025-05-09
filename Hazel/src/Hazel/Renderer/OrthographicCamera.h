@@ -5,7 +5,7 @@
 namespace Hazel {
 	class OrthographicCamera :public Camera {
 	public:
-		OrthographicCamera(float Left,float Right,float Bottom,float Top,float Near,float Far);
+		OrthographicCamera(float Left,float Right,float Bottom,float Top);
 
 
 		virtual void SetPosition(const glm::vec3& position)override;

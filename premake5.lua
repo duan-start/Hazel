@@ -10,6 +10,7 @@ workspace "Hazel"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"  
 
+
 IncludeDir = {}  
 IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"  
 IncludeDir["Glad"] = "Hazel/vendor/Glad/include"  
@@ -17,15 +18,20 @@ IncludeDir["Imgui"] = "Hazel/vendor/imgui"
 IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 
+
+
 -- Include directories relative to root folder (Solution directory)  
-include "Hazel/vendor/GLFW"  
-include "Hazel/vendor/Glad"  
-include "Hazel/vendor/imgui"
 --这是工程文件啊，下面的是在干嘛啊，肯定不能加啊，有没有premakefile文件，肯定不行
 --include "./Hazel/vendor/glm"
-
 --print("GLM Include Directory: " .. IncludeDir["glm"])
+group "Dependencies"
+        include "Hazel/vendor/GLFW"
+        include "Hazel/vendor/Glad"
+        include "Hazel/vendor/imgui"
 
+
+ -- 定义 Core 组
+group "Core"
 
 project "Hazel"  
     location "Hazel"  
@@ -96,7 +102,8 @@ project "Hazel"
         runtime "Release"
         optimize"On"  
         
-
+  -- 定义 Applications 组
+group "Applications"
 project "Sandbox"  
     location "Sandbox"  
     kind "ConsoleApp"  

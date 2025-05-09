@@ -76,7 +76,7 @@ namespace Hazel {
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
 			//这里是我们的数据指针
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			WindowClose event;
+			WindowCloseEvent event;
 			data.EventCallback(event);
 		});
 
