@@ -1,6 +1,6 @@
 #pragma once  
 
-#include "Hazel/Core.h"  
+#include "Hazel/Core/Core.h"  
 #include "Hazel/Renderer/Shader.h"  
 
 typedef unsigned int GLenum;
@@ -11,9 +11,11 @@ class OpenGLShader : public Shader
 public:  
 	static GLenum ShaderTypeFromString(const std::string& type);
 
-	OpenGLShader(const std::string& vertexsrc, const std::string& fragmentsrc); 
+	OpenGLShader(const std::string& name,const std::string& vertexsrc, const std::string& fragmentsrc); 
 	OpenGLShader(const std::string& filepath);
 
+	
+	virtual const std::string& GetName()const override { return m_Name; }
 	virtual void Bind() const override;  
 	virtual void UnBind() const override;  
 	virtual ~OpenGLShader();  
@@ -37,5 +39,6 @@ private:
 	void Compile(const std::unordered_map<GLenum, std::string>& shaderSource);
 private:  
 	uint32_t m_RenderID;  
+	std::string m_Name;
 };  
 }

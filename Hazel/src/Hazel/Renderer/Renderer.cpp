@@ -8,10 +8,14 @@ namespace Hazel {
 	{
 		RenderCommand::Init();
 	}
-	void Renderer::BeginScene(const Ref<Camera>& camera,const std::pair<int,int>& aspect)
+	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+	{
+		RenderCommand::SetViewport(0,0,width,height);
+	}
+	void Renderer::BeginScene(const Camera& camera,const std::pair<int,int>& aspect)
 	{
 		
-		m_SceneData->ViewProjection = camera->GetViewProjectionMatrix();
+		m_SceneData->ViewProjection = camera.GetViewProjectionMatrix();
 		m_SceneData->CurrentTime = glfwGetTime();
 		m_SceneData->SCR_Height = aspect.second;
 		m_SceneData->SCR_Width = aspect.first; 

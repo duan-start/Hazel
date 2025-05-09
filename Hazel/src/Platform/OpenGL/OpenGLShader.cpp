@@ -13,10 +13,18 @@ namespace Hazel {
 	{
 		std::string source = ReadFile(filepath);
 		if (&source == nullptr) {
-			std::cout << "funck";
+			std::cout << "FAILED TO OPEN SHADER SOURCE";
 		}
 		auto shaderSources = Process(source);
 		Compile(shaderSources);
+
+		//根据文件的路径，提取对应的文件名字
+		//assert/shader/texture.glsl
+		auto lastSlash = filepath.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = filepath.rfind(".");
+		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
+		m_Name = filepath.substr(lastSlash, count);
 	}
 
 
@@ -30,7 +38,7 @@ namespace Hazel {
 		return 0;
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& vertexsrc, const std::string& fragmentsrc)
+	OpenGLShader::OpenGLShader(const std::string& name,const std::string& vertexsrc, const std::string& fragmentsrc)
 	{// Read our shaders into the appropriate buffers
 		//我是真不愿写这么多
 		std::unordered_map<GLenum, std::string> shaderSource;
@@ -38,8 +46,6 @@ namespace Hazel {
 		shaderSource[GL_FRAGMENT_SHADER] = fragmentsrc;
 		Compile(shaderSource);
 	}
-
-
 
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
@@ -62,6 +68,7 @@ namespace Hazel {
 		return  result;
 	}
 
+	//TODO: bind the shaderID with source code
 	std::unordered_map<GLenum, std::string> OpenGLShader::Process(const std::string& source)
 	{
 		/*1.	typeToken 的硬编码问题：
@@ -111,11 +118,22 @@ namespace Hazel {
 		return shaderSources;
 	}
 
+	//TODU：使用源代码进行编译操作
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSource)
 	{
-
+		HZ_CORE_ASSERT(shaderSource.size() == 2, "Support only 2 shaders now");
 		GLuint program = glCreateProgram();
-		std::vector<GLenum> glShaderIDs(shaderSource.size());
+
+		//开始初始化的时候保留的应该是存储的最大值，而不简单是容量
+		//std::vector<GLenum> glShaderIDs(shaderSource.size());
+	//----------------------------------------
+		//std::vector<GLenum> glShaderIDs;
+		// glShaderIDs.reserve(shaderSource.size());
+		//由于glenum 是一个unsigned int 类型的数值，且大小知晓，可以通过栈上分配的方式。
+		std::array<GLenum, 2> glShaderIDs;
+		//设置保留容量，即推入数据的时候不会去多次申请内存
+		//用来计数
+		unsigned int glShaderIDIndex = 0;
 		m_RenderID = program;
 		for (auto vf : shaderSource) {
 			GLenum type = vf.first;
@@ -152,7 +170,8 @@ namespace Hazel {
 
 		// Attach our shaders to our program
 		 glAttachShader(program, shader);
-		 glShaderIDs.push_back(shader);
+		 glShaderIDs[glShaderIDIndex++]=shader;
+		
 		}
 
 		// Link our program

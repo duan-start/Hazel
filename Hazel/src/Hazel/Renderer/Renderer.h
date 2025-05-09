@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "Shader.h"
 
-#include "Hazel/Window.h"
+#include "Hazel/Core/Window.h"
 
 
 namespace Hazel {
@@ -12,7 +12,9 @@ namespace Hazel {
 	class Renderer {
 	public:
 		static void Init();
-		static void BeginScene(const Ref<Camera>& camera, const std::pair<int, int>& aspect);
+		static void OnWindowResize(uint32_t width,uint32_t height);
+
+		static void BeginScene(const Camera& camera, const std::pair<int, int>& aspect);
 		static void EndScene();
 
 		static void Submit(const Ref<Shader>& shader, const Ref<VerTexArray>& vertexArray,const glm::mat4& transform=glm::mat4(1.0f));

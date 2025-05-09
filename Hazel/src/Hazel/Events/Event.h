@@ -68,6 +68,7 @@ namespace Hazel {
 		bool Dispatch(EventFn<T> func) {
 			if (m_Event.Handled) return false;
 			if (m_Event.GetEventType() == T::GetStaticType()) {
+				//调用别的类自己的处理函数进行处理
 				m_Event.m_Handled = func(*(T*)&m_Event);
 				return true;
 			}
