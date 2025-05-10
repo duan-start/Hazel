@@ -128,7 +128,7 @@ namespace Hazel {
 		virtual void UBind()const = 0;
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
-		static VerTexBuffer* Creat(float* vertices,uint32_t size);
+		static Ref<VerTexBuffer> Creat(float* vertices,uint32_t size);
 	};
 	
 	class IndexBuffer
