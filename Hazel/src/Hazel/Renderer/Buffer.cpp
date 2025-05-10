@@ -7,11 +7,11 @@ namespace Hazel {
 	VerTexBuffer::~VerTexBuffer()
 	{
 	}
-	VerTexBuffer* VerTexBuffer::Creat(float* vertices, uint32_t size)
+	Ref<VerTexBuffer> VerTexBuffer::Creat(float* vertices, uint32_t size)
 	{
 		switch (Renderer::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI");return nullptr;
-		case RendererAPI::API::OpenGL: return new OpenGLVerTexBuffer(vertices, size);
+		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVerTexBuffer>(vertices, size);
 		}
 		HZ_CORE_ASSERT(false, "Unknown RenderAPI"); return nullptr;
 	}

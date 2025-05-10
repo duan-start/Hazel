@@ -40,7 +40,7 @@ namespace Hazel {
 
 	Ref<Shader> ShaderLibrary::Get(const std::string& name)
 	{
-		HZ_CORE_ASSERT(!Exists(name), "Shader does not exists");
+		HZ_CORE_ASSERT(Exists(name), "Shader does not exists");
 		return m_Shaders[name];
 	}
 
@@ -49,8 +49,7 @@ namespace Hazel {
 	{
 		HZ_CORE_ASSERT(!Exists(name), "Shader has been already exists");
 		Ref<Shader> shader= Shader::Create(name, vertex, fragment);
-		Add(shader);
-
+		m_Shaders[name] = shader;
 	}
 
 	void ShaderLibrary::Load(const std::string& filepath)

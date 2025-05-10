@@ -3,18 +3,20 @@
 
 #include <Hazel.h>
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Hazel/Core/EntryPoint.h"
 
+#include "Sandbox2D.h"
 
 class ExampleLayer : public Hazel::Layer {
 public:
 	ExampleLayer()
-		: Layer("Example") ,m_ModelPos(0.f), m_CameralController(1280.f/720.f){
+		: Layer("Example"), m_CameralController(1280.f/720.f){
 		
 		
 		//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
 		//m_Camera->SetRotation(glm::vec4(0., 0., 1., 45.));
 
-		m_VertexArray.reset(Hazel::VerTexArray::Create());
+		m_VertexArray = Hazel::VerTexArray::Create();
 
 		float vertices[5 * 4] = {
 			//屏幕坐标     //纹理坐标
@@ -24,7 +26,7 @@ public:
 		 0.5f,0.5f,0.f,		1.f,1.f//you shang
 		};
 
-		m_VertexBuffer.reset(Hazel::VerTexBuffer::Creat(vertices, sizeof(vertices)));
+		m_VertexBuffer=(Hazel::VerTexBuffer::Creat(vertices, sizeof(vertices)));
 
 
 		{//把不要的东西全部都销毁,
@@ -54,7 +56,7 @@ public:
 
 
 		//绑定第二个状态
-		m_SquareVA.reset(Hazel::VerTexArray::Create());
+		m_SquareVA =(Hazel::VerTexArray::Create());
 		float bluevertices[3 * 4] = {
 		 -.5f,-.5f,-.5f,//左下
 		-.5f,.5f,-.5f,//左上
@@ -64,7 +66,7 @@ public:
 
 		//虽然这里是创建智能指针，但是也是创建类，也是实例化，注意构造函数,不是，没搞懂这个make_shared的用法
 		Hazel::Ref<Hazel::VerTexBuffer> squareVB;
-		squareVB.reset(Hazel::VerTexBuffer::Creat(bluevertices, sizeof(bluevertices)));
+		squareVB=(Hazel::VerTexBuffer::Creat(bluevertices, sizeof(bluevertices)));
 
 		{//把不要的东西全部都销毁
 			Hazel::BufferLayout layout = {
@@ -193,9 +195,6 @@ public:
 	}
 
 private:
-	//Hazel::Ref<Hazel::Shader> m_Shader;
-	//Hazel::Ref<Hazel::Shader> m_BlueShader, m_TexShader;
-
 	Hazel::ShaderLibrary m_ShaderLib;
 
 	Hazel::Ref<Hazel::Texture2D> m_Texture, m_TextureHu;
@@ -211,19 +210,20 @@ private:
 
 	Hazel::OrthographicCameraController m_CameralController;
 
+	//因为有了相机控制系统，这里就不需要单独的相机属性了，全部存在那块位置（初始化）
 	////z轴的初始化导致旋转的时候的精度会出现问题，就会出现有些时候渲染帧失败
 	//glm::vec3 m_Position{ 0.5f,0.5f,0.0f };
-
-	glm::vec3 m_ModelPos;
-
+	//glm::vec3 m_ModelPos;
 	glm::vec3 m_SquareColor{0.04f,0.1f,0.11f};
 };
 
 class Sandbox : public Hazel::Application {
 public:
 	Sandbox() {
-		PushLayer(new ExampleLayer());
-		std::cout << "Example";
+
+		PushOverlay(new Sandbox2D());
+		//PushLayer(new ExampleLayer());
+		//std::cout << "Example";
 	}
 	~Sandbox() {
 
