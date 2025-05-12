@@ -5,6 +5,7 @@
 namespace Hazel {
 	class OrthographicCamera :public Camera {
 	public:
+		
 		OrthographicCamera(float Left,float Right,float Bottom,float Top);
 
 

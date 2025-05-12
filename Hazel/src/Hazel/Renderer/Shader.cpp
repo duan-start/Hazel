@@ -21,6 +21,8 @@ namespace Hazel {
 		HZ_CORE_ASSERT(false, "Unknown RenderAPI"); return nullptr;
 	};
 
+
+
 	Shader::~Shader()
 	{
 	}

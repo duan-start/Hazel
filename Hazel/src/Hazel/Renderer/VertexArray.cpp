@@ -4,7 +4,7 @@
 #include "Platform/OpenGL/OpenGLVertexArray.h"
 
 namespace Hazel{
-	Ref<VerTexArray> VerTexArray::Create()
+	Ref<VertexArray> VertexArray::Create()
 	{
 		switch (Renderer::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
@@ -12,7 +12,7 @@ namespace Hazel{
 		}
 		HZ_CORE_ASSERT(false, "Unknown RenderAPI"); return nullptr;
 	}
-	VerTexArray::~VerTexArray()
+	VertexArray::~VertexArray()
 	{
 	}
 }
