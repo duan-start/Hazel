@@ -120,15 +120,15 @@ namespace Hazel {
 
 
 
-	class VerTexBuffer
+	class VertexBuffer
 	{
 	public:
-		virtual ~VerTexBuffer();
+		virtual ~VertexBuffer();
 		virtual	void Bind()const = 0;
 		virtual void UBind()const = 0;
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
-		static Ref<VerTexBuffer> Creat(float* vertices,uint32_t size);
+		static Ref<VertexBuffer> Creat(float* vertices,uint32_t size);
 	};
 	
 	class IndexBuffer
@@ -138,7 +138,7 @@ namespace Hazel {
 		virtual	void Bind()const = 0;
 		virtual void UBind()const = 0;
 		virtual uint32_t GetCount() const = 0;
-		static IndexBuffer* Creat(uint32_t* indices, uint32_t count);
+		static Ref<IndexBuffer> Creat(uint32_t* indices, uint32_t count);
 	};
 
 }

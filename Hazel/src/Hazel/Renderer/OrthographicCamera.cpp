@@ -36,8 +36,6 @@ namespace Hazel {
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
-
-
 	//简单的思路：根据相机的位置和旋转角度（如果是2d的话就是一个一维的值）（这个是使用者给定的），去计算从原点到这样的矩阵（从右往左的顺序，先旋转后移动），然后求个逆，视图矩阵就写好了
 	//其实这是2d简化版本的，如果是3d的话，相机的坐标是一个维度为3的向量，相机的方向也是一个维度为3的向量
 	void OrthographicCamera::RecalculateViewMatrix()
@@ -50,12 +48,12 @@ namespace Hazel {
 		//// 视图矩阵 = (T * R)^-1 = R^-1 * T^-1
 		//m_ViewMatrix = glm::transpose(rotation) * glm::translate(glm::mat4(1.0f), -m_Position);
 
+
+		//m_ViewProjection=glm::inverse(m_ViewMatrixInverse*m_ProjectionMatrixInverse);
 		glm::mat4 m_ViewMatrixInverse = glm::translate(glm::mat4(1.0f), m_Position) * glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation.w),
 			glm::vec3(m_Rotation.x, m_Rotation.y, m_Rotation.z));//这个实际上对于2d来说是没有必要的，只是我后面像尝试将透视矩阵和相机的一起写到这里面
 		m_ViewMatrix = glm::inverse(m_ViewMatrixInverse);
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
-
-		// 调试输出
 
 	}
 }

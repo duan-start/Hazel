@@ -2,7 +2,7 @@
 #include "Hazel/Renderer/Buffer.h"
 
 namespace Hazel {
-	class OpenGLVerTexBuffer:public VerTexBuffer
+	class OpenGLVerTexBuffer:public VertexBuffer
 	{
 	public:
 		OpenGLVerTexBuffer(float* vertices, uint32_t size);

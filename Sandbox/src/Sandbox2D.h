@@ -16,9 +16,9 @@ private:
 	Hazel::ShaderLibrary m_ShaderLib;
 	Hazel::Ref<Hazel::Shader> m_SquareShader;
 	//每个vao 表示一个渲染流程
-	Hazel::Ref<Hazel::VerTexArray> m_SquareVA;
-	Hazel::Ref<Hazel::VerTexBuffer> m_VertexBuffer;
-	Hazel::Ref<Hazel::IndexBuffer> m_IndexBuffer;
+	Hazel::Ref<Hazel::VertexArray> m_SquareVA;
+	//Hazel::Ref<Hazel::VertexBuffer> m_VertexBuffer;
+	//Hazel::Ref<Hazel::IndexBuffer> m_IndexBuffer;
 
 
 	Hazel::OrthographicCameraController m_CameralController;

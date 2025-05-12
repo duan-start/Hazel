@@ -41,7 +41,7 @@ namespace Hazel {
 		glBindVertexArray(0);
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(const Ref<VerTexBuffer>& vertexBuffer)
+	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 	{
 
 		//先确定有layout布局

@@ -4,10 +4,10 @@
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
 namespace Hazel {
-	VerTexBuffer::~VerTexBuffer()
+	VertexBuffer::~VertexBuffer()
 	{
 	}
-	Ref<VerTexBuffer> VerTexBuffer::Creat(float* vertices, uint32_t size)
+	Ref<VertexBuffer> VertexBuffer::Creat(float* vertices, uint32_t size)
 	{
 		switch (Renderer::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI");return nullptr;
@@ -21,11 +21,11 @@ namespace Hazel {
 	{
 	}
 
-	IndexBuffer* IndexBuffer::Creat(uint32_t* indices, uint32_t count)
+	Ref<IndexBuffer> IndexBuffer::Creat(uint32_t* indices, uint32_t count)
 	{
 		switch (Renderer::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
-		case RendererAPI::API::OpenGL: return new OpenGLIndexBuffer(indices, count);
+		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLIndexBuffer> (indices, count);
 		}
 		HZ_CORE_ASSERT(false, "Unknown RenderAPI"); return nullptr;
 	}

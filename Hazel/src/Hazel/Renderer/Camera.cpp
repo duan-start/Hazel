@@ -5,6 +5,7 @@
 #include "PerspectivegraphicCamera.h"
 
 namespace Hazel {
+	//由于正交和透视的相机的初始化参数不同（表示的意义不同），所以这比参数的定名还不是很清楚
 	Camera* Camera::Create(float Left, float Right, float Bottom, float Top)
 	{
 		switch (s_CamerType)

@@ -20,16 +20,21 @@ public:
 	virtual void UnBind() const override;  
 	virtual ~OpenGLShader();  
 
-	void UploadUniformBool(const std::string& name, bool value) const;  
-	void UploadUniformInt(const std::string& name, int value) const;  
-	void UploadUniformFloat(const std::string& name, float value) const;
+	virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const override;
+	virtual void SetUniformMat4(const std::string& name, glm::mat4 value)const override;
+	virtual void SetUniformFloat3(const std::string& name, glm::vec3 value)const override;
 
-	void UploadUniformMat4(const std::string& name, glm::mat4 value) const;  
-	void UploadUniformMat3(const std::string& name, glm::mat3 value) const;
+	//这三种类型直接复制也没有关系
+	void UploadUniformBool(const std::string& name,const bool& value) const;
+	void UploadUniformInt(const std::string& name, const int& value) const;
+	void UploadUniformFloat(const std::string& name, const float& value)const;
 
-	void UploadUniformVec2(const std::string& name, glm::vec2 value) const;  
-	void UploadUniformVec3(const std::string& name, glm::vec3 value) const;  
-	void UploadUniformVec4(const std::string& name, glm::vec4 value) const;
+	void UploadUniformMat4(const std::string& name, const glm::mat4& value) const;
+	void UploadUniformMat3(const std::string& name, const glm::mat3& value) const;
+
+	void UploadUniformVec2(const std::string& name, const glm::vec2& value) const;
+	void UploadUniformVec3(const std::string& name, const glm::vec3& value) const;
+	void UploadUniformVec4(const std::string& name, const glm::vec4& value) const ;
 	//由于两个构造函数有共用的部分，所以这边要封装成一个私有的函数
 private:
 	

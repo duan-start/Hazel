@@ -16,7 +16,7 @@ public:
 		//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
 		//m_Camera->SetRotation(glm::vec4(0., 0., 1., 45.));
 
-		m_VertexArray = Hazel::VerTexArray::Create();
+		m_VertexArray = Hazel::VertexArray::Create();
 
 		float vertices[5 * 4] = {
 			//屏幕坐标     //纹理坐标
@@ -26,7 +26,7 @@ public:
 		 0.5f,0.5f,0.f,		1.f,1.f//you shang
 		};
 
-		m_VertexBuffer=(Hazel::VerTexBuffer::Creat(vertices, sizeof(vertices)));
+		m_VertexBuffer=(Hazel::VertexBuffer::Creat(vertices, sizeof(vertices)));
 
 
 		{//把不要的东西全部都销毁,
@@ -50,13 +50,13 @@ public:
 		uint32_t Index[] = { 0, 1, 2,   // first triangle
 		1, 2, 3    // second triangle
 		};
-		m_IndexBuffer.reset(Hazel::IndexBuffer::Creat(Index, sizeof(Index) / sizeof(uint32_t)));
+		m_IndexBuffer=(Hazel::IndexBuffer::Creat(Index, sizeof(Index) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
 
 
 		//绑定第二个状态
-		m_SquareVA =(Hazel::VerTexArray::Create());
+		m_SquareVA =(Hazel::VertexArray::Create());
 		float bluevertices[3 * 4] = {
 		 -.5f,-.5f,-.5f,//左下
 		-.5f,.5f,-.5f,//左上
@@ -65,8 +65,8 @@ public:
 		};
 
 		//虽然这里是创建智能指针，但是也是创建类，也是实例化，注意构造函数,不是，没搞懂这个make_shared的用法
-		Hazel::Ref<Hazel::VerTexBuffer> squareVB;
-		squareVB=(Hazel::VerTexBuffer::Creat(bluevertices, sizeof(bluevertices)));
+		Hazel::Ref<Hazel::VertexBuffer> squareVB;
+		squareVB=(Hazel::VertexBuffer::Creat(bluevertices, sizeof(bluevertices)));
 
 		{//把不要的东西全部都销毁
 			Hazel::BufferLayout layout = {
@@ -143,7 +143,7 @@ public:
 		//hack
 		auto& youTube = m_ShaderLib.Get("Youtube");
 		youTube->Bind();
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(youTube)->UploadUniformVec3("color", m_SquareColor);
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(youTube)->UploadUniformVec4("color", m_SquareColor);
 		youTube->UnBind();
 
 		glm::mat4 scale = glm::scale(glm::mat4 (1.0f), glm::vec3(0.1f));
@@ -190,7 +190,7 @@ public:
 
 	void OnImGuiRender() override {
 		ImGui::Begin("Setting");
-		ImGui::ColorEdit3("Squar_colr", glm::value_ptr(m_SquareColor));
+		ImGui::ColorEdit4("Squar_colr", glm::value_ptr(m_SquareColor));
 		ImGui::End();
 	}
 
@@ -200,12 +200,12 @@ private:
 	Hazel::Ref<Hazel::Texture2D> m_Texture, m_TextureHu;
 
 	//每个vao 表示一个渲染流程
-	Hazel::Ref<Hazel::VerTexBuffer> m_VertexBuffer;
+	Hazel::Ref<Hazel::VertexBuffer> m_VertexBuffer;
 	Hazel::Ref<Hazel::IndexBuffer> m_IndexBuffer;
-	Hazel::Ref<Hazel::VerTexArray> m_VertexArray;
+	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
 
 	//多个vao
-	Hazel::Ref<Hazel::VerTexArray> m_SquareVA;
+	Hazel::Ref<Hazel::VertexArray> m_SquareVA;
 	//std::unique_ptr<BufferLayout> m_BufferLayout;
 
 	Hazel::OrthographicCameraController m_CameralController;
@@ -214,7 +214,7 @@ private:
 	////z轴的初始化导致旋转的时候的精度会出现问题，就会出现有些时候渲染帧失败
 	//glm::vec3 m_Position{ 0.5f,0.5f,0.0f };
 	//glm::vec3 m_ModelPos;
-	glm::vec3 m_SquareColor{0.04f,0.1f,0.11f};
+	glm::vec4 m_SquareColor{0.04f,0.1f,0.11f,0.2f};
 };
 
 class Sandbox : public Hazel::Application {

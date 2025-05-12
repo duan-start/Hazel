@@ -99,10 +99,10 @@ namespace Hazel {
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)
 				layer->OnImGuiRender();
+
 				m_ImGuiLayer->End();
 				//auto [mx, my] = Input::GetMousePosition();
 				//HZ_CORE_TRACE("{0}, {1}", mx, my);
-
 
 			//窗口画面的更新
 			m_Window->OnUpdate();

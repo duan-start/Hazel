@@ -17,7 +17,7 @@ namespace Hazel {
 		static void BeginScene(const Camera& camera, const std::pair<int, int>& aspect);
 		static void EndScene();
 
-		static void Submit(const Ref<Shader>& shader, const Ref<VerTexArray>& vertexArray,const glm::mat4& transform=glm::mat4(1.0f));
+		static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray,const glm::mat4& transform=glm::mat4(1.0f));
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 	private:
