@@ -8,6 +8,7 @@ namespace Hazel {
 	struct Renderer2DStorge {
 		Ref<Shader> TextureShader;
 		Ref<VertexArray> QuadVertexArray;
+		Ref<Texture2D> WhitePixel;
 	};
 
 	static Renderer2DStorge* s_Data;
@@ -15,7 +16,6 @@ namespace Hazel {
 	void Renderer2D::Init()
 	{
 		s_Data = new Renderer2DStorge();
-
 		s_Data->QuadVertexArray = (Hazel::VertexArray::Create());
 
 		float vertices[4 * 5] = {
@@ -52,6 +52,14 @@ namespace Hazel {
 		//设置采样器的卡槽
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->SetUniformInt("u_texture", 0);
+
+
+		//创建一个纹理
+		s_Data->WhitePixel = Texture2D::Create(1, 1);
+		//这里是8位
+		uint32_t white = 0xffffffff;
+		s_Data->WhitePixel->SetData(&white, sizeof(uint32_t));
+
 	}
 
 	void Renderer2D::Shutdown()
@@ -77,6 +85,7 @@ namespace Hazel {
 	{
 		s_Data->TextureShader->Bind();
 		s_Data->QuadVertexArray->Bind();
+		s_Data->WhitePixel->Bind();
 		glm::mat4 tansform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
 
 		(s_Data->TextureShader)->SetUniformFloat4("u_color", color);
@@ -101,6 +110,7 @@ namespace Hazel {
 
 
 		RenderCommand::DrawIndexed(s_Data->QuadVertexArray);
+	
 	}
 
 	void Renderer2D::DrawQurad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture)
