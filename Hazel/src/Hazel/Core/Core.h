@@ -39,6 +39,24 @@ namespace Hazel {
     template<typename T>
     using Scope = std::unique_ptr<T>;
 
+    //允许使用多个参数创建对应的指针，这里做了一个模板，但是没太明白重要性在哪
+    //感觉就算不封装也没什么关系
+    //可能是为了后面自己写一套新的逻辑替代吧（直接改这里面创建指针的形式）
+    template <typename T,typename ... Args>
+    constexpr Scope<T> CreateScope(Args&& ... args) {
+        //forward和move的区别：
+        return std::make_unique<T>(std::forward<Args>(args)...);
+    }
+
+
     template<typename T>
     using Ref = std::shared_ptr<T>;
+
+    template <typename T, typename ... Args>
+    constexpr Ref<T> CreateRef(Args&& ... args) {
+        //forward和move的区别：
+        return std::make_shared<T>(std::forward<Args>(args)...);
+    }
+
+
 }
