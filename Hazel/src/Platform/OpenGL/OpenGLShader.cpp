@@ -232,14 +232,19 @@ namespace Hazel {
 		UploadUniformVec4(name, value);
 	}
 
-	void OpenGLShader::SetUniformMat4(const std::string& name, glm::mat4 value) const
+	void OpenGLShader::SetUniformMat4(const std::string& name,const glm::mat4& value) const
 	{
 		UploadUniformMat4(name, value);
 	}
 
-	void OpenGLShader::SetUniformFloat3(const std::string& name, glm::vec3 value) const
+	void OpenGLShader::SetUniformFloat3(const std::string& name,const glm::vec3& value) const
 	{
 		UploadUniformVec3(name, value);
+	}
+
+	void OpenGLShader::SetUniformInt(const std::string& name, int value) const
+	{
+		UploadUniformInt(name, value);
 	}
 
 	//---------------------------------------------------------

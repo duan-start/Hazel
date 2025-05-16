@@ -20,7 +20,9 @@ uniform float iTime;
 out vec4 FragColor;	
 in vec2 TexCoords;
 uniform sampler2D u_texture;
+uniform vec4 u_color;
 void main(){
-FragColor=texture(u_texture,TexCoords);	
+//FragColor=vec4(TexCoords,0.f,1.0f);
+FragColor=texture(u_texture,TexCoords*4.f)*u_color;	
 //FragColor=vec4(fragColor.x,fragColor.y,fragColor.z,0.5);
 }

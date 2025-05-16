@@ -17,8 +17,11 @@ namespace Hazel {
 		virtual const std::string& GetName()const = 0;
 
 		virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const = 0;
-		virtual void SetUniformMat4(const std::string& name, glm::mat4 value)const = 0;
-		virtual void SetUniformFloat3(const std::string& name, glm::vec3 value)const=0 ;
+		virtual void SetUniformMat4(const std::string& name,const glm::mat4& value)const = 0;
+		virtual void SetUniformFloat3(const std::string& name,const glm::vec3& value)const=0 ;
+
+		//用来设置采样器的卡槽
+		virtual void SetUniformInt(const std::string& name, int value)const = 0;
 
 		virtual ~Shader() ;
 		static Ref<Shader> Create(const std::string& name,const std::string& vertexsrc, const std::string& fragmentsrc);

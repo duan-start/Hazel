@@ -19,7 +19,7 @@ private:
 	Hazel::Ref<Hazel::VertexArray> m_SquareVA;
 	//Hazel::Ref<Hazel::VertexBuffer> m_VertexBuffer;
 	//Hazel::Ref<Hazel::IndexBuffer> m_IndexBuffer;
-
+	Hazel::Ref<Hazel::Texture2D> m_Texture;
 
 	Hazel::OrthographicCameraController m_CameralController;
 	glm::vec4 m_SquareColor{ 0.04f,0.1f,0.11f,0.5f };

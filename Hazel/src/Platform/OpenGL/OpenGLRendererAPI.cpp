@@ -9,10 +9,11 @@ namespace Hazel {
 		//为什么这里加上这个函数反而导致显示不正常
 		//因为这个函数设置了如何混合的具体参数（最终是依赖你的pixelshader的a值进行设定的，所以）
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
 	}
 	void OpenGLRendererAPI::Clear()
 	{
-		glClear(GL_COLOR_BUFFER_BIT );
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 	}
 
