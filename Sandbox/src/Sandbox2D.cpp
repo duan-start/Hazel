@@ -8,11 +8,14 @@ Sandbox2D::Sandbox2D():
 	
 void Sandbox2D::OnAttach()
 {
-
+	//注意纹理的宽高比例和采样的比例要一致，不然会出现插值错误，结果失真
+	//也有可能是纹理损坏了，用自带的图像工具重新修改（导出下）就可以正确显示了
+	m_Texture = Hazel::Texture2D::Create("assets/textures/Mesh.jpg");
 }
 
 void Sandbox2D::OnDettach()
 {
+	
 }
 
 void Sandbox2D::OnUpdate(Hazel::Timestep ts)
@@ -23,8 +26,10 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	Hazel::RenderCommand::Clear();
 
 	Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
-	Hazel::Renderer2D::DrawQurad({ 0.f,0.f,0.0f }, { 1.0f,1.0f }, m_SquareColor);
 	Hazel::Renderer2D::DrawQurad({ 0.5f,0.5f }, { 1.5f,1.0f }, { 0.4f,0.2f,0.3f,0.8f });
+	Hazel::Renderer2D::DrawQurad({ 0.f,0.f,0.0f }, { 1.0f,1.0f }, m_SquareColor);
+	Hazel::Renderer2D::DrawQurad({ 0.2f,0.2f ,-0.1f}, { 5.f,5.f }, m_Texture);
+
 	Hazel::Renderer2D::EndScene();
 }
 

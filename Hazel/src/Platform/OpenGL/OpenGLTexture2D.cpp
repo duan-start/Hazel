@@ -39,9 +39,14 @@ namespace Hazel {
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height); // 使用新的变量名  
 
-		// 设置纹理参数  
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//比learnopengl 里面的glTexParameteri要更加高级点，可以直接设置对应id的texutr,而不需要手动绑定textre,然后再设置
+		// 设置纹理参数,设置过滤类型（放大过滤和缩小过滤）纹理过大（mag）,纹理过小（min）
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		//设置超出边界的环绕情况
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		// 上传纹理数据 ，这个决定初始上传的纹理是什么格式
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
