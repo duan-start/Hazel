@@ -15,6 +15,7 @@ namespace Hazel {
 
 	void Renderer2D::Init()
 	{
+		HZ_PROFILE_FUNCTION();
 		s_Data = new Renderer2DStorge();
 		s_Data->QuadVertexArray = (Hazel::VertexArray::Create());
 
@@ -64,11 +65,13 @@ namespace Hazel {
 
 	void Renderer2D::Shutdown()
 	{
+		HZ_PROFILE_FUNCTION();
 		delete s_Data;
 	}
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
+		HZ_PROFILE_FUNCTION();
 		//set和upload的区别：set可以在缓冲区中设定，但是upload就是直接将数据传输到gpu上面了
 
 		s_Data->TextureShader->Bind();
@@ -79,10 +82,13 @@ namespace Hazel {
 
 	void Renderer2D::EndScene()
 	{
+		HZ_PROFILE_FUNCTION();
 	}
 
 	void Renderer2D::DrawQurad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		s_Data->TextureShader->Bind();
 		s_Data->QuadVertexArray->Bind();
 		s_Data->WhitePixel->Bind();
@@ -100,6 +106,8 @@ namespace Hazel {
 
 	void Renderer2D::DrawQurad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		s_Data->TextureShader->Bind();
 		s_Data->QuadVertexArray->Bind();
 		texture->Bind();

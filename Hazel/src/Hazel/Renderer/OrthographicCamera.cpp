@@ -13,12 +13,14 @@ namespace Hazel {
 	//这个参数我还没有太搞明白
 	OrthographicCamera::OrthographicCamera(float Left, float Right, float Bottom, float Top) :m_ProjectionMatrix(glm::ortho(Left, Right, Bottom, Top,-1.0f,1.0f)), m_ViewMatrix(1.0f)
 	{
+		HZ_PROFILE_FUNCTION();
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 
 	void OrthographicCamera::SetPosition(const glm::vec3& position)
 	{
+
 		m_Position = position;
 		RecalculateViewMatrix();
 	}
@@ -31,6 +33,7 @@ namespace Hazel {
 
 	void OrthographicCamera::SetProjection(const glm::vec4& screen)
 	{
+		HZ_PROFILE_FUNCTION();
 		m_ProjectionMatrix = glm::ortho(screen.x, screen.y, screen.z, screen.w);
 		//直接这样计算就好了，没有必要调用recal。。函数
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
@@ -40,6 +43,7 @@ namespace Hazel {
 	//其实这是2d简化版本的，如果是3d的话，相机的坐标是一个维度为3的向量，相机的方向也是一个维度为3的向量
 	void OrthographicCamera::RecalculateViewMatrix()
 	{
+		HZ_PROFILE_FUNCTION();
 		// 正确的2D相机矩阵顺序：先旋转后平移（T * R）的逆 = R^-1 * T^-1
 		//glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation.w),
 		//	glm::vec3(0.0f, 0.0f, 1.0f)); // 强制Z轴

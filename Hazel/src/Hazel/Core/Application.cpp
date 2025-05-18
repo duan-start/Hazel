@@ -18,6 +18,8 @@ namespace Hazel {
 
 
 	Application::Application() {
+		HZ_PROFILE_FUNCTION();
+
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
 		s_Instance = this;
 		m_Window = std::unique_ptr<Window>(Window::Create());
@@ -31,12 +33,16 @@ namespace Hazel {
 	}
 
 	Application:: ~Application() {
+		HZ_PROFILE_FUNCTION();
+
 		//不用写，这个实际上实在laystack手动删除，在那个地方管理生命周期
 		//delete m_ImGuiLayer;  // 手动释放 m_ImGuiLayer
 	}
 
 	//设置事件回调函数
 	void Application::OnEvent(Event& e) {
+		HZ_PROFILE_FUNCTION();
+
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
 
@@ -54,23 +60,32 @@ namespace Hazel {
 
 	void Application::PushLayer(Layer* layer)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* overlay)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_LayerStack.PushOverLayer(overlay);
 		overlay->OnAttach();
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_Running = false;
 		return true;
 	}
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		if (e.GetWidth() == 0 || e.GetHeight() == 0) {
 			m_Minimized = true;
 			return false;
@@ -84,7 +99,11 @@ namespace Hazel {
 
 	void Application::Run() {
 
+		HZ_PROFILE_FUNCTION();
+
 		while (m_Running) {
+
+			HZ_PROFILE_SCOPE("RunLoop");
 
 			float time = glfwGetTime();
 			Timestep timestep = time - m_LastFrameTime;
@@ -92,13 +111,18 @@ namespace Hazel {
 
 			//自定义的层栈的更新
 			if (!m_Minimized) {
+			HZ_PROFILE_SCOPE("LayerStack Update");
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate(timestep);
 			}
 			//ImGui的更新
 			m_ImGuiLayer->Begin();
+			{
+			HZ_PROFILE_SCOPE("LayerStack OnImGuiRender");
+
 			for (Layer* layer : m_LayerStack)
 				layer->OnImGuiRender();
+			}
 
 				m_ImGuiLayer->End();
 				//auto [mx, my] = Input::GetMousePosition();

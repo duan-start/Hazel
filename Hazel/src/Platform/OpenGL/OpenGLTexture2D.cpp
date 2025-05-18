@@ -8,6 +8,7 @@ namespace Hazel {
 
 	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
 	{
+		HZ_PROFILE_FUNCTION();
 		//这里只是设置好初始的gpu的，但是没有data
 		m_Height = height;
 		m_Width = width;
@@ -35,12 +36,17 @@ namespace Hazel {
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path):
 		m_path(path)
 	{
+		HZ_PROFILE_FUNCTION();
 		int height, width, channels;
 		//由于默认图像的坐标和opengl是y轴相反的，（uv坐标）
 		//所以这边直接反转stbi处理的图像的信息
 		stbi_set_flip_vertically_on_load(1);
 
-		stbi_uc* data = stbi_load(path.c_str(), (int*)&width, (int*)&height, (int*)&channels, 0);
+		stbi_uc* data = nullptr;
+		{
+			HZ_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std:string&)");
+			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+		}
 		HZ_CORE_ASSERT(data, "Failed To Load Image");
 		HZ_CORE_ASSERT(width > 0 && height > 0, "Loaded image has zero dimensions.");
 		
@@ -84,10 +90,12 @@ namespace Hazel {
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
+		HZ_PROFILE_FUNCTION();
 		glDeleteTextures(1, &m_RendererID);
 	}
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
+		HZ_PROFILE_FUNCTION();
 		//这里做一个健壮性的测试
 		//确保size 不会出问题
 		uint32_t bpp = 4;
@@ -98,6 +106,7 @@ namespace Hazel {
 	}
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
+		HZ_PROFILE_FUNCTION();
 		glBindTextureUnit(slot,m_RendererID);
 	}
 }

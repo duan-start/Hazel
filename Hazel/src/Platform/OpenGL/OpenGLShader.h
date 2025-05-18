@@ -23,7 +23,7 @@ public:
 	virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const override;
 	virtual void SetUniformMat4(const std::string& name, const glm::mat4& value)const override;
 	virtual void SetUniformFloat3(const std::string& name,const glm::vec3& value)const override;
-
+	void OpenGLShader::SetUniformFloat(const std::string& name, float value) const override;
 	virtual void SetUniformInt(const std::string& name, int value) const override;
 
 	//这三种类型直接复制也没有关系

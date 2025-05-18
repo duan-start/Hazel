@@ -21,7 +21,14 @@ private:
 	//Hazel::Ref<Hazel::IndexBuffer> m_IndexBuffer;
 	Hazel::Ref<Hazel::Texture2D> m_Texture;
 
+	//struct ProfileResult {
+	//	const char* Name;
+	//	float Time;
+	//};
+
+	//std::vector<ProfileResult> m_ProfileResults;
+
 	Hazel::OrthographicCameraController m_CameralController;
-	glm::vec4 m_SquareColor{ 0.04f,0.1f,0.11f,0.5f };
+	glm::vec4 m_SquareColor{ 0.2f,0.6f,0.8f,0.9f };
 };
 

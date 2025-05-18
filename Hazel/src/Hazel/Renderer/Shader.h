@@ -19,6 +19,7 @@ namespace Hazel {
 		virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const = 0;
 		virtual void SetUniformMat4(const std::string& name,const glm::mat4& value)const = 0;
 		virtual void SetUniformFloat3(const std::string& name,const glm::vec3& value)const=0 ;
+		virtual void SetUniformFloat(const std::string& name, float value) const = 0;
 
 		//用来设置采样器的卡槽
 		virtual void SetUniformInt(const std::string& name, int value)const = 0;

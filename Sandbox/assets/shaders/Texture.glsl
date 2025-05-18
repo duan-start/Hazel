@@ -23,6 +23,6 @@ uniform sampler2D u_texture;
 uniform vec4 u_color;
 void main(){
 //FragColor=vec4(TexCoords,0.f,1.0f);
-FragColor=texture(u_texture,TexCoords*4.f)*u_color;	
+FragColor=texture(u_texture,TexCoords)*u_color;	
 //FragColor=vec4(fragColor.x,fragColor.y,fragColor.z,0.5);
 }

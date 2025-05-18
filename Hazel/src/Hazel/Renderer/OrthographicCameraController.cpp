@@ -9,10 +9,11 @@ namespace Hazel {
 
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation) :m_Camera(-aspectRatio * m_ZoomLevel, aspectRatio* m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel),m_AspectRatio(aspectRatio), m_rotation(rotation)
 		{
+		HZ_PROFILE_FUNCTION();
 		}
 	void OrthographicCameraController::OnUpdate(Timestep ts)
 	{
-
+		HZ_PROFILE_FUNCTION();
 		//HZ_TRACE("{0}", ts.GetSeconds());
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_W)) {
 			m_CameraPos.y += m_CameraTranslationSpeed * ts;
@@ -43,6 +44,7 @@ namespace Hazel {
 
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& e)
 	{
+		HZ_PROFILE_FUNCTION();
 		//通过改变视图的大小来确定平面物体缩放的比例（透视和正交的思想倒是大差不差）
 		m_ZoomLevel -= e.GetYOffset()*0.2f;
 		//保证最大的放大比例，这样放大的pos的这个移动速度，（虽然fps基本都是这样的）
@@ -53,6 +55,7 @@ namespace Hazel {
 
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
 	{
+		HZ_PROFILE_FUNCTION();
 		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();
 		m_Camera.SetProjection(glm::vec4(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel));
 		return true;
@@ -60,6 +63,7 @@ namespace Hazel {
 
 	void OrthographicCameraController::OnEvent(Event& e)
 	{
+		HZ_PROFILE_FUNCTION();
 		EventDispatcher dispatcher(e);
 
 		//这样hack真的可以吗，感觉是轮询而不是选择

@@ -68,7 +68,7 @@ void main(){
 	vec3 Color=vec3(color.x,color.y,color.z);
 	final=(final+Color)/2;
 	final=clamp(final+Color,0,1);
-//	FragColor=vec4(final,color.w);
-	FragColor=color;
+	FragColor=vec4(final,color.w);
+	//FragColor=color;
 	}
 	

@@ -21,33 +21,38 @@ namespace Hazel {
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps&props) {
+		HZ_PROFILE_FUNCTION();
 		Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow() {
+		HZ_PROFILE_FUNCTION();
 		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props) {
+		HZ_PROFILE_FUNCTION();
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
 
 		HZ_CORE_INFO(" Creating window {0} ({1} {2})", props.Title, props.Width, props.Height);
 
-
-		if (!s_GLFWInitialized) {
-			//glfw terminate on system shutdown;
-			int success = glfwInit();
-			HZ_CORE_ASSERT(success, "Could not Initialize GLFW!");
-			glfwSetErrorCallback([](int error, const char* description) {
-				HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
-			});
-			s_GLFWInitialized = true;
-		}
-
+		{
+			HZ_PROFILE_SCOPE("glfwCreateWindow");
+			if (!s_GLFWInitialized) {
+				//glfw terminate on system shutdown;
+				int success = glfwInit();
+				HZ_CORE_ASSERT(success, "Could not Initialize GLFW!");
+				glfwSetErrorCallback([](int error, const char* description) {
+					HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
+				});
+				s_GLFWInitialized = true;
+				}
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		}
 	
+		//这里可以改一下接口调用
 		m_Context = new OpenGLContext(m_Window);
 		//我突然发现我已经把这个扔到了初始化中了 m_Context->Init();
 		//把这个具象的东西放到抽象的接口
@@ -111,8 +116,6 @@ namespace Hazel {
 
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) {
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-			
-			
 
 			switch (action) {
 			case GLFW_PRESS: {
@@ -144,9 +147,11 @@ namespace Hazel {
 	}
 
 	void WindowsWindow::Shutdown(){
+		HZ_PROFILE_FUNCTION();
 		glfwDestroyWindow(m_Window);
 	}
 	void WindowsWindow::OnUpdate() {
+		HZ_PROFILE_FUNCTION();
 		glfwPollEvents();
 		m_Context->SwapBuffers();
 		//glfwSwapBuffers(m_Window);
@@ -154,6 +159,7 @@ namespace Hazel {
 	}
 
 	void WindowsWindow::SetVSync(bool enabled) {
+		HZ_PROFILE_FUNCTION();
 		if (enabled)
 			glfwSwapInterval(1);
 		else
@@ -162,6 +168,7 @@ namespace Hazel {
 	}
 
 	bool WindowsWindow::IsVSync() const {
+		//像这种查询类的都没有必要设置时间测试
 		return m_Data.VSync;
 	}
 

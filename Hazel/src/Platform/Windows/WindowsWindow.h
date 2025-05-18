@@ -37,6 +37,6 @@ namespace Hazel {
 			EventCallbackFn EventCallback;
 		};
 		WindowData m_Data;
-
+		//设置一个int表示窗口的个数
 	};
 }

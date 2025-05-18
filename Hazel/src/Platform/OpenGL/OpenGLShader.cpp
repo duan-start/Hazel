@@ -11,6 +11,7 @@ namespace Hazel {
 
 	OpenGLShader::OpenGLShader(const std::string& filepath)
 	{
+		HZ_PROFILE_FUNCTION();
 		std::string source = ReadFile(filepath);
 		if (&source == nullptr) {
 			std::cout << "FAILED TO OPEN SHADER SOURCE";
@@ -31,6 +32,7 @@ namespace Hazel {
 
 	GLenum OpenGLShader::ShaderTypeFromString(const std::string& type)
 	{
+		HZ_PROFILE_FUNCTION();
 		if (type == "vertex") return GL_VERTEX_SHADER;
 		if (type == "fragment" || type == "pixel") return GL_FRAGMENT_SHADER;
 
@@ -39,7 +41,9 @@ namespace Hazel {
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& name,const std::string& vertexsrc, const std::string& fragmentsrc)
-	{// Read our shaders into the appropriate buffers
+	{
+		HZ_PROFILE_FUNCTION();
+		// Read our shaders into the appropriate buffers
 		//我是真不愿写这么多
 		std::unordered_map<GLenum, std::string> shaderSource;
 		shaderSource[GL_VERTEX_SHADER] = vertexsrc;
@@ -50,6 +54,7 @@ namespace Hazel {
 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
+		HZ_PROFILE_FUNCTION();
 		std::string result;
 		std::ifstream in(filepath, std::ios::in, std::ios::binary);
 
@@ -121,6 +126,7 @@ namespace Hazel {
 	//TODU：使用源代码进行编译操作
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSource)
 	{
+		HZ_PROFILE_FUNCTION();
 		HZ_CORE_ASSERT(shaderSource.size() == 2, "Support only 2 shaders now");
 		GLuint program = glCreateProgram();
 
@@ -214,74 +220,93 @@ namespace Hazel {
 //---------------------------------------------------------
 	void OpenGLShader::Bind() const
 	{
+		HZ_PROFILE_FUNCTION();
 		glUseProgram(m_RenderID);
 	}
 
 	void OpenGLShader::UnBind() const
 	{
+		HZ_PROFILE_FUNCTION();
 		glUseProgram(0);
 	}
 
 	OpenGLShader::~OpenGLShader()
 	{
+		HZ_PROFILE_FUNCTION();
 		glDeleteProgram(m_RenderID);
 	}
 
 	void OpenGLShader::SetUniformFloat4(const std::string& name, const glm::vec4& value) const
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformVec4(name, value);
 	}
 
 	void OpenGLShader::SetUniformMat4(const std::string& name,const glm::mat4& value) const
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformMat4(name, value);
 	}
 
 	void OpenGLShader::SetUniformFloat3(const std::string& name,const glm::vec3& value) const
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformVec3(name, value);
+	}
+	void OpenGLShader::SetUniformFloat(const std::string& name, float value) const
+	{
+		HZ_PROFILE_FUNCTION();
+		UploadUniformFloat(name, value);
 	}
 
 	void OpenGLShader::SetUniformInt(const std::string& name, int value) const
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformInt(name, value);
 	}
 
 	//---------------------------------------------------------
 	//---------------------------------------------------------
 	void OpenGLShader::UploadUniformBool(const std::string& name, const bool& value) const {
+		HZ_PROFILE_FUNCTION();
 		glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), (int)value);
 	}
 
 	void OpenGLShader::UploadUniformInt(const std::string& name, const int& value) const {
+		HZ_PROFILE_FUNCTION();
 		glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), value);
 	}
 
 	void OpenGLShader::UploadUniformFloat(const std::string& name, const float& value) const {
+		HZ_PROFILE_FUNCTION();
 		glUniform1f(glGetUniformLocation(m_RenderID, name.c_str()), value);
 	}
 
 	void OpenGLShader::UploadUniformVec2(const std::string& name, const glm::vec2& value) const
 	{
+		HZ_PROFILE_FUNCTION();
 		glUniform2f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y);
 	}
 
 	void OpenGLShader::UploadUniformVec3(const std::string& name, const glm::vec3& value) const
 	{
+		HZ_PROFILE_FUNCTION();
 		glUniform3f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y, value.z);
 	}
 	void OpenGLShader::UploadUniformVec4(const std::string& name,const glm::vec4& value) const 
 	{
+		HZ_PROFILE_FUNCTION();
 		glUniform4f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y, value.z,value.w);
 	}
 
 	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& value) const {
-
+		HZ_PROFILE_FUNCTION();
 		glUniformMatrix4fv(glGetUniformLocation(m_RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::UploadUniformMat3(const std::string& name,const glm::mat3& value) const
 	{
+		HZ_PROFILE_FUNCTION();
 		glUniformMatrix3fv(glGetUniformLocation(m_RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 	}
 

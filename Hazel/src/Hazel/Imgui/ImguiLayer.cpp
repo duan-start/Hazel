@@ -23,6 +23,8 @@ namespace Hazel {
 
 	void ImguiLayer::OnAttach()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
@@ -54,12 +56,16 @@ namespace Hazel {
 
 	void ImguiLayer::Begin()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
 	void ImguiLayer::End()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2(app.GetWindow().GetWidth(), app.GetWindow().GetHeight());
@@ -75,6 +81,8 @@ namespace Hazel {
 	}
 	void ImguiLayer::OnImGuiRender()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		static bool show = true;
 		ImGui::ShowDemoWindow(&show);
 	}
@@ -83,6 +91,8 @@ namespace Hazel {
 
 	void ImguiLayer::OnDettach()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
