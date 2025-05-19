@@ -54,10 +54,10 @@ void Sandbox2D::OnAttach()
 
 	//注意纹理的宽高比例和采样的比例要一致，不然会出现插值错误，结果失真
 	//也有可能是纹理损坏了，用自带的图像工具重新修改（导出下）就可以正确显示了
-	m_Texture = Hazel::Texture2D::Create("assets/textures/bg.jpg");
+	m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
-void Sandbox2D::OnDettach()
+void Sandbox2D::OnDetach()
 {
 	HZ_PROFILE_FUNCTION();
 
@@ -88,9 +88,9 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	{
 		HZ_PROFILE_SCOPE("Render Draw ");
 		Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
-		Hazel::Renderer2D::DrawQurad({ -0.5f,-0.5f }, { 0.8f,0.7f }, { 0.8f,0.2f,0.3f,1.0f });
-		Hazel::Renderer2D::DrawQurad({ 0.5f,0.5f,0.0f }, { 0.5f,0.5f }, m_SquareColor);
-		Hazel::Renderer2D::DrawQurad({ 0.2f,0.2f ,-0.1f}, { 5.f,5.f }, m_Texture);
+		Hazel::Renderer2D::DrawQuad({ -0.5f,-0.5f }, { 0.8f,0.7f }, { 0.8f,0.2f,0.3f,1.0f });
+		Hazel::Renderer2D::DrawQuad({ 0.5f,0.5f,0.0f }, { 0.5f,0.5f }, m_SquareColor);
+		Hazel::Renderer2D::DrawQuad({ 0.2f,0.2f ,-0.1f}, { 5.f,5.f }, m_Texture);
 
 	}
 	Hazel::Renderer2D::EndScene();

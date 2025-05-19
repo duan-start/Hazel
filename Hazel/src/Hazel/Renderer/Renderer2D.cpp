@@ -85,7 +85,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 	}
 
-	void Renderer2D::DrawQurad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -99,12 +99,12 @@ namespace Hazel {
 		RenderCommand::DrawIndexed(s_Data->QuadVertexArray);
 	}
 
-	void Renderer2D::DrawQurad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		DrawQurad({ position.x,position.y ,0.0f }, size, color);
+		DrawQuad({ position.x,position.y ,0.0f }, size, color);
 	}
 
-	void Renderer2D::DrawQurad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -121,9 +121,37 @@ namespace Hazel {
 	
 	}
 
-	void Renderer2D::DrawQurad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
-		DrawQurad({ position.x,position.y,0.f }, size, texture);
+		DrawQuad({ position.x,position.y,0.f }, size, texture);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, const glm::vec4& color)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		s_Data->TextureShader->Bind();
+		s_Data->QuadVertexArray->Bind();
+		texture->Bind();
+		//°ó¶¨°×É«
+		(s_Data->TextureShader)->SetUniformFloat4("u_color", color);
+
+		glm::mat4 tansform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f })*glm::rotate(glm::mat4(1.0f),rotation,{0.f,0.f,1.0f});
+
+		s_Data->TextureShader->SetUniformMat4("u_Transform", tansform);
+		RenderCommand::DrawIndexed(s_Data->QuadVertexArray);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		DrawQuad({position.x, position.y, 0.f
+		}, size, rotation, s_Data->WhitePixel, color);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture)
+	{
+		DrawQuad({ position.x, position.y, 0.f
+			}, size, rotation, texture, glm::vec4(1.0f));
 	}
 
 }

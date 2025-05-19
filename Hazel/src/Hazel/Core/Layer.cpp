@@ -13,7 +13,7 @@ namespace Hazel {
 	{
 	}
 
-	void Layer::OnDettach()
+	void Layer::OnDetach()
 	{
 	}
 

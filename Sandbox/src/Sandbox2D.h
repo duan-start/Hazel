@@ -8,7 +8,7 @@ public:
 	 ~Sandbox2D()= default;
 
 	virtual void OnAttach()override;
-	virtual void OnDettach()override;
+	virtual void OnDetach()override;
 	virtual void OnUpdate(Hazel:: Timestep ts)override;
 	virtual void OnImGuiRender()override;
 	virtual void OnEvent(Hazel::Event& event)override;

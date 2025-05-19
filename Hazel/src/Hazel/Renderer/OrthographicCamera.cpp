@@ -11,8 +11,8 @@ namespace Hazel {
 	//这里的projectionMatrix作用在世界坐标上，返回的是一个四维的向量（w分量为1）
 	//由于没有透视，所以只需要取其中x,y坐标映射到屏幕上，z用来做zbuffer;
 	//这个参数我还没有太搞明白
-	OrthographicCamera::OrthographicCamera(float Left, float Right, float Bottom, float Top) :m_ProjectionMatrix(glm::ortho(Left, Right, Bottom, Top,-1.0f,1.0f)), m_ViewMatrix(1.0f)
-	{
+	OrthographicCamera::OrthographicCamera(float Left, float Right, float Bottom, float Top) :m_ProjectionMatrix(glm::ortho(Left, Right, Bottom, Top,-1.0f,1.2f)), m_ViewMatrix(1.0f)
+	{//为什么这里的深度值是1的时候我出于-0.5的都绘制不出来
 		HZ_PROFILE_FUNCTION();
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}

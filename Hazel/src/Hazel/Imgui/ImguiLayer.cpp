@@ -89,7 +89,7 @@ namespace Hazel {
 
 
 
-	void ImguiLayer::OnDettach()
+	void ImguiLayer::OnDetach()
 	{
 		HZ_PROFILE_FUNCTION();
 

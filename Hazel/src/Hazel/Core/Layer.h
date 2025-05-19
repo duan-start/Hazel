@@ -9,7 +9,7 @@ namespace Hazel {
 		Layer(const std::string& debug_name = "Layer");
 		virtual ~Layer();
 		virtual void OnAttach();
-		virtual void OnDettach();
+		virtual void OnDetach();
 		virtual void OnUpdate(Timestep ts);
 		virtual void OnImGuiRender();
 		virtual void OnEvent(Event& event);

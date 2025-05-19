@@ -134,6 +134,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\GameTest\ParticleSystem.cpp" />
+    <ClCompile Include="src\GameTest\Random.cpp" />
+    <ClCompile Include="src\GameTest\Player.cpp" />
+    <ClCompile Include="src\GameTest\Level.cpp" />
+    <ClCompile Include="src\GameTest\GameLayer.cpp" />
     <ClCompile Include="src\ExampleLayer.cpp" />
     <ClCompile Include="src\Sandbox2D.cpp" />
     <ClCompile Include="src\Sandboxapp.cpp" />
@@ -144,6 +149,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\GameTest\Color.h" />
+    <ClInclude Include="src\GameTest\ParticleSystem.h" />
+    <ClInclude Include="src\GameTest\Random.h" />
+    <ClInclude Include="src\GameTest\Player.h" />
+    <ClInclude Include="src\GameTest\Level.h" />
+    <ClInclude Include="src\GameTest\GameLayer.h" />
     <ClInclude Include="src\ExampleLayer.h" />
     <ClInclude Include="src\Sandbox2D.h" />
   </ItemGroup>

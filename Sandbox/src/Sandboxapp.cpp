@@ -4,6 +4,7 @@
 #include <Hazel.h>
 #include "Hazel/Core/EntryPoint.h"
 
+#include "GameTest/GameLayer.h"
 #include "Sandbox2D.h"
 #include "ExampleLayer.h"
 
@@ -11,8 +12,11 @@ class Sandbox : public Hazel::Application {
 public:
 	Sandbox() {
 		//PushOverlay(new Sandbox2D());
-		PushOverlay(new ExampleLayer());
-		//std::cout << "Example";
+
+		//PushOverlay(new ExampleLayer());
+		
+		// GameTest
+		PushOverlay(new GameLayer());
 	}
 	~Sandbox() {
 
