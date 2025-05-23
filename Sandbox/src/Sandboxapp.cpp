@@ -11,12 +11,12 @@
 class Sandbox : public Hazel::Application {
 public:
 	Sandbox() {
-		//PushOverlay(new Sandbox2D());
+		PushOverlay(new Sandbox2D());
 
 		//PushOverlay(new ExampleLayer());
 		
 		// GameTest
-		PushOverlay(new GameLayer());
+		//PushOverlay(new GameLayer());
 	}
 	~Sandbox() {
 

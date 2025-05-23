@@ -88,9 +88,12 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	{
 		HZ_PROFILE_SCOPE("Render Draw ");
 		Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
-		Hazel::Renderer2D::DrawQuad({ -0.5f,-0.5f }, { 0.8f,0.7f }, { 0.8f,0.2f,0.3f,1.0f });
-		Hazel::Renderer2D::DrawQuad({ 0.5f,0.5f,0.0f }, { 0.5f,0.5f }, m_SquareColor);
-		Hazel::Renderer2D::DrawQuad({ 0.2f,0.2f ,-0.1f}, { 5.f,5.f }, m_Texture);
+		//Hazel::Renderer2D::DrawRotatedQuad({ -.5f,-.5f }, { 1.5f,0.5f },glm::radians(m_Float), { 0.8f,0.2f,0.3f,1.0f });
+		//Hazel::Renderer2D::DrawQuad({ 0.0f,0.0f}, { 0.5f,0.5f }, m_SquareColor);
+		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
+		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
+		//Hazel::Renderer2D::DrawQuad({ 0.3f,0.3f}, { 0.5f,0.5f }, m_SquareColor);
+		//Hazel::Renderer2D::DrawQuad({ 0.2f,0.2f ,-0.1f}, { 5.f,5.f }, m_Texture,10.f,{0.3f,0.2f,0.2f,1.0f});
 
 	}
 	Hazel::Renderer2D::EndScene();
@@ -102,6 +105,7 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::Begin("Setting");
 	ImGui::ColorEdit4("Squar_colr", glm::value_ptr(m_SquareColor));
 
+	ImGui::SliderFloat("My Float", &m_Float, 0.0f, 180.0f);
 	//for (auto& result : m_ProfileResults) {
 	//	char label[50];
 	//	//添加到缓冲区

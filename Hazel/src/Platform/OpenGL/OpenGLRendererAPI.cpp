@@ -28,9 +28,11 @@ namespace Hazel {
 		glClearColor(color.x, color.y, color.z, color.w);
 	}
 
-	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
+	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray,uint32_t indexCount)
 	{
-		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+		//给用户一个自由度，默认渲染所有的indexCount(input Count=0),也允许用户指定渲染的个数
+		uint32_t count = indexCount ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 		//一定需要手动释放吗
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}

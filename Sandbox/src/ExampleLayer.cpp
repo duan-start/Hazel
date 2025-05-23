@@ -18,7 +18,7 @@ ExampleLayer::ExampleLayer()
 	 0.5f,0.5f,0.f,		1.f,1.f//you shang
 	};
 
-	m_VertexBuffer = (Hazel::VertexBuffer::Creat(vertices, sizeof(vertices)));
+	m_VertexBuffer = (Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 
 	{//把不要的东西全部都销毁,

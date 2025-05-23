@@ -106,7 +106,7 @@ void Level::OnRender()
 	glm::vec4 color = HSVtoRGB(m_PillarHSV);
 
 	// Background
-	Renderer2D::DrawQuad({ playerPos.x, 0.0f, -0.8f }, { 50.0f, 50.0f }, { 0.3f, 0.3f, 0.3f, 1.0f });
+	//Renderer2D::DrawQuad({ playerPos.x, 0.0f, -0.8f }, { 50.0f, 50.0f }, { 0.3f, 0.3f, 0.3f, 1.0f });
 
 	// Floor and ceiling
 	Renderer2D::DrawQuad({ playerPos.x,  34.0f }, { 50.0f, 50.0f }, color);
@@ -114,8 +114,8 @@ void Level::OnRender()
 
 	for (auto& pillar : m_Pillars)
 	{
-		Renderer2D::DrawQuad(pillar.TopPosition, pillar.TopScale, glm::radians(180.0f), m_TriangleTexture, color);
-		Renderer2D::DrawQuad(pillar.BottomPosition, pillar.BottomScale, 0.0f, m_TriangleTexture, color);
+		Renderer2D::DrawRotatedQuad(pillar.TopPosition, pillar.TopScale, glm::radians(180.0f), m_TriangleTexture,1.0f, color);
+		Renderer2D::DrawRotatedQuad(pillar.BottomPosition, pillar.BottomScale, 0.0f, m_TriangleTexture, 1.0f,color);
 	}
 
 	m_Player.OnRender();
@@ -145,6 +145,8 @@ void Level::CreatePillar(int index, float offset)
 
 bool Level::CollisionTest()
 {
+	return false;
+
 	if (glm::abs(m_Player.GetPosition().y) > 8.5f)
 		return true;
 
