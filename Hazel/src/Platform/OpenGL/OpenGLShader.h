@@ -23,13 +23,16 @@ public:
 	virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const override;
 	virtual void SetUniformMat4(const std::string& name, const glm::mat4& value)const override;
 	virtual void SetUniformFloat3(const std::string& name,const glm::vec3& value)const override;
-	void OpenGLShader::SetUniformFloat(const std::string& name, float value) const override;
+	void SetUniformFloat(const std::string& name, float value) const override;
+
+	virtual void SetUniformIntArray(const std::string& name,int* value, uint32_t count)  override;
 	virtual void SetUniformInt(const std::string& name, int value) const override;
 
 	//这三种类型直接复制也没有关系
 	void UploadUniformBool(const std::string& name,const bool& value) const;
 	void UploadUniformInt(const std::string& name, const int& value) const;
 	void UploadUniformFloat(const std::string& name, const float& value)const;
+	void UploadUniformIntArray(const std::string& name, const int* value, uint32_t count);
 
 	void UploadUniformMat4(const std::string& name, const glm::mat4& value) const;
 	void UploadUniformMat3(const std::string& name, const glm::mat3& value) const;

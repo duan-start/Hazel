@@ -88,10 +88,15 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	{
 		HZ_PROFILE_SCOPE("Render Draw ");
 		Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
-		//Hazel::Renderer2D::DrawRotatedQuad({ -.5f,-.5f }, { 1.5f,0.5f },glm::radians(m_Float), { 0.8f,0.2f,0.3f,1.0f });
-		//Hazel::Renderer2D::DrawQuad({ 0.0f,0.0f}, { 0.5f,0.5f }, m_SquareColor);
+
+		Hazel::Renderer2D::DrawRotatedQuad({ -.5f,-.5f }, { 1.5f,0.5f },glm::radians(m_Float), m_SquareColor);
+
+		Hazel::Renderer2D::DrawQuad({ 0.0f,0.0f}, { 0.5f,0.5f }, m_SquareColor);
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
 		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
+
+		Hazel::Renderer2D::DrawQuad({ -.5f, -.5f, -0.1f }, { 10.0f, 10.0f }, m_Texture, 10.0f);
+		Hazel::Renderer2D::DrawQuad({ -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, m_Texture, 20.0f);
 		//Hazel::Renderer2D::DrawQuad({ 0.3f,0.3f}, { 0.5f,0.5f }, m_SquareColor);
 		//Hazel::Renderer2D::DrawQuad({ 0.2f,0.2f ,-0.1f}, { 5.f,5.f }, m_Texture,10.f,{0.3f,0.2f,0.2f,1.0f});
 

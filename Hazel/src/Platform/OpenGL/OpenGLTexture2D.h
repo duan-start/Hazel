@@ -13,6 +13,7 @@ namespace Hazel {
 		~OpenGLTexture2D();
 		virtual uint32_t GetWidth()const { return m_Width; }
 		virtual uint32_t GetHeight()const { return m_Height; }
+		virtual bool operator==(const Texture& other) const override;
 
 		virtual void SetData(void*, uint32_t size)override;
 

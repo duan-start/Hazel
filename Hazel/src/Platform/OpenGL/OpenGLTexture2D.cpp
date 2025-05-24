@@ -93,6 +93,11 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 		glDeleteTextures(1, &m_RendererID);
 	}
+
+    bool OpenGLTexture2D::operator==(const Texture& other) const  
+    {  
+       return m_RendererID == ((OpenGLTexture2D&)other).m_RendererID;  
+    }
 	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
 		HZ_PROFILE_FUNCTION();

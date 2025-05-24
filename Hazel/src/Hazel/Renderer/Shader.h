@@ -23,6 +23,7 @@ namespace Hazel {
 
 		//用来设置采样器的卡槽
 		virtual void SetUniformInt(const std::string& name, int value)const = 0;
+		virtual void SetUniformIntArray(const std::string& name,int* value, uint32_t count) = 0;
 
 		virtual ~Shader() ;
 		static Ref<Shader> Create(const std::string& name,const std::string& vertexsrc, const std::string& fragmentsrc);
