@@ -7,7 +7,7 @@
 
 namespace Hazel {
 
-	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation) :m_Camera(-aspectRatio * m_ZoomLevel, aspectRatio* m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel),m_AspectRatio(aspectRatio), m_rotation(rotation)
+	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation) :m_Bounds({ -aspectRatio * m_ZoomLevel, aspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel }), m_Camera(-aspectRatio * m_ZoomLevel, aspectRatio* m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel), m_AspectRatio(aspectRatio), m_rotation(rotation)
 		{
 		HZ_PROFILE_FUNCTION();
 		}
@@ -49,6 +49,7 @@ namespace Hazel {
 		m_ZoomLevel -= e.GetYOffset()*0.2f;
 		//保证最大的放大比例，这样放大的pos的这个移动速度，（虽然fps基本都是这样的）
 		m_ZoomLevel = std::fmax(0.1f, m_ZoomLevel);
+		m_Bounds = { -m_AspectRatio * m_ZoomLevel,m_AspectRatio * m_ZoomLevel,-m_ZoomLevel,m_ZoomLevel };
 		m_Camera.SetProjection(glm::vec4( - m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel));
 		return true;
 	}
@@ -57,6 +58,7 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();
+		m_Bounds = { -m_AspectRatio * m_ZoomLevel,m_AspectRatio * m_ZoomLevel,-m_ZoomLevel,m_ZoomLevel };
 		m_Camera.SetProjection(glm::vec4(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel));
 		return true;
 	}

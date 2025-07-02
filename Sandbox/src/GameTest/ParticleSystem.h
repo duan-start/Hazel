@@ -14,12 +14,12 @@ struct ParticleProps
 class ParticleSystem
 {
 public:
-	ParticleSystem();
+	ParticleSystem(uint32_t index=10000);
 
 	void Emit(const ParticleProps& particleProps);
 
 	void OnUpdate(Hazel::Timestep ts);
-	void OnRender();
+	void OnRender(Hazel::OrthographicCamera& camera);
 private:
 	struct Particle
 	{
@@ -35,5 +35,5 @@ private:
 		bool Active = false;
 	};
 	std::vector<Particle> m_ParticlePool;
-	uint32_t m_PoolIndex = 999;
+	uint32_t m_PoolIndex;
 };

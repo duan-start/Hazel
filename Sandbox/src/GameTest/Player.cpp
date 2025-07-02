@@ -66,12 +66,12 @@ void Player::OnUpdate(Hazel::Timestep ts)
 	m_ParticleSystem.OnUpdate(ts);
 }
 
-void Player::OnRender()
+void Player::OnRender(Hazel::OrthographicCamera& camera)
 {
-	m_ParticleSystem.OnRender();
-
-	//这里还是有点问题
 	Renderer2D::DrawRotatedQuad({ m_Position.x, m_Position.y, 0.5f }, { 1.0f, 1.3f }, glm::radians(GetRotation()), m_ShipTexture);
+	m_ParticleSystem.OnRender(camera);
+	//这里还是有点问题,我换了一下顺序
+
 }
 
 void Player::OnImGuiRender()

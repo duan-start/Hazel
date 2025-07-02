@@ -13,8 +13,8 @@ namespace Hazel {
 
 		virtual void OnUpdate()override;
 
-		inline unsigned int GetWidth() const override { return m_Data.Width; }
-		inline unsigned int GetHeight() const override { return m_Data.Height; }
+		inline uint32_t GetWidth() const override { return m_Data.Width; }
+		inline uint32_t GetHeight() const override { return m_Data.Height; }
 		
 		virtual void SetEventCallback(const EventCallbackFn& callback) override {//
 		 m_Data.EventCallback = callback;

@@ -17,12 +17,12 @@ namespace Hazel {
 	Application* Application::s_Instance = nullptr;
 
 
-	Application::Application() {
+	Application::Application(const std::string& name) {
 		HZ_PROFILE_FUNCTION();
 
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
 		s_Instance = this;
-		m_Window = std::unique_ptr<Window>(Window::Create());
+		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 		//按理是要在析构函数中delete掉的，
 		m_ImGuiLayer = new ImguiLayer();
@@ -95,7 +95,9 @@ namespace Hazel {
 		m_Minimized = false;
 		return false;
 	}
-
+	void Application::Close() {
+		m_Running = false;
+	}
 
 	void Application::Run() {
 

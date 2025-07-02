@@ -15,7 +15,7 @@ public:
 	void LoadAssets();
 
 	void OnUpdate(Hazel::Timestep ts);
-	void OnRender();
+	void OnRender(Hazel::OrthographicCamera& camera);
 
 	void OnImGuiRender();
 

@@ -1,4 +1,4 @@
-#include "hzpch.h"
+﻿#include "hzpch.h"
 #include "ImguiLayer.h"
 
 //#include "glad/glad.h"
@@ -96,6 +96,17 @@ namespace Hazel {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+	}
+
+	void ImguiLayer::OnEvent(Event& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		if (e.IsInCategory(EventCategoryMouseButton) && io.WantCaptureMouse)
+		{
+			HZ_CORE_TRACE("ImGui 拦截鼠标事件：{}", e.GetName());
+			e.Handled = true;  // ✅ 这行必须有
+		}
 	}
 
 	//void ImguiLayer::OnUpdate()

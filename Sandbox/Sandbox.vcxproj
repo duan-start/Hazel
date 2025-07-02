@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>HZ_PLATFORM_WINDOWS;HZ_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\vendor\imgui;..\Hazel\vendor\glm;..\Hazel\vendor\stb_image;..\Hazel\src;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\vendor\imgui;..\Hazel\vendor\glm;..\Hazel\vendor\stb_image;..\Hazel\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -134,12 +134,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\GameTest\ParticleSystem.cpp" />
-    <ClCompile Include="src\GameTest\Random.cpp" />
-    <ClCompile Include="src\GameTest\Player.cpp" />
-    <ClCompile Include="src\GameTest\Level.cpp" />
-    <ClCompile Include="src\GameTest\GameLayer.cpp" />
+    <ClInclude Include="src\ExampleLayer.h" />
+    <ClInclude Include="src\GameTest\Color.h" />
+    <ClInclude Include="src\GameTest\GameLayer.h" />
+    <ClInclude Include="src\GameTest\Level.h" />
+    <ClInclude Include="src\GameTest\ParticleSystem.h" />
+    <ClInclude Include="src\GameTest\Player.h" />
+    <ClInclude Include="src\GameTest\Random.h" />
+    <ClInclude Include="src\Sandbox2D.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\ExampleLayer.cpp" />
+    <ClCompile Include="src\GameTest\GameLayer.cpp" />
+    <ClCompile Include="src\GameTest\Level.cpp" />
+    <ClCompile Include="src\GameTest\ParticleSystem.cpp" />
+    <ClCompile Include="src\GameTest\Player.cpp" />
+    <ClCompile Include="src\GameTest\Random.cpp" />
     <ClCompile Include="src\Sandbox2D.cpp" />
     <ClCompile Include="src\Sandboxapp.cpp" />
   </ItemGroup>
@@ -147,16 +157,6 @@
     <ProjectReference Include="..\Hazel\Hazel.vcxproj">
       <Project>{99294D0D-053E-75BE-CEBF-181E3A9371EF}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\GameTest\Color.h" />
-    <ClInclude Include="src\GameTest\ParticleSystem.h" />
-    <ClInclude Include="src\GameTest\Random.h" />
-    <ClInclude Include="src\GameTest\Player.h" />
-    <ClInclude Include="src\GameTest\Level.h" />
-    <ClInclude Include="src\GameTest\GameLayer.h" />
-    <ClInclude Include="src\ExampleLayer.h" />
-    <ClInclude Include="src\Sandbox2D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

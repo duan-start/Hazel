@@ -53,7 +53,7 @@ void GameLayer::OnUpdate(Hazel::Timestep ts)
 	Hazel::RenderCommand::Clear();
 
 	Hazel::Renderer2D::BeginScene(*m_Camera);
-	m_Level.OnRender();
+	m_Level.OnRender(*m_Camera);
 	Hazel::Renderer2D::EndScene();
 }
 

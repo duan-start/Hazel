@@ -5,9 +5,10 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/compatibility.hpp>
 
-ParticleSystem::ParticleSystem()
+ParticleSystem::ParticleSystem(uint32_t index):
+	m_PoolIndex(index-1)
 {
-	m_ParticlePool.resize(1000);
+	m_ParticlePool.resize(index);
 }
 
 void ParticleSystem::Emit(const ParticleProps& particleProps)
@@ -56,8 +57,10 @@ void ParticleSystem::OnUpdate(Hazel::Timestep ts)
 	}
 }
 
-void ParticleSystem::OnRender()
+void ParticleSystem::OnRender(Hazel::OrthographicCamera& camera)
 {
+	Hazel::Renderer2D::BeginScene(camera);
+
 	for (auto& particle : m_ParticlePool)
 	{
 		if (!particle.Active)
@@ -69,5 +72,8 @@ void ParticleSystem::OnRender()
 
 		float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
 		Hazel::Renderer2D::DrawRotatedQuad(particle.Position, { size, size }, particle.Rotation, color);
+		//Hazel::Renderer2D::DrawQuad(particle.Position, { size, size }, color);
+	
 	}
+	Hazel::Renderer2D::EndScene();
 }

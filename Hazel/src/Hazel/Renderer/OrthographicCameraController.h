@@ -15,6 +15,13 @@ namespace Hazel {
 	//也就是指针
 	//但是如果强调的是一个新的系统的话，是推荐直接使用复合的关系来实现的
 
+	struct OrthographicCameraBounds {
+		float Left, Right;
+		float Bottom, Top;
+		float GetWidth() { return Right - Left; }
+		float GetHeight() { return Top - Bottom; }
+	};
+
 	class OrthographicCameraController
 	{
 	public:
@@ -33,6 +40,8 @@ namespace Hazel {
 		const float GetZoomLevel()const { return m_ZoomLevel; }
 		void SetZoomLevel(float zoom) { m_ZoomLevel = zoom; }
 
+		const OrthographicCameraBounds& GetBounds() const{ return m_Bounds; }
+
 	private:
 		//回调的事件处理函数
 		bool OnMouseScrolled(MouseScrolledEvent& e);
@@ -46,14 +55,17 @@ namespace Hazel {
 		//这个顺序不能乱，相机的初始化需要前面的参数
 
 		//这里是直接参照的Hack，按理是直接用我写出的那个抽象的（通过指针的方式），后面扩展3d渲染器的时候可以重构
+		//和序列初始化的顺序要一致
+		OrthographicCameraBounds m_Bounds;
 		OrthographicCamera m_Camera;
-
 		//考虑使用者如果要用的话
 		bool m_rotation;
 		float m_Rotation{0.f};
 
 		float m_CameraTranslationSpeed = 5.0f, m_CameraRotationSpeed = 45.0f;
 		glm::vec3 m_CameraPos{0.f,0.f,0.f};
+
+
 	};
 }
 

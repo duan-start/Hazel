@@ -3,6 +3,7 @@
 #include "stb_image.h"
 
 #include <glad/glad.h>
+#include <filesystem>
 
 namespace Hazel {
 
@@ -45,6 +46,8 @@ namespace Hazel {
 		stbi_uc* data = nullptr;
 		{
 			HZ_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std:string&)");
+			//std::cout << "Working dir: " << std::filesystem::current_path() << std::endl;
+
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}
 		HZ_CORE_ASSERT(data, "Failed To Load Image");

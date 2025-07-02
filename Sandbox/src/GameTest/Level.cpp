@@ -99,7 +99,7 @@ void Level::OnUpdate(Hazel::Timestep ts)
 	}
 }
 
-void Level::OnRender()
+void Level::OnRender(Hazel::OrthographicCamera& camera)
 {
 	const auto& playerPos = m_Player.GetPosition();
 
@@ -118,7 +118,7 @@ void Level::OnRender()
 		Renderer2D::DrawRotatedQuad(pillar.BottomPosition, pillar.BottomScale, 0.0f, m_TriangleTexture, 1.0f,color);
 	}
 
-	m_Player.OnRender();
+	m_Player.OnRender(camera);
 }
 
 void Level::OnImGuiRender()
@@ -145,7 +145,7 @@ void Level::CreatePillar(int index, float offset)
 
 bool Level::CollisionTest()
 {
-	return false;
+	//return false;
 
 	if (glm::abs(m_Player.GetPosition().y) > 8.5f)
 		return true;

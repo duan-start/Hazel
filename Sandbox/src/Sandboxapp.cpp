@@ -10,8 +10,8 @@
 
 class Sandbox : public Hazel::Application {
 public:
-	Sandbox() {
-		PushOverlay(new Sandbox2D());
+	Sandbox():Application("Sandbox") {
+		PushLayer(new Sandbox2D());
 
 		//PushOverlay(new ExampleLayer());
 		

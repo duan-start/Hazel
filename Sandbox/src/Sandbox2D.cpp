@@ -55,6 +55,27 @@ void Sandbox2D::OnAttach()
 	//注意纹理的宽高比例和采样的比例要一致，不然会出现插值错误，结果失真
 	//也有可能是纹理损坏了，用自带的图像工具重新修改（导出下）就可以正确显示了
 	m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
+	m_BgTexture = Hazel::Texture2D::Create("assets/textures/bg.jpg");
+	m_SpriteSheet = Hazel::Texture2D::Create("assets/games/sprite/Spritesheet/mapPack_spritesheet.png");
+
+	//Initfbo
+	Hazel::FramebufferSpecification fbSpec; 
+		fbSpec.Width = 1280;
+		fbSpec.Height = 720;
+	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
+
+	m_sprite = Hazel::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 2,2 }, { 63,63 });
+	m_sprite2 = Hazel::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 7,2 }, { 63,63 });
+	//Init Particles
+	
+	m_Particle.Position = { 0.0f, 0.0f };
+	m_Particle.Velocity = { 0.0f, 0.0f }, m_Particle.VelocityVariation = { 3.0f, 1.0f };
+	m_Particle.SizeBegin = 0.5f, m_Particle.SizeEnd = 0.0f, m_Particle.SizeVariation = 0.3f;
+	m_Particle.ColorBegin = m_SquareColor;
+	m_Particle.ColorEnd = { 0.6f, 0.6f, 0.6f, 1.0f };
+	m_Particle.LifeTime = 4.0f;
+
+
 }
 
 void Sandbox2D::OnDetach()
@@ -63,10 +84,9 @@ void Sandbox2D::OnDetach()
 
 }
 
-
-
 void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 {
+	m_Particle.ColorBegin = m_SquareColor;
 	//由于这个模板的参数是构造函数里面的，所以会自动推导，不需要显示的指定
 	//比如不需要Timer<decltype(lamda)>(...);
 	HZ_PROFILE_FUNCTION();
@@ -77,55 +97,176 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 
 		m_CameralController.OnUpdate(ts);
 
-
+		Hazel::Renderer2D::ResetStats();
 	{
 		HZ_PROFILE_SCOPE("Render Prep ");
+		m_Framebuffer->Bind();
 		///---------------------------------------------
 		Hazel::RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
 		Hazel::RenderCommand::Clear();
 	}
 
 	{
+		static float radiance = 0.f;
 		HZ_PROFILE_SCOPE("Render Draw ");
 		Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
 
-		Hazel::Renderer2D::DrawRotatedQuad({ -.5f,-.5f }, { 1.5f,0.5f },glm::radians(m_Float), m_SquareColor);
+		Hazel::Renderer2D::DrawRotatedQuad({ .5f,-.5f }, { 1.0f,1.0f }, glm::radians(radiance), m_Texture, 5.0f, m_SquareColor);
 
-		Hazel::Renderer2D::DrawQuad({ 0.0f,0.0f}, { 0.5f,0.5f }, m_SquareColor);
+		Hazel::Renderer2D::DrawRotatedQuad({ 0.0f,0.0f }, { 0.5f,0.5f }, glm::radians(m_Float),m_SquareColor);
 		Hazel::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });
-		Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
-
-		Hazel::Renderer2D::DrawQuad({ -.5f, -.5f, -0.1f }, { 10.0f, 10.0f }, m_Texture, 10.0f);
+		//Hazel::Renderer2D::DrawQuad({ 0.5f, -0.5f }, { 0.5f, 0.75f }, { 0.2f, 0.3f, 0.8f, 1.0f });
+		
+		//background
+		Hazel::Renderer2D::DrawQuad({ 0.f, 0.f, -0.2f }, { 20.0f, 20.0f }, m_Texture, 10.0f);
 		Hazel::Renderer2D::DrawQuad({ -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, m_Texture, 20.0f);
-		//Hazel::Renderer2D::DrawQuad({ 0.3f,0.3f}, { 0.5f,0.5f }, m_SquareColor);
-		//Hazel::Renderer2D::DrawQuad({ 0.2f,0.2f ,-0.1f}, { 5.f,5.f }, m_Texture,10.f,{0.3f,0.2f,0.2f,1.0f});
+		Hazel::Renderer2D::EndScene();
 
+		//new scene  //presure test
+		Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
+		for (float y = -5.f; y < 5.f; y += 0.5f) {
+			for (float x = -5.f; x < 5.f; x += 0.5f) {
+				glm::vec2 color = { (x + 5.f) / 10.f,(y + 5.f) / 10.f };
+				Hazel::Renderer2D::DrawQuad({ x, y,-0.1f }, { 0.45f, 0.45f }, glm::vec4(color.x,.4f,color.y,.5f));
+			}
+		}
+
+		Hazel::Renderer2D::EndScene();
+		m_Framebuffer->Unbind();
+
+		radiance+=ts*50.f;
 	}
+
+	
+#if 0
+	Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
+	Hazel::Renderer2D::DrawQuad({ 0.f, 0.f, -0.2f }, { 2.0f, 2.0f }, m_sprite, 1.0f);
+	Hazel::Renderer2D::DrawQuad({ 3.f, 0.f, -0.2f }, { 2.0f, 2.0f }, m_sprite2, 1.0f);
 	Hazel::Renderer2D::EndScene();
+#endif
+	m_ParticleSystem.OnUpdate(ts);
+	m_ParticleSystem.OnRender(m_CameralController.GetCamera());
 }
 
 void Sandbox2D::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
+
+	static bool dockingspaceEnable = true;
+
+	if (dockingspaceEnable) {
+		static bool dockspaceOpen = true;
+		static bool opt_fullscreen = true;
+		static bool opt_padding = false;
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+		// because it would be confusing to have two docking targets within each others.
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		if (opt_fullscreen)
+		{
+			const ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(viewport->WorkSize);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+		else
+		{
+			dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+		}
+
+		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+		// and handle the pass-thru hole, so we ask Begin() to not render a background.
+		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+			window_flags |= ImGuiWindowFlags_NoBackground;
+
+
+		if (!opt_padding)
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+		if (!opt_padding)
+			ImGui::PopStyleVar();
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		// Submit the DockSpace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		}
+
+
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Close"))
+					Hazel::Application::Get().Close();
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
+		}
+
+		ImGui::End();
+	}
+
 	ImGui::Begin("Setting");
 	ImGui::ColorEdit4("Squar_colr", glm::value_ptr(m_SquareColor));
-
 	ImGui::SliderFloat("My Float", &m_Float, 0.0f, 180.0f);
-	//for (auto& result : m_ProfileResults) {
-	//	char label[50];
-	//	//添加到缓冲区
-	//	strcpy(label, "%.3fms ");
-	//	strcat(label, result.Name);
-	//	//打印出来格式化
-	//	ImGui::Text(label, result.Time);
-	//}
-	////每次重新更新
-	//m_ProfileResults.clear();
+	auto states = Hazel::Renderer2D::GetStats();
+	//visual stats
+	ImGui::Text("Renderer2D stats: ");
+	ImGui::Text("DrawCalls: %d", states.DrawCalls);
+	ImGui::Text("QuadCount: %d", states.QuadCount);
+	ImGui::Text("QuadVertex: %d", states.GetTotalVertexCount());
+	ImGui::Text("QuadIndex: %d", states.GetTotalIndexCount());
+	// textureID = m_BgTexture->GetRenderID();
+	//ImGui::Image((void*)textureID, ImVec2{ 256.0f, 256.0f });
 
+	uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
+	ImGui::Image((void*)textureID, ImVec2{ 1280, 720 }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 	ImGui::End();
 }
 
 void Sandbox2D::OnEvent(Hazel::Event& event)
 {
 	m_CameralController.OnEvent(event);
+
+	Hazel::EventDispatcher dispatcher(event);
+	dispatcher.Dispatch<Hazel::MouseButtonPressed>(
+		HZ_BIND_EVENT_FN(Sandbox2D::OnMouseButtonPressed));
+}
+
+bool Sandbox2D::OnMouseButtonPressed(Hazel::MouseButtonPressed& e)
+{
+
+	if (e.GetMouseButton() == HZ_MOUSE_BUTTON_LEFT)
+	{
+		auto [x, y] = Hazel::Input::GetMousePosition();
+		auto width = Hazel::Application::Get().GetWindow().GetWidth();
+		auto height = Hazel::Application::Get().GetWindow().GetHeight();
+
+		auto bounds = m_CameralController.GetBounds();
+		auto pos = m_CameralController.GetCamera().GetPosition();
+
+		x = (x / width) * bounds.GetWidth() - bounds.GetWidth() * 0.5f;
+		y = bounds.GetHeight() * 0.5f - (y / height) * bounds.GetHeight();
+		m_Particle.Position = { x + pos.x,y + pos.y };
+
+		for (int i = 0; i < 5; i++)
+			m_ParticleSystem.Emit(m_Particle);
+
+		return true; // 表示事件已处理
+	}
+
+	return false;
 }
