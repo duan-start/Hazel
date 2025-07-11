@@ -17,6 +17,7 @@ IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
 IncludeDir["Imgui"] = "Hazel/vendor/imgui"
 IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
+IncludeDir["Entt"] = "Hazel/vendor/Entt/include"
 
 
 
@@ -64,7 +65,8 @@ project "Hazel"
         "%{IncludeDir.Glad}",
         "%{IncludeDir.Imgui}",
         "%{IncludeDir.glm}",
-        "%{IncludeDir.stb_image}"
+        "%{IncludeDir.stb_image}",
+        "%{IncludeDir.Entt}"
     }
 
     links{
@@ -122,6 +124,7 @@ project "Hazel-Editor"
         "Hazel/vendor/imgui",
         "Hazel/vendor/glm",
         "Hazel/vendor/stb_image",
+        "Hazel/vendor/Entt/include",
         "Hazel/src"  
     }  
     
@@ -175,7 +178,9 @@ project "Sandbox"
         "Hazel/vendor/imgui",
         "Hazel/vendor/glm",
         "Hazel/vendor/stb_image",
-        "Hazel/src"  
+        "Hazel/vendor/Entt/include",
+        "Hazel/src" 
+
     }  
     
     links{  

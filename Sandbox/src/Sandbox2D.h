@@ -43,6 +43,7 @@ private:
 	 ParticleProps m_Particle;
 	 ParticleSystem m_ParticleSystem;
 
+	 glm::vec2 m_FramebufferSize;
 
 };
 

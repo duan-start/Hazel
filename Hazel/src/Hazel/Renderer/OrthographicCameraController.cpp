@@ -42,6 +42,13 @@ namespace Hazel {
 		m_CameraTranslationSpeed = m_ZoomLevel*1.5f;
 	}
 
+	void OrthographicCameraController::OnResize(uint32_t width, uint32_t height)
+	{
+		m_AspectRatio = (float)width / (float)height;
+		m_Bounds = { -m_AspectRatio * m_ZoomLevel,m_AspectRatio * m_ZoomLevel,-m_ZoomLevel,m_ZoomLevel };
+		m_Camera.SetProjection(glm::vec4(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel));
+	}
+
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& e)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -54,12 +61,11 @@ namespace Hazel {
 		return true;
 	}
 
+
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
 	{
 		HZ_PROFILE_FUNCTION();
-		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();
-		m_Bounds = { -m_AspectRatio * m_ZoomLevel,m_AspectRatio * m_ZoomLevel,-m_ZoomLevel,m_ZoomLevel };
-		m_Camera.SetProjection(glm::vec4(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel));
+		OnResize((float)e.GetWidth(), (float)e.GetHeight());
 		return true;
 	}
 

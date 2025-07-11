@@ -13,6 +13,9 @@
 #include "Hazel/Core/KeyCodes.h"
 #include "Hazel/Core/MouseButtonCodes.h"
 
+#include "Hazel/Scene/Scene.h"
+#include "Hazel/Scene/Components.h"
+
 #include "Hazel/Renderer/OrthographicCameraController.h"
 
 #include "Hazel/Renderer/Buffer.h"

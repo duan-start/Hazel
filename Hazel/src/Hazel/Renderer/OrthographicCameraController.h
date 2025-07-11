@@ -31,6 +31,8 @@ namespace Hazel {
 		void OnEvent(Event& event);
 		void OnUpdate(Timestep ts);
 
+		void OnResize(uint32_t width, uint32_t height);
+
 		OrthographicCamera& GetCamera() {
 			return m_Camera;
 		}

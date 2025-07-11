@@ -59,6 +59,7 @@ void Sandbox2D::OnAttach()
 	m_SpriteSheet = Hazel::Texture2D::Create("assets/games/sprite/Spritesheet/mapPack_spritesheet.png");
 
 	//Initfbo
+	m_FramebufferSize = { 1280,720 };
 	Hazel::FramebufferSpecification fbSpec; 
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
@@ -102,7 +103,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 		HZ_PROFILE_SCOPE("Render Prep ");
 		m_Framebuffer->Bind();
 		///---------------------------------------------
-		Hazel::RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
+		Hazel::RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		Hazel::RenderCommand::Clear();
 	}
 
@@ -152,9 +153,6 @@ void Sandbox2D::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
 
-	static bool dockingspaceEnable = true;
-
-	if (dockingspaceEnable) {
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen = true;
 		static bool opt_padding = false;
@@ -202,8 +200,6 @@ void Sandbox2D::OnImGuiRender()
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
-
-
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -217,7 +213,7 @@ void Sandbox2D::OnImGuiRender()
 		}
 
 		ImGui::End();
-	}
+
 
 	ImGui::Begin("Setting");
 	ImGui::ColorEdit4("Squar_colr", glm::value_ptr(m_SquareColor));
@@ -231,10 +227,21 @@ void Sandbox2D::OnImGuiRender()
 	ImGui::Text("QuadIndex: %d", states.GetTotalIndexCount());
 	// textureID = m_BgTexture->GetRenderID();
 	//ImGui::Image((void*)textureID, ImVec2{ 256.0f, 256.0f });
+	ImGui::End();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
+	ImGui::Begin("ViewPort");
+	ImVec2 SpaceAvil= ImGui::GetContentRegionAvail();
+	if (glm::distance(m_FramebufferSize, glm::vec2(SpaceAvil.x, SpaceAvil.y)) > 1.0f&&!Hazel::Input::IsMouseButtonPressed(0)) {
+		m_FramebufferSize = { SpaceAvil.x, SpaceAvil.y };
+		m_Framebuffer->Resize(SpaceAvil.x, SpaceAvil.y);
+		m_CameralController.OnResize(SpaceAvil.x, SpaceAvil.y);
+	}
 
 	uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-	ImGui::Image((void*)textureID, ImVec2{ 1280, 720 }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+	ImGui::Image((void*)textureID, ImVec2{ m_FramebufferSize.x, m_FramebufferSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 	ImGui::End();
+	ImGui::PopStyleVar();
 }
 
 void Sandbox2D::OnEvent(Hazel::Event& event)
