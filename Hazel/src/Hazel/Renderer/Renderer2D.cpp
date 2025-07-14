@@ -168,6 +168,20 @@ namespace Hazel {
 		//index（用户指定）和初始化其他结构体变量
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		s_Data.TextureSlotIndex = 1;
+	}
+
+	void Renderer2D::BeginScene(const GameCamera& camera, const glm::mat4& transform)
+	{
+		HZ_PROFILE_FUNCTION();
+		//会有危险吗
+		auto& viewpro = camera.GetProjection() * glm::inverse(transform);
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetUniformMat4("u_ViewProjection", viewpro);
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		s_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer2D::EndScene()

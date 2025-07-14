@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderCommand.h"
 #include "RendererAPI.h"
+#include "GameCamera.h"
 #include "Camera.h"
 #include "Shader.h"
 
@@ -14,6 +15,7 @@ namespace Hazel {
 		static void Init();
 		static void OnWindowResize(uint32_t width,uint32_t height);
 
+		static void BeginScene(const GameCamera& camera, const glm::mat4& transform);
 		static void BeginScene(const Camera& camera, const std::pair<int, int>& aspect);
 		static void EndScene();
 

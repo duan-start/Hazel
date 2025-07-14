@@ -27,8 +27,8 @@ private:
 	Ref<Framebuffer> m_Framebuffer;
 
 	Ref<Scene> m_ActiveScene;
-	entt::entity m_SquareEntity;
-
+	Entity m_SquareEntity, m_CameraEntity, m_SecondCamera;
+	bool m_PrimaryCamera = true;
 	OrthographicCameraController m_CameralController;
 
 	glm::vec4 m_SquareColor{ 0.2f,0.6f,0.8f,0.9f };

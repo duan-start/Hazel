@@ -16,13 +16,18 @@ namespace Hazel {
 	{
 		RenderCommand::SetViewport(0,0,width,height);
 	}
+	void Renderer::BeginScene(const GameCamera& camera, const glm::mat4& transform)
+	{
+		m_SceneData->ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		//m_SceneData->CurrentTime = glfwGetTime();
+	}
 	void Renderer::BeginScene(const Camera& camera,const std::pair<int,int>& aspect)
 	{
 		
 		m_SceneData->ViewProjection = camera.GetViewProjectionMatrix();
-		m_SceneData->CurrentTime = glfwGetTime();
-		m_SceneData->SCR_Height = aspect.second;
-		m_SceneData->SCR_Width = aspect.first; 
+		//m_SceneData->CurrentTime = glfwGetTime();
+	//	m_SceneData->SCR_Height = aspect.second;
+		//m_SceneData->SCR_Width = aspect.first; 
 	}
 	void Renderer::EndScene()
 	{
@@ -36,8 +41,8 @@ namespace Hazel {
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
 
 		//youtube
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformFloat("iTime", m_SceneData->CurrentTime);
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformVec2("iResolution", glm::vec2(m_SceneData->SCR_Width, m_SceneData->SCR_Height));
+		//std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformFloat("iTime", m_SceneData->CurrentTime);
+		//std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformVec2("iResolution", glm::vec2(m_SceneData->SCR_Width, m_SceneData->SCR_Height));
 
 		RenderCommand::DrawIndexed(vertexArray);
 		shader->UnBind();

@@ -20,10 +20,17 @@ void EditorLayer::OnAttach()
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 
 	m_ActiveScene = CreateRef<Scene>();
-	auto square = m_ActiveScene->CreateEntity();
-	m_ActiveScene->Reg().emplace<TransformComponent>(square);
-	m_ActiveScene->Reg().emplace<SpriteRendererComponent>(square, glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+	auto square = m_ActiveScene->CreateEntity("Green Square");
+
+	square.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
 	m_SquareEntity = square;
+
+	m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
+	m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+
+	m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Space Entity");
+	auto& cc = m_SecondCamera.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+	cc.Primary = false;
 }
 
 void EditorLayer::OnDetach()
@@ -48,12 +55,9 @@ void EditorLayer::OnUpdate(Timestep ts)
 	RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	RenderCommand::Clear();
 
-	Renderer2D::BeginScene(m_CameralController.GetCamera());
-
 	// Update scene
 	m_ActiveScene->OnUpdate(ts);
 
-	Renderer2D::EndScene();
 	m_Framebuffer->Unbind();
 
 
@@ -63,7 +67,9 @@ void EditorLayer::OnUpdate(Timestep ts)
 void EditorLayer::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
-
+	//imgui应该自带flush
+	//RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	//RenderCommand::Clear();
 	static bool dockspaceOpen = true;
 	static bool opt_fullscreen = true;
 	static bool opt_padding = false;
@@ -136,8 +142,27 @@ void EditorLayer::OnImGuiRender()
 	ImGui::Text("QuadVertex: %d", states.GetTotalVertexCount());
 	ImGui::Text("QuadIndex: %d", states.GetTotalIndexCount());
 
-	auto& squareColor = m_ActiveScene->Reg().get<SpriteRendererComponent>(m_SquareEntity).Color;
-	ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
+	if (m_SquareEntity)
+	{
+		ImGui::Separator();
+		auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("%s", tag.c_str());
+
+		auto& squareColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
+		ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
+		ImGui::Separator();
+	}
+
+	//glm存储的方式是列主序
+	ImGui::DragFloat3("Camera Transform",
+		glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
+
+	if (ImGui::Checkbox("Camera A", &m_PrimaryCamera))
+	{
+		m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
+		m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
+	}
+
 
 	ImGui::End();
 

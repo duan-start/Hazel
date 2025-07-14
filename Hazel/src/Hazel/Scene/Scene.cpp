@@ -1,10 +1,13 @@
 #include "hzpch.h"
+
 #include "Scene.h"
 
 #include "Components.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
+
 #include <glm/glm.hpp>
+#include "Entity.h"
 
 namespace Hazel {
 
@@ -49,22 +52,56 @@ namespace Hazel {
 	{
 	}
 
-	entt::entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(const std::string& name)
 	{
-		return m_Registry.create();
+		Entity entity( m_Registry.create(), this );
+		entity.AddComponent<TransformComponent>();
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Entity" : name;
+		return entity;
 	}
 
 	void Scene::OnUpdate(Timestep ts)
 	{
+	#ifdef NoCamera
 		//包含这两个component的实体组合
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 		for (auto entity : group)
 		{
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
+			auto& transform = group.get<TransformComponent>(entity);
+			auto& sprite = group.get<SpriteRendererComponent>(entity);
 			Renderer2D::DrawQuad(transform, sprite.Color);
 		}
+	#endif
+		GameCamera* mainCamera = nullptr;
+		glm::mat4* cameraTransform = nullptr;
+		{
+			auto group = m_Registry.group<>(entt::get<TransformComponent, CameraComponent>);
 
+			for (auto entity : group){
+				auto& [transform, camera] = m_Registry.get<TransformComponent, CameraComponent>(entity);
+				if (camera.Primary) {
+					cameraTransform= &transform.Transform;
+					mainCamera = &camera.Camera;
+					break;
+				}
+			}
+
+			if (mainCamera)
+			{
+				Renderer2D::BeginScene(mainCamera->GetProjection(), *cameraTransform);
+
+				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+				for (auto entity : group)
+				{
+					auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+					Renderer2D::DrawQuad(transform, sprite.Color);
+				}
+
+				Renderer2D::EndScene();
+			}
+		}
 
 	}
 
