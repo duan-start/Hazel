@@ -73,6 +73,23 @@ namespace Hazel {
 			Renderer2D::DrawQuad(transform, sprite.Color);
 		}
 	#endif
+		//为每一个有这个组件的实体进行lamda（即按脚本的更新）
+		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+			{
+				if (!nsc.Instance)
+				{
+					nsc.InstantiateFunction(nsc.Instance);
+					nsc.Instance->m_Entity = Entity{ entity, this };
+
+					if (nsc.OnCreateFunction)
+						nsc.OnCreateFunction(nsc.Instance);
+				}
+
+				if (nsc.OnUpdateFunction)
+					nsc.OnUpdateFunction(nsc.Instance, ts);
+			});
+
+
 		GameCamera* mainCamera = nullptr;
 		glm::mat4* cameraTransform = nullptr;
 		{
@@ -101,6 +118,22 @@ namespace Hazel {
 
 				Renderer2D::EndScene();
 			}
+		}
+
+	}
+
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
+
+		// Resize our non-FixedAspectRatio cameras
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			auto& cameraComponent = view.get<CameraComponent>(entity);
+			if (!cameraComponent.FixedAspectRatio)
+				cameraComponent.Camera.SetViewPortSize(width, height);
 		}
 
 	}
