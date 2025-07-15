@@ -35,15 +35,15 @@ void EditorLayer::OnAttach()
 	class CameraController : public ScriptableEntity
 	{
 	public:
-		void OnCreate()
+		void OnCreate()override
 		{
 		}
 
-		void OnDestroy()
+		void OnDestroy()override
 		{
 		}
 
-		void OnUpdate(Timestep ts)
+		void OnUpdate(Timestep ts)override
 		{
 			auto& transform = GetComponent<TransformComponent>().Transform;
 			float speed = 5.0f;

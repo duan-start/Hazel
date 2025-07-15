@@ -63,30 +63,18 @@ namespace Hazel {
 
 	void Scene::OnUpdate(Timestep ts)
 	{
-	#ifdef NoCamera
-		//包含这两个component的实体组合
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group)
-		{
-			auto& transform = group.get<TransformComponent>(entity);
-			auto& sprite = group.get<SpriteRendererComponent>(entity);
-			Renderer2D::DrawQuad(transform, sprite.Color);
-		}
-	#endif
 		//为每一个有这个组件的实体进行lamda（即按脚本的更新）
 		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
 			{
 				if (!nsc.Instance)
 				{
-					nsc.InstantiateFunction(nsc.Instance);
+					nsc.Instance=nsc.InstantiateScript();
 					nsc.Instance->m_Entity = Entity{ entity, this };
-
-					if (nsc.OnCreateFunction)
-						nsc.OnCreateFunction(nsc.Instance);
+					//nsc.Instance->OnCreate();
 				}
+					nsc.Instance->OnUpdate(ts);
 
-				if (nsc.OnUpdateFunction)
-					nsc.OnUpdateFunction(nsc.Instance, ts);
+
 			});
 
 
@@ -96,7 +84,8 @@ namespace Hazel {
 			auto group = m_Registry.group<>(entt::get<TransformComponent, CameraComponent>);
 
 			for (auto entity : group){
-				auto& [transform, camera] = m_Registry.get<TransformComponent, CameraComponent>(entity);
+				//返回的是一个临时对象的元组
+				auto [transform, camera] = m_Registry.get<TransformComponent, CameraComponent>(entity);
 				if (camera.Primary) {
 					cameraTransform= &transform.Transform;
 					mainCamera = &camera.Camera;
@@ -111,7 +100,7 @@ namespace Hazel {
 				auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 				for (auto entity : group)
 				{
-					auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+					auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
 					Renderer2D::DrawQuad(transform, sprite.Color);
 				}
