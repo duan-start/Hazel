@@ -4,10 +4,22 @@
 #include <glm/glm.hpp>
 
 namespace Hazel {
+	struct IDComponent {
+		uint32_t EntityID=entt::null;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+		IDComponent(uint32_t id)
+			: EntityID(id) {
+		}
+
+		operator uint32_t () { return EntityID; }
+		//operator uint32_t& ()  { return EntityID; }
+	};
 
 	struct TagComponent {
 		std::string Tag;
-		
+
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
 		TagComponent(const std::string& tag)
@@ -65,6 +77,7 @@ namespace Hazel {
 		//BindFunction(对应的class)
 		template<typename T>
 		void Bind(){
+			//由于基类不能实例化，所以我直接使用的是dynamic_cast （性能开销会大一点，运行时的原因），而static_cast 是编译时的语言
 			InstantiateScript = []() { return dynamic_cast<ScriptableEntity*>(new T()); };
 			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
 		}

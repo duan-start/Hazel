@@ -23,7 +23,9 @@ namespace Hazel {
 		uint32_t m_ViewportWidth=0, m_ViewportHeight=0;
 
 	private:
+		//声明无需定义，甚至不需要前面声明
 		friend class Entity;
+		friend class SceneHierarchyPanel;
 	};
 
 }

@@ -56,6 +56,7 @@ namespace Hazel {
 	{
 		Entity entity( m_Registry.create(), this );
 		entity.AddComponent<TransformComponent>();
+		entity.AddComponent<IDComponent>((uint32_t)entity);
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
 		return entity;

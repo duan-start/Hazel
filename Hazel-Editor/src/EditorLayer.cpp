@@ -20,10 +20,15 @@ void EditorLayer::OnAttach()
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 
 	m_ActiveScene = CreateRef<Scene>();
+	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
 	auto square = m_ActiveScene->CreateEntity("Green Square");
 
 	square.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
 	m_SquareEntity = square;
+
+	auto redSquare = m_ActiveScene->CreateEntity("Red Square");
+	redSquare.AddComponent<SpriteRendererComponent>(glm::vec4{ 1.0f, 0.0f, 0.0f, 1.0f });
 
 	m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
 	m_CameraEntity.AddComponent<CameraComponent>();
@@ -49,16 +54,17 @@ void EditorLayer::OnAttach()
 			float speed = 5.0f;
 
 			if (Input::IsKeyPressed(HZ_KEY_A))
-				transform[3][0] -= speed * ts;
-			if (Input::IsKeyPressed(HZ_KEY_D))
 				transform[3][0] += speed * ts;
+			if (Input::IsKeyPressed(HZ_KEY_D))
+				transform[3][0] -= speed * ts;
 			if (Input::IsKeyPressed(HZ_KEY_W))
-				transform[3][1] += speed * ts;
-			if (Input::IsKeyPressed(HZ_KEY_S))
 				transform[3][1] -= speed * ts;
+			if (Input::IsKeyPressed(HZ_KEY_S))
+				transform[3][1] += speed * ts;
 		}
 	};
 
+	
 	m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 }
 
@@ -96,6 +102,7 @@ void EditorLayer::OnUpdate(Timestep ts)
 void EditorLayer::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
+
 	//imgui应该自带flush
 	//RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	//RenderCommand::Clear();
@@ -171,33 +178,6 @@ void EditorLayer::OnImGuiRender()
 	ImGui::Text("QuadVertex: %d", states.GetTotalVertexCount());
 	ImGui::Text("QuadIndex: %d", states.GetTotalIndexCount());
 
-	if (m_SquareEntity)
-	{
-		ImGui::Separator();
-		auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("%s", tag.c_str());
-
-		auto& squareColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
-		ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
-		ImGui::Separator();
-	}
-
-	//glm存储的方式是列主序
-	ImGui::DragFloat3("Camera Transform",
-		glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
-
-	if (ImGui::Checkbox("Camera A", &m_PrimaryCamera))
-	{
-		m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
-		m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
-	}
-	{
-		auto& camera = m_SecondCamera.GetComponent<CameraComponent>().Camera;
-		float orthoSize = camera.GetOrthographicSize();
-		if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
-			camera.SetOrthographicSize(orthoSize);
-	}
-
 	ImGui::End();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
@@ -215,6 +195,9 @@ void EditorLayer::OnImGuiRender()
 	ImGui::Image((void*)textureID, ImVec2{ m_FramebufferSize.x, m_FramebufferSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 	ImGui::End();
 	ImGui::PopStyleVar();
+
+	m_SceneHierarchyPanel.OnImGuiRender();
+
 }
 
 void EditorLayer::OnEvent(Event& event)
