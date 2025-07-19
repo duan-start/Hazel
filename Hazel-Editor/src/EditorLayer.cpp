@@ -50,17 +50,17 @@ void EditorLayer::OnAttach()
 
 		void OnUpdate(Timestep ts)override
 		{
-			auto& transform = GetComponent<TransformComponent>().Transform;
+			auto& transform = GetComponent<TransformComponent>().Translation;
 			float speed = 5.0f;
 
 			if (Input::IsKeyPressed(HZ_KEY_A))
-				transform[3][0] += speed * ts;
+				transform[0] += speed * ts;
 			if (Input::IsKeyPressed(HZ_KEY_D))
-				transform[3][0] -= speed * ts;
+				transform[0] -= speed * ts;
 			if (Input::IsKeyPressed(HZ_KEY_W))
-				transform[3][1] -= speed * ts;
+				transform[1] -= speed * ts;
 			if (Input::IsKeyPressed(HZ_KEY_S))
-				transform[3][1] += speed * ts;
+				transform[1] += speed * ts;
 		}
 	};
 
