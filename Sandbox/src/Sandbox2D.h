@@ -21,7 +21,7 @@ private:
 	//Hazel::Ref<Hazel::IndexBuffer> m_IndexBuffer;
 	Hazel::Ref<Hazel::Texture2D> m_Texture;
 
-	Hazel::OrthographicCameraController m_CameralController;
+	Hazel::CameraController m_CameralController;
 	glm::vec4 m_SquareColor{ 0.04f,0.1f,0.11f,0.5f };
 };
 

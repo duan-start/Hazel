@@ -19,9 +19,8 @@ namespace Hazel {
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 
 		//收集显卡信息
-		HZ_CORE_INFO("HZ_CORE_INFO:");
-		HZ_CORE_INFO("OpenGL VENDOR:{0}",glGetString(GL_VENDOR));
-		HZ_CORE_INFO("OpenGL VERSION:{0}",glGetString(GL_VERSION));
+        HZ_CORE_INFO("OpenGL VENDOR:{0}", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
+		HZ_CORE_INFO("OpenGL VERSION:{0}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 		HZ_CORE_INFO("OpenGL :");
 	}
 	void OpenGLContext::SwapBuffers()

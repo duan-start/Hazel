@@ -10,7 +10,7 @@
 class ExampleLayer : public Hazel::Layer {
 public:
 	ExampleLayer()
-		: Layer("Example"), m_CameralController(1280.f/720.f){
+		: Layer("Example"), m_CameralController(Hazel::CameraAPI::Ortho,1280.f/720.f){
 		
 		
 		//m_Camera->SetPosition(glm::vec3(0.5,0.5,0.5));
@@ -208,7 +208,7 @@ private:
 	Hazel::Ref<Hazel::VertexArray> m_SquareVA;
 	//std::unique_ptr<BufferLayout> m_BufferLayout;
 
-	Hazel::OrthographicCameraController m_CameralController;
+	Hazel::CameraController m_CameralController;
 
 	//因为有了相机控制系统，这里就不需要单独的相机属性了，全部存在那块位置（初始化）
 	////z轴的初始化导致旋转的时候的精度会出现问题，就会出现有些时候渲染帧失败
@@ -221,7 +221,7 @@ class Sandbox : public Hazel::Application {
 public:
 	Sandbox() {
 
-		PushOverlay(new Sandbox2D());
+		PushLayer(new Sandbox2D());
 		//PushLayer(new ExampleLayer());
 		//std::cout << "Example";
 	}

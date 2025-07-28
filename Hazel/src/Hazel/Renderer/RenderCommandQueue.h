@@ -1,5 +1,7 @@
 #pragma once
 
+#include "RendererAPI.h"
+
 namespace Hazel {
 
 	class RenderCommandQueue
@@ -18,6 +20,9 @@ namespace Hazel {
 		unsigned char* m_CommandBuffer;
 		unsigned char* m_CommandBufferPtr;
 		unsigned int m_RenderCommandCount = 0;
+
+	private:
+		static RendererAPI* s_RendererAPI;
 	};
 
 

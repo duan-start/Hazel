@@ -67,12 +67,12 @@ namespace Hazel {
 		delete s_Data;
 	}
 
-	void Renderer2D::BeginScene(const OrthographicCamera& camera)
+	void Renderer2D::BeginScene(const Ref<Camera> camera)
 	{
 		//set和upload的区别：set可以在缓冲区中设定，但是upload就是直接将数据传输到gpu上面了
 
 		s_Data->TextureShader->Bind();
-		s_Data->TextureShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data->TextureShader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 		s_Data->TextureShader->UnBind();
 		
 	}

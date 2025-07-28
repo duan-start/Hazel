@@ -7,6 +7,22 @@ namespace Hazel {
 	//renderer 和api的中间层类
 	class RenderCommand {
 	public:
+		//new
+		inline static unsigned int Clear(void* datablock) {
+			float* data = (float*)datablock;
+
+			float r = *data++;
+			float g = *data++;
+			float b = *data++;
+			float a = *data;
+
+			s_RendererAPI->SetClearColor({ r, g, b, a });
+			s_RendererAPI->Clear();
+			return sizeof(float) * 4;
+		}
+		;
+	public:
+
 		inline static void Init() {
 			s_RendererAPI->Init();
 		}

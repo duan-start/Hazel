@@ -82,7 +82,7 @@
       <AdditionalIncludeDirectories>..\Hazel\vendor\spdlog\include;..\Hazel\vendor\imgui;..\Hazel\vendor\glm;..\Hazel\vendor\stb_image;..\Hazel\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -134,6 +134,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Sandbox2D.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\Sandbox2D.cpp" />
     <ClCompile Include="src\Sandboxapp.cpp" />
   </ItemGroup>
@@ -141,9 +144,6 @@
     <ProjectReference Include="..\Hazel\Hazel.vcxproj">
       <Project>{99294D0D-053E-75BE-CEBF-181E3A9371EF}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\Sandbox2D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

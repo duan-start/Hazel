@@ -8,9 +8,12 @@ namespace Hazel {
 	{
 		RecalculateViewMatrix();
 	}
+	PerspectivegraphicCamera::PerspectivegraphicCamera(const CameraSpec& spec):m_ProjectionMatrix(glm::perspective(glm::radians(spec.perspective.Fov), spec.perspective.AspectRatio, spec.perspective.Near, spec.perspective.Far)), m_ViewMatrix(1.0f)
+	{
+	}
 	void PerspectivegraphicCamera::SetProjection(const glm::vec4& screen)
 	{
-		m_ProjectionMatrix = (glm::perspective(screen.x, screen.y, screen.z, screen.w));
+		m_Spec = { CameraAPI::Perspective, {screen.x, screen.y, screen.z, screen.w} };
 		RecalculateViewMatrix();
 	}
 	void PerspectivegraphicCamera::SetRotation(const glm::vec4& rotation)
@@ -25,6 +28,9 @@ namespace Hazel {
 	}
 	void PerspectivegraphicCamera::RecalculateViewMatrix() 
 	{
+		//加上重新设置的projection
+		m_ProjectionMatrix = glm::perspective(m_Spec.perspective.Fov, m_Spec.perspective.AspectRatio, m_Spec.perspective.Near, m_Spec.perspective.Far);
+
 		//正面计算,由于这边是设置摄像机的位置，后面要做逆，所以是先旋转后平移，从右自左
 		glm::mat4 transform = glm::translate(glm::mat4(1.0), m_Position) * glm::rotate(glm::mat4(1.0), glm::radians(m_Rotation.w), glm::vec3(m_Rotation.x, m_Rotation.y, m_Rotation.z));
 

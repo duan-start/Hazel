@@ -103,7 +103,8 @@ namespace Hazel {
 				m_ImGuiLayer->End();
 				//auto [mx, my] = Input::GetMousePosition();
 				//HZ_CORE_TRACE("{0}, {1}", mx, my);
-
+			//new
+			Renderer::Get().WaitAndRender();
 			//窗口画面的更新
 			m_Window->OnUpdate();
 

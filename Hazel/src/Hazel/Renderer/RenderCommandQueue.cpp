@@ -1,7 +1,11 @@
 #include "hzpch.h"
 #include "RenderCommandQueue.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 
+namespace Hazel {
+	RendererAPI* RenderCommandQueue::s_RendererAPI = new OpenGLRendererAPI;
 
+}
 
 #define HZ_RENDER_TRACE(...) HZ_CORE_TRACE(__VA_ARGS__)
 
