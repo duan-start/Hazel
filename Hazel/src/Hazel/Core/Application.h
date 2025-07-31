@@ -39,7 +39,7 @@ private:
 	std::unique_ptr<Window> m_Window;
 	bool m_Running = true;
 	LayerStack m_LayerStack;
-	ImguiLayer* m_ImGuiLayer;
+	ImGuiLayer* m_ImGuiLayer;
 
 	bool m_Minimized = false;
 	float m_LastFrameTime = 0.f;

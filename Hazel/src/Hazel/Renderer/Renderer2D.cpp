@@ -569,7 +569,7 @@ namespace Hazel {
 		//查找纹理是否已经添加到
 		float textureIndex = 0.0f;
 		if (*texture.get() == *s_Data.TextureSlots[0].get())
-			textureIndex == 0.0f;
+			textureIndex = 0.0f;
 		else {
 			for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 			{

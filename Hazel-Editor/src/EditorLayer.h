@@ -5,25 +5,32 @@
 
 using namespace Hazel;
 
-class EditorLayer:public Layer
+class EditorLayer :public Layer
 {
 public:
 	EditorLayer();
-	 ~EditorLayer()= default;
+	~EditorLayer() = default;
 
 	virtual void OnAttach()override;
 	virtual void OnDetach()override;
-	virtual void OnUpdate( Timestep ts)override;
+	virtual void OnUpdate(Timestep ts)override;
 	virtual void OnImGuiRender()override;
 	virtual void OnEvent(Event& event)override;
 
+private:
 	bool OnMouseButtonPressed(MouseButtonPressed& e);
+	bool OnKeyPressed(KeyPressedEvent& e);
+
+	void NewScene();
+	void OpenScene();
+	void SaveSceneAs();
 private:
 	Ref<Shader> m_SquareShader;
 
 	Ref<VertexArray> m_SquareVA;
 
 	glm::vec2  m_FramebufferSize = { 1280,720 };
+	glm::vec2 m_ViewportSize = m_FramebufferSize;
 
 	Ref<Framebuffer> m_Framebuffer;
 
@@ -35,6 +42,7 @@ private:
 	glm::vec4 m_SquareColor{ 0.2f,0.6f,0.8f,0.9f };
 	 float m_Float=45.f;
 
+	 int m_GizmoType = -1;
 	 // Panels
 	 SceneHierarchyPanel m_SceneHierarchyPanel;
 };

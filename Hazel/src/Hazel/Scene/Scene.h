@@ -18,7 +18,7 @@ namespace Hazel {
 		void OnUpdate(Timestep ts);
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void DestroyEntity(Entity entity);
-
+		Entity GetPrimaryCameraEntity();
 
 	private:
 		template<typename T>
@@ -31,6 +31,7 @@ namespace Hazel {
 		//声明无需定义，甚至不需要前面声明
 		friend class Entity;
 		friend class SceneHierarchyPanel;
+		friend class SceneSerializer;
 	};
 
 	

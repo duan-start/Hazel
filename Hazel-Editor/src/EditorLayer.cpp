@@ -1,4 +1,13 @@
-﻿#include "EditorLayer.h"
+﻿
+#include "EditorLayer.h"
+#include "Hazel/Scene/SceneSerializer.h"
+
+#include "Hazel/Utils/PlatformUtils.h"
+
+#include "ImGuizmo.h"
+
+#include "Hazel/Math/Math.h"
+
 #include <chrono>
 
 
@@ -19,9 +28,11 @@ void EditorLayer::OnAttach()
 	fbSpec.Height = 720;
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 
+
 	m_ActiveScene = CreateRef<Scene>();
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
+#if 0
 	auto square = m_ActiveScene->CreateEntity("Green Square");
 
 	square.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
@@ -36,6 +47,8 @@ void EditorLayer::OnAttach()
 	m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Space Entity");
 	auto& cc = m_SecondCamera.AddComponent<CameraComponent>();
 	cc.Primary = false;
+
+
 
 	class CameraController : public ScriptableEntity
 	{
@@ -66,6 +79,7 @@ void EditorLayer::OnAttach()
 
 	
 	m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+#endif
 }
 
 void EditorLayer::OnDetach()
@@ -148,15 +162,35 @@ void EditorLayer::OnImGuiRender()
 
 	// Submit the DockSpace
 	ImGuiIO& io = ImGui::GetIO();
+
+	//有一个初始化的ui大小
+	ImGuiStyle& style = ImGui::GetStyle();
+	float minWinSizeX = style.WindowMinSize.x;
+	style.WindowMinSize.x = 370.0f;
+
 	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 	{
 		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 	}
+
+	style.WindowMinSize.x = minWinSizeX;
+
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+
+
+			if (ImGui::MenuItem("New", "Ctrl+N"))
+				NewScene();
+
+			if (ImGui::MenuItem("Open...", "Ctrl+O"))
+				OpenScene();
+
+			if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+				SaveSceneAs();
+
 			if (ImGui::MenuItem("Close"))
 				Hazel::Application::Get().Close();
 			ImGui::EndMenu();
@@ -169,7 +203,7 @@ void EditorLayer::OnImGuiRender()
 
 
 	ImGui::Begin("Setting");
-	ImGui::SliderFloat("My Float", &m_Float, 0.0f, 180.0f);
+	//ImGui::SliderFloat("My Float", &m_Float, 0.0f, 180.0f);
 	auto states = Hazel::Renderer2D::GetStats();
 	//visual stats
 	ImGui::Text("Renderer2D stats: ");
@@ -183,7 +217,15 @@ void EditorLayer::OnImGuiRender()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
 	ImGui::Begin("ViewPort");
 	//Resize viewport
+
+	/*auto m_ViewportFocused = ImGui::IsWindowFocused();
+	auto m_ViewportHovered = ImGui::IsWindowHovered();
+	Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+	Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);*/
+
 	ImVec2 SpaceAvil = ImGui::GetContentRegionAvail();
+	m_ViewportSize = { SpaceAvil.x, SpaceAvil.y };
+
 	if (glm::distance(m_FramebufferSize, glm::vec2(SpaceAvil.x, SpaceAvil.y)) > 1.0f && !Hazel::Input::IsMouseButtonPressed(0)) {
 		m_FramebufferSize = { SpaceAvil.x, SpaceAvil.y };
 		m_Framebuffer->Resize(SpaceAvil.x, SpaceAvil.y);
@@ -192,7 +234,59 @@ void EditorLayer::OnImGuiRender()
 	}
 
 	uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-	ImGui::Image((void*)textureID, ImVec2{ m_FramebufferSize.x, m_FramebufferSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+
+
+	// Gizmos
+	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+	if (selectedEntity && m_GizmoType != -1)
+	{
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+
+		float windowWidth = (float)ImGui::GetWindowWidth();
+		float windowHeight = (float)ImGui::GetWindowHeight();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+		// Camera
+		auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+		const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+		const glm::mat4& cameraProjection = camera.GetProjection();
+		glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+		// Entity transform
+		auto& tc = selectedEntity.GetComponent<TransformComponent>();
+		glm::mat4 transform = tc.GetTransform();
+
+		// Snapping
+		bool snap = Input::IsKeyPressed(HZ_KEY_LEFT_CONTROL);
+		float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+		// Snap to 45 degrees for rotation
+		if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+			snapValue = 45.0f;
+
+		float snapValues[3] = { snapValue, snapValue, snapValue };
+
+		ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+			nullptr, snap ? snapValues : nullptr);
+
+		if (ImGuizmo::IsUsing())
+		{
+			glm::vec3 translation, rotation, scale;
+			Math::DecomposeTransform(transform, translation, rotation, scale);
+
+			glm::vec3 deltaRotation = rotation - tc.Rotation;
+			tc.Translation = translation;
+			tc.Rotation += deltaRotation;
+			tc.Scale = scale;
+		}
+	}
+
+
+
+
+
 	ImGui::End();
 	ImGui::PopStyleVar();
 
@@ -200,13 +294,94 @@ void EditorLayer::OnImGuiRender()
 
 }
 
+bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+{
+	// Shortcuts
+	if (e.GetRepeatCount() > 0)
+		return false;
+
+	bool control = Input::IsKeyPressed(HZ_KEY_LEFT_CONTROL) || Input::IsKeyPressed(HZ_KEY_RIGHT_CONTROL);
+	bool shift = Input::IsKeyPressed(HZ_KEY_LEFT_SHIFT) || Input::IsKeyPressed(HZ_KEY_RIGHT_SHIFT);
+	switch (e.GetKeyCode())
+	{
+	case HZ_KEY_N:
+	{
+		if (control)
+			NewScene();
+
+		break;
+	}
+	case HZ_KEY_O:
+	{
+		if (control)
+			OpenScene();
+
+		break;
+	}
+	case HZ_KEY_S:
+	{
+		if (control)
+			SaveSceneAs();
+
+		break;
+	}
+
+	// Gizmos
+	case HZ_KEY_Q:
+		m_GizmoType = -1;
+		break;
+	case HZ_KEY_M:
+		m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+		break;
+	case HZ_KEY_R:
+		m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+		break;
+	case HZ_KEY_Z:
+		m_GizmoType = ImGuizmo::OPERATION::SCALE;
+		break;
+
+	}
+}
+
+void EditorLayer::NewScene()
+{
+	m_ActiveScene = CreateRef<Scene>();
+	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+}
+
+void EditorLayer::OpenScene()
+{
+	std::string filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
+	if (!filepath.empty())
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Deserialize(filepath);
+	}
+}
+
+void EditorLayer::SaveSceneAs()
+{
+	std::string filepath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0");
+	if (!filepath.empty())
+	{
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Serialize(filepath);
+	}
+}
+
+
 void EditorLayer::OnEvent(Event& event)
 {
 	m_CameralController.OnEvent(event);
 
 	EventDispatcher dispatcher(event);
-	dispatcher.Dispatch<MouseButtonPressed>(
-	HZ_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+	dispatcher.Dispatch<MouseButtonPressed>(HZ_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+	dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 }
 
 bool EditorLayer::OnMouseButtonPressed(MouseButtonPressed& e)

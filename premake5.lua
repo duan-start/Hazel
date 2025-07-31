@@ -18,8 +18,8 @@ IncludeDir["Imgui"] = "Hazel/vendor/imgui"
 IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
 IncludeDir["Entt"] = "Hazel/vendor/Entt/include"
-
-
+IncludeDir["Yaml"] = "Hazel/vendor/yaml-cpp/include"
+IncludeDir["ImGuizmo"] = "Hazel/vendor/ImGuizmo"
 
 -- Include directories relative to root folder (Solution directory)  
 --这是工程文件啊，下面的是在干嘛啊，肯定不能加啊，有没有premakefile文件，肯定不行
@@ -29,7 +29,7 @@ group "Dependencies"
         include "Hazel/vendor/GLFW"
         include "Hazel/vendor/Glad"
         include "Hazel/vendor/imgui"
-
+        include "Hazel/vendor/yaml-cpp"
 
  -- 定义 Core 组
 group "Core"
@@ -55,7 +55,9 @@ project "Hazel"
         "%{IncludeDir.glm}/glm/**.hpp",
         "%{IncludeDir.glm}/glm/**.inl",
         "%{IncludeDir.stb_image}/**.h",
-        "%{IncludeDir.stb_image}/**.cpp"
+        "%{IncludeDir.stb_image}/**.cpp",
+        "%{IncludeDir.ImGuizmo}/ImGuizmo.h",
+        "%{IncludeDir.ImGuizmo}/ImGuizmo.cpp"
     }  
 
     includedirs{  
@@ -66,15 +68,21 @@ project "Hazel"
         "%{IncludeDir.Imgui}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
-        "%{IncludeDir.Entt}"
+        "%{IncludeDir.Entt}",
+        "%{IncludeDir.Yaml}",
+        "%{IncludeDir.ImGuizmo}"
     }
 
     links{
         "GLFW",
         "Glad",
         "Imgui",
+        "yaml-cpp",
         "opengl32.lib"
     }
+
+    filter "files:vendor/ImGuizmo/**.cpp"
+	flags { "NoPCH" }
 
     filter "system:windows"  
         systemversion"10.0"  
@@ -116,7 +124,9 @@ project "Hazel-Editor"
 
     files{  
         "%{prj.name}/src/**.h",  
-        "%{prj.name}/src/**.cpp"  
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/Panels/**.h",  
+        "%{prj.name}/Panels/**.cpp"  
     }  
 
     includedirs{  
@@ -125,7 +135,8 @@ project "Hazel-Editor"
         "Hazel/vendor/glm",
         "Hazel/vendor/stb_image",
         "Hazel/vendor/Entt/include",
-        "Hazel/src"  
+        "Hazel/src",
+        "%{IncludeDir.ImGuizmo}"
     }  
     
     links{  

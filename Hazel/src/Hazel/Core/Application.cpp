@@ -25,7 +25,7 @@ namespace Hazel {
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 		//按理是要在析构函数中delete掉的，
-		m_ImGuiLayer = new ImguiLayer();
+		m_ImGuiLayer = new ImGuiLayer();
 
 		Renderer::Init();
 		PushOverlay(m_ImGuiLayer);

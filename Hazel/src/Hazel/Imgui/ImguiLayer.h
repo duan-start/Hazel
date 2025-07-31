@@ -6,14 +6,15 @@
 #include "Hazel/Events/keyEvent.h"
 #include "Hazel/Events/ApplicationEvent.h"
 namespace Hazel {
-	class HAZEL_API ImguiLayer :public Layer {
+	class HAZEL_API ImGuiLayer :public Layer {
 	public:
-		ImguiLayer();
-		~ImguiLayer();
+		ImGuiLayer();
+		~ImGuiLayer();
 		virtual void OnAttach()override;
 		virtual void OnDetach()override;
 		virtual void OnEvent(Event& event) override;
 		//virtual void OnUpdate() override;
+		void SetDarkThemeColors();
 		void Begin();
 		void End();
 		virtual void OnImGuiRender() override;
