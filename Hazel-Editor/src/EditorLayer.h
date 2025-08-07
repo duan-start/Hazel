@@ -2,6 +2,7 @@
 
 #include "Hazel.h"
 #include "../Panels/SceneHierarchyPanel.h"
+#include "Hazel/Renderer/EditorCamera.h"
 
 using namespace Hazel;
 
@@ -38,6 +39,7 @@ private:
 	Entity m_SquareEntity, m_CameraEntity, m_SecondCamera;
 	bool m_PrimaryCamera = true;
 	OrthographicCameraController m_CameralController;
+	EditorCamera m_EditorCamera;
 
 	glm::vec4 m_SquareColor{ 0.2f,0.6f,0.8f,0.9f };
 	 float m_Float=45.f;

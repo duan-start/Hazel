@@ -171,6 +171,20 @@ namespace Hazel {
 		s_Data.TextureSlotIndex = 1;
 	}
 
+	void Renderer2D::BeginScene(const EditorCamera& camera)
+	{
+		
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 viewProj = camera.GetViewProjection();
+
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetUniformMat4("u_ViewProjection", viewProj);
+
+		StartNewBactch();
+		
+	}
+
 	void Renderer2D::BeginScene(const GameCamera& camera, const glm::mat4& transform)
 	{
 		HZ_PROFILE_FUNCTION();

@@ -2,7 +2,7 @@
 #include "GameCamera.h"
 
 namespace Hazel {
-	//后面就是你了
+	
 	class SceneCamera:public GameCamera
 	{
 	public:
@@ -13,9 +13,11 @@ namespace Hazel {
 		virtual ~SceneCamera() = default;
 		
 		//专门用来设置同一的宽高比
+		//Set aspectRatio
 		void SetViewPortSize(uint32_t width, uint32_t height);
 
 		//二者摄像机的宽高比也是一个必要的参数
+		//Camera parameters except aspectratio(fixed aspecRatio)
 		void SetOrthoGraphic(float size, float nearClip, float farClip);
 		void SetPerspetive(float verticalFov, float clipNear, float clipFar);
 
@@ -25,7 +27,7 @@ namespace Hazel {
 		float GetOrthographicFarClip() const { return m_OrthographicFar; }
 		void SetOrthographicFarClip(float farClip) { m_OrthographicFar = farClip; RecalculateProjection(); }
 
-		//所谓size其实就是height，也是放大缩小的根本原因
+		//size==height，也是放大缩小的根本原因
 		float GetOrthographicSize() const { return m_OrthographicSize; }
 		void SetOrthographicSize(float size) { m_OrthographicSize = size; RecalculateProjection(); }
 
@@ -38,11 +40,12 @@ namespace Hazel {
 		}
 		void SetPerspectiveFarClip(float farClip){ m_PerspectiveFar = farClip; RecalculateProjection();
 		}
+
 		void SetPerspectiveVerticalFOV(float fov){ m_PerspectiveFOV = fov; RecalculateProjection();
 		}
 		
 
-
+		//Othor
 		void SetProjectionType(ProjectionType type) { m_ProjectionType = type; RecalculateProjection(); }
 		ProjectionType GetProjectionType()const { return m_ProjectionType;}
 

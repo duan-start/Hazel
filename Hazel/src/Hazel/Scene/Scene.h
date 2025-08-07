@@ -3,6 +3,7 @@
 #include "entt.hpp"
 
 #include "Hazel/Core/Timestep.h"
+#include "Hazel/Renderer/EditorCamera.h"
 
 namespace Hazel {
 	class Entity;
@@ -15,7 +16,11 @@ namespace Hazel {
 
 		Entity CreateEntity(const std::string& name= "");
 
-		void OnUpdate(Timestep ts);
+		//游戏运行的tick
+		void OnUpdateRuntime(Timestep ts);
+		//编辑器进行编辑的tick
+		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
+
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void DestroyEntity(Entity entity);
 		Entity GetPrimaryCameraEntity();

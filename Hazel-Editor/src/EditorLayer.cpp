@@ -28,7 +28,7 @@ void EditorLayer::OnAttach()
 	fbSpec.Height = 720;
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 
-
+	m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 	m_ActiveScene = CreateRef<Scene>();
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
@@ -98,14 +98,18 @@ void EditorLayer::OnUpdate(Timestep ts)
 	//Timer myTimer("Name", []() {});
 
 	m_CameralController.OnUpdate(ts);
+	m_EditorCamera.OnUpdate(ts);
 
 	m_Framebuffer->Bind();
+	//Render
 	Renderer2D::ResetStats();
 	RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	RenderCommand::Clear();
 
 	// Update scene
-	m_ActiveScene->OnUpdate(ts);
+	//m_ActiveScene->OnUpdateRuntime(ts);
+	m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+
 
 	m_Framebuffer->Unbind();
 
@@ -222,14 +226,14 @@ void EditorLayer::OnImGuiRender()
 	auto m_ViewportHovered = ImGui::IsWindowHovered();
 	Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 	Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);*/
-
+	//如果界面大小更改，全部重新resize一下
 	ImVec2 SpaceAvil = ImGui::GetContentRegionAvail();
 	m_ViewportSize = { SpaceAvil.x, SpaceAvil.y };
-
 	if (glm::distance(m_FramebufferSize, glm::vec2(SpaceAvil.x, SpaceAvil.y)) > 1.0f && !Hazel::Input::IsMouseButtonPressed(0)) {
 		m_FramebufferSize = { SpaceAvil.x, SpaceAvil.y };
 		m_Framebuffer->Resize(SpaceAvil.x, SpaceAvil.y);
 		m_CameralController.OnResize(SpaceAvil.x, SpaceAvil.y);
+		m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 		m_ActiveScene->OnViewportResize((uint32_t)SpaceAvil.x, (uint32_t)SpaceAvil.y);
 	}
 
@@ -237,7 +241,8 @@ void EditorLayer::OnImGuiRender()
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 
-	// Gizmos
+	// Gizmos   scale有bug 后面查找一下
+	
 	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 	if (selectedEntity && m_GizmoType != -1)
 	{
@@ -248,11 +253,15 @@ void EditorLayer::OnImGuiRender()
 		float windowHeight = (float)ImGui::GetWindowHeight();
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
-		// Camera
-		auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+		// Runtime Camera
+		/*auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
 		const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
 		const glm::mat4& cameraProjection = camera.GetProjection();
-		glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+		glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());*/
+		// Editor camera
+		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+
 
 		// Entity transform
 		auto& tc = selectedEntity.GetComponent<TransformComponent>();
@@ -378,6 +387,7 @@ void EditorLayer::SaveSceneAs()
 void EditorLayer::OnEvent(Event& event)
 {
 	m_CameralController.OnEvent(event);
+	m_EditorCamera.OnEvent(event);
 
 	EventDispatcher dispatcher(event);
 	dispatcher.Dispatch<MouseButtonPressed>(HZ_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
