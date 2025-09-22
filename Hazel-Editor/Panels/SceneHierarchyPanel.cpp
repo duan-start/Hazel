@@ -1,17 +1,114 @@
-#include "hzpch.h"
-
 #include "SceneHierarchyPanel.h"
-#include "Hazel/Imgui/ImguiLayer.h"
-#include <imgui_internal.h>
 
-#include "Hazel/Scene/Components.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Hazel/Scene/Components.h"
+#include <cstring>
+
+/* The Microsoft C++ compiler is non-compliant with the C++ standard and needs
+ * the following definition to disable a security warning on std::strncpy().
+ */
+#ifdef _MSVC_LANG
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 namespace Hazel {
+
+	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
+	{
+		SetContext(context);
+	}
+
+	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	{
+		m_Context = context;
+		m_SelectionContext = {};
+	}
+
+	void SceneHierarchyPanel::OnImGuiRender()
+	{
+		ImGui::Begin("Scene Hierarchy");
+
+		m_Context->m_Registry.view<IDComponent>().each([&](auto entityID)
+			{
+				Entity entity{(entt::entity)(int) entityID , m_Context.get() };
+				DrawEntityNode(entity);
+			});
+
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+			m_SelectionContext = {};
+
+		// Right-click on blank space
+		if (ImGui::BeginPopupContextWindow(0, 1))
+		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+				m_Context->CreateEntity("Empty Entity");
+
+			ImGui::EndPopup();
+		}
+
+		ImGui::End();
+
+		ImGui::Begin("Properties");
+		if (m_SelectionContext)
+		{
+			DrawComponents(m_SelectionContext);
+		}
+
+		ImGui::End();
+	}
+
+	void SceneHierarchyPanel::SetSelectedEntity(Entity entity)
+	{
+		m_SelectionContext = entity;
+	}
+
+	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	{
+		auto& tag = entity.GetComponent<TagComponent>().Tag;
+
+		ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+		if (ImGui::IsItemClicked())
+		{
+			m_SelectionContext = entity;
+		}
+
+		bool entityDeleted = false;
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Delete Entity"))
+				entityDeleted = true;
+
+			ImGui::EndPopup();
+		}
+
+		if (opened)
+		{
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, tag.c_str());
+			if (opened)
+				ImGui::TreePop();
+			ImGui::TreePop();
+		}
+
+		if (entityDeleted)
+		{
+			m_Context->DestroyEntity(entity);
+			if (m_SelectionContext == entity)
+				m_SelectionContext = {};
+		}
+	}
 
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
 		ImGui::PushID(label.c_str());
 
 		ImGui::Columns(2);
@@ -28,8 +125,10 @@ namespace Hazel {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.2f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("X", buttonSize))
 			values.x = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -40,8 +139,10 @@ namespace Hazel {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.8f, 0.3f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
 			values.y = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -52,8 +153,10 @@ namespace Hazel {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.2f, 0.35f, 0.9f, 1.0f });
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
+		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize))
 			values.z = resetValue;
+		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 
 		ImGui::SameLine();
@@ -66,68 +169,6 @@ namespace Hazel {
 
 		ImGui::PopID();
 	}
-
-
-	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
-	{
-		SetContext(context);
-		m_SelectionContext = {};
-	}
-	void SceneHierarchyPanel::OnImGuiRender()
-	{
-		ImGui::Begin("Scene Hierarchy");
-
-		m_Context->m_Registry.view<IDComponent>().each([&](auto entityID)
-			{
-				Entity entity((entt::entity)(uint32_t)entityID, m_Context.get());
-				DrawEntityNode(entity);
-			});
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_SelectionContext = {};
-
-		if (ImGui::BeginPopupContextWindow(0, 1))
-		{
-			if (ImGui::MenuItem("Create Empty Entity"))
-				m_Context->CreateEntity("Empty Entity");
-
-			ImGui::EndPopup();
-		}
-
-
-		if (m_SelectionContext) {
-			bool entityDeleted = false;
-			if (ImGui::BeginPopupContextWindow(0, 1))
-			{
-				if (ImGui::MenuItem("Delete Entity"))
-					entityDeleted = true;
-
-				ImGui::EndPopup();
-			}
-
-			if (entityDeleted)
-			{
-				m_Context->DestroyEntity(m_SelectionContext);
-				m_SelectionContext = {};
-			}
-		}
-		ImGui::End();
-
-
-		ImGui::Begin("Properties");
-
-		if (m_SelectionContext) {
-
-			DrawComponents(m_SelectionContext);
-		}
-		ImGui::End();
-	}
-
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
-	{
-		m_Context = context;
-		m_SelectionContext = {};
-	}
-
 
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
@@ -172,15 +213,13 @@ namespace Hazel {
 
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
-
-
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, sizeof(buffer), tag.c_str());
+			std::strncpy(buffer, tag.c_str(), sizeof(buffer));
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 			{
 				tag = std::string(buffer);
@@ -197,12 +236,19 @@ namespace Hazel {
 		{
 			if (ImGui::MenuItem("Camera"))
 			{
-				m_SelectionContext.AddComponent<CameraComponent>();
+				if (!m_SelectionContext.HasComponent<CameraComponent>())
+					m_SelectionContext.AddComponent<CameraComponent>();
+				else
+					HZ_CORE_WARN("This entity already has the Camera Component!");
 				ImGui::CloseCurrentPopup();
 			}
+
 			if (ImGui::MenuItem("Sprite Renderer"))
 			{
-				m_SelectionContext.AddComponent<SpriteRendererComponent>();
+				if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
+					m_SelectionContext.AddComponent<SpriteRendererComponent>();
+				else
+					HZ_CORE_WARN("This entity already has the Sprite Renderer Component!");
 				ImGui::CloseCurrentPopup();
 			}
 
@@ -210,9 +256,9 @@ namespace Hazel {
 		}
 
 		ImGui::PopItemWidth();
+
 		DrawComponent<TransformComponent>("Transform", entity, [](auto& component)
 			{
-
 				DrawVec3Control("Translation", component.Translation);
 				glm::vec3 rotation = glm::degrees(component.Rotation);
 				DrawVec3Control("Rotation", rotation);
@@ -220,13 +266,13 @@ namespace Hazel {
 				DrawVec3Control("Scale", component.Scale, 1.0f);
 			});
 
-
 		DrawComponent<CameraComponent>("Camera", entity, [](auto& component)
 			{
 				auto& camera = component.Camera;
 
 				ImGui::Checkbox("Primary", &component.Primary);
-				const char* projectionTypeStrings[] = { "Orthographic", "Perspective" };
+
+				const char* projectionTypeStrings[] = { "Perspective", "Orthographic" };
 				const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
 				if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
 				{
@@ -263,48 +309,27 @@ namespace Hazel {
 
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
 				{
+					float orthoSize = camera.GetOrthographicSize();
+					if (ImGui::DragFloat("Size", &orthoSize))
+						camera.SetOrthographicSize(orthoSize);
+
 					float orthoNear = camera.GetOrthographicNearClip();
 					if (ImGui::DragFloat("Near", &orthoNear))
 						camera.SetOrthographicNearClip(orthoNear);
+
 					float orthoFar = camera.GetOrthographicFarClip();
 					if (ImGui::DragFloat("Far", &orthoFar))
 						camera.SetOrthographicFarClip(orthoFar);
+
 					ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
 				}
-					});
+			});
 
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 			});
-	};
 
-
-	
-
-	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
-	{
-		auto& tag = entity.GetComponent<TagComponent>().Tag;
-
-		//用来高亮的
-		ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
-		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
-		//如果选中了就进行节点展开
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
-		if (ImGui::IsItemClicked())
-		{
-			m_SelectionContext = entity;
-		}
-
-		if (opened)
-		{
-			//高亮延伸
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, tag.c_str());
-			if (opened)
-				ImGui::TreePop();
-			ImGui::TreePop();
-		}
 	}
-	
+
 }

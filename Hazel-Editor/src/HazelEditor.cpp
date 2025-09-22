@@ -7,12 +7,11 @@
 
 class HazelEditor : public Hazel::Application {
 public:
-	HazelEditor():Application("Hazel Editor")
+	HazelEditor(ApplicationCommandLineArgs args):Application("Hazel Editor", args)
 	{
 		PushLayer(new EditorLayer());
 
 		//PushOverlay(new ExampleLayer());
-		
 		// GameTest
 		//PushOverlay(new GameLayer());
 	}
@@ -21,6 +20,6 @@ public:
 	}
 };
  
-Hazel::Application* Hazel::CreateApplication() {
-	return new HazelEditor();
+Hazel::Application* Hazel::CreateApplication(ApplicationCommandLineArgs args) {
+	return new HazelEditor(args);
 }

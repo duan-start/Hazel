@@ -1,9 +1,11 @@
 #include "hzpch.h"
 #include "Renderer2D.h"
+#include "Hazel/Renderer/UniformBuffer.h"
 #include "Shader.h"
 #include "RenderCommand.h"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include <glm/gtc/type_ptr.hpp>
 namespace Hazel {
 
 	//vetext attribute
@@ -18,6 +20,9 @@ namespace Hazel {
 		float TexIndex;
 		//采样级别
 		float TilingFactor;
+
+		//Editor Only
+		int EntityID;
 	};
 
 	struct Renderer2DStorge {
@@ -33,7 +38,7 @@ namespace Hazel {
 		Ref<Shader> TextureShader;
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
-		Ref<Texture2D> WhitePixel;
+		Ref<Texture2D> WhiteTexture;
 
 		//index
 		uint32_t QuadIndexCount = 0;
@@ -47,6 +52,13 @@ namespace Hazel {
 		//一个初始的正方形
 		glm::vec4 QuadVertexPositions[4];
 
+
+		struct CameraData
+		{
+			glm::mat4 ViewProjection;
+		};
+		CameraData CameraBuffer;
+		Ref<UniformBuffer> CameraUniformBuffer;
 		//数据统计 statictis 每帧的数据
 		Renderer2D::statistics states;
 
@@ -72,7 +84,8 @@ namespace Hazel {
 				{ ShaderDataType::Float4, "a_Col" },
 				{ ShaderDataType::Float2, "a_Tex" },
 				{ ShaderDataType::Float,  "a_TexID"},
-				{ ShaderDataType::Float,  "a_Fra"}
+				{ ShaderDataType::Float,  "a_Fra"},
+				{ ShaderDataType::Int,  "a_EntID"}
 			};
 
 			s_Data.QuadVertexBuffer->SetLayout(layout);
@@ -108,7 +121,7 @@ namespace Hazel {
 		delete[] quadIndices;
 
 		//Shader
-		s_Data.TextureShader = Hazel::Shader::Create("assets/shaders/Texture.glsl");
+		//s_Data.TextureShader = Hazel::Shader::Create("assets/shaders/Texture.glsl");
 #if OLDPATH
 		//Texture OldPath
 		//设置采样器的卡槽
@@ -120,38 +133,37 @@ namespace Hazel {
 		uint32_t white = 0xffffffff;
 		s_Data.WhitePixel->SetData(&white, sizeof(uint32_t));
 #endif
-		//Texture Batch
-		//采样槽是确定的（前绑定），但是纹理是不确定的（后绑定）
-		int sampleID[s_Data.MaxTextureSlots];
-		for (int i = 0; i < s_Data.MaxTextureSlots; i++) {
-			sampleID[i] = i;
-		}
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetUniformIntArray("u_texture", sampleID, s_Data.MaxTextureSlots);
-		//s_Data.TextureShader->SetUniformMat4("u_Transform",glm::mat4(1.0f));
+		s_Data.WhiteTexture = Texture2D::Create(1, 1);
+		uint32_t whiteTextureData = 0xffffffff;
+		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
-		//创建一个纹理
-		s_Data.WhitePixel = Texture2D::Create(1, 1);
-		//这里是8位
-		uint32_t white = 0xffffffff;
-		s_Data.WhitePixel->SetData(&white, sizeof(uint32_t));
-		s_Data.TextureSlots[0] = s_Data.WhitePixel;
+		int32_t samplers[s_Data.MaxTextureSlots];
+		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+			samplers[i] = i;
+		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+
+
+		// Set first texture slot to 0
+		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
+
 
 		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
+		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DStorge::CameraData), 0);
 	}
 
 
 	void Renderer2D::Shutdown()
 	{
+		delete[] s_Data.QuadVertexBufferBase;
 		//初始化对应的参数（shutdown）
-		s_Data.QuadIndexCount = 0;
-		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		//s_Data.QuadIndexCount = 0;
+		//s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
-		s_Data.TextureSlotIndex = 1;
+		//s_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
@@ -163,12 +175,13 @@ namespace Hazel {
 		//set和upload的区别：set可以在缓冲区中设定，但是upload就是直接将数据传输到gpu上面了
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		StartNewBactch();
 		//s_Data.TextureShader->UnBind();
 		
 		//index（用户指定）和初始化其他结构体变量
-		s_Data.QuadIndexCount = 0;
-		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
-		s_Data.TextureSlotIndex = 1;
+		//s_Data.QuadIndexCount = 0;
+		//s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		//s_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer2D::BeginScene(const EditorCamera& camera)
@@ -176,10 +189,8 @@ namespace Hazel {
 		
 		HZ_PROFILE_FUNCTION();
 
-		glm::mat4 viewProj = camera.GetViewProjection();
-
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetUniformMat4("u_ViewProjection", viewProj);
+		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DStorge::CameraData),0);
 
 		StartNewBactch();
 		
@@ -189,13 +200,10 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 		//会有危险吗
-		auto& viewpro = camera.GetProjection() * glm::inverse(transform);
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetUniformMat4("u_ViewProjection", viewpro);
+		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DStorge::CameraData),0);
 
-		s_Data.QuadIndexCount = 0;
-		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
-		s_Data.TextureSlotIndex = 1;
+		StartNewBactch();
 	}
 
 	void Renderer2D::EndScene()
@@ -204,29 +212,44 @@ namespace Hazel {
 
 		//设置顶点指针属性和传输数据是可以分开的（但是前者一定要在程序的前面）
 		//传输实际的数据到GPU上已经设置好的VBO里面
-		uint32_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
-		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+		//uint32_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
+		//s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
 
 		//统一batching Rendering 保证批处理逻辑
 		Flush();
 	}
 
 	void Renderer2D::Flush()
-	{
-		//绑定所有的卡槽
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++) {
-			s_Data.TextureSlots[i]->Bind(i);
-		}
+	{  
+		////contion
+		//s_Data.TextureShader->Bind();
+		////绑定所有的卡槽
+		//for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++) {
+		//	s_Data.TextureSlots[i]->Bind(i);
+		//}
+		////绘制
+		//RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
+		//s_Data.states.DrawCalls++;
 
-		//绘制
+		if (s_Data.QuadIndexCount == 0)
+			return; // Nothing to draw
+
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
+		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+
+		// Bind textures
+		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+			s_Data.TextureSlots[i]->Bind(i);
+
+		s_Data.TextureShader->Bind();
 		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
-		s_Data.states.DrawCalls++;
+		//s_Data.Stats.DrawCalls++;
 	}
 
 	//hack
 	void Renderer2D::StartNewBactch()
 	{
-		EndScene();
+		//EndScene();
 		//new set
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
@@ -481,12 +504,12 @@ namespace Hazel {
 	}
 
 	//对于齐次方程式来讲，所有的信息都已经包含在里面了
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color,int Entity)
 	{
-		DrawQuad(transform, s_Data.WhitePixel,1.0f,color);
+		DrawQuad(transform, s_Data.WhiteTexture,1.0f,color,Entity);
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor,int Entity)
 	{	
 		//textureIndex
 		float textureIndex = 0.0f;
@@ -519,6 +542,7 @@ namespace Hazel {
 		s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[0];
 		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		s_Data.QuadVertexBufferPtr->EntityID = Entity;
 		s_Data.QuadVertexBufferPtr++;
 
 		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[1];
@@ -526,6 +550,7 @@ namespace Hazel {
 		s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[1];
 		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		s_Data.QuadVertexBufferPtr->EntityID = Entity;
 		s_Data.QuadVertexBufferPtr++;
 
 		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[2];
@@ -533,6 +558,7 @@ namespace Hazel {
 		s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[2];
 		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		s_Data.QuadVertexBufferPtr->EntityID = Entity;
 		s_Data.QuadVertexBufferPtr++;
 
 		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[3];
@@ -540,6 +566,7 @@ namespace Hazel {
 		s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[3];
 		s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 		s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+		s_Data.QuadVertexBufferPtr->EntityID = Entity;
 		s_Data.QuadVertexBufferPtr++;
 
 		s_Data.QuadIndexCount += 6;
@@ -549,12 +576,12 @@ namespace Hazel {
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
-		DrawRotatedQuad({ position.x,position.y,0.0f }, size, rotation, s_Data.WhitePixel, 1.0f, color);
+		DrawRotatedQuad({ position.x,position.y,0.0f }, size, rotation, s_Data.WhiteTexture, 1.0f, color);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
-		DrawRotatedQuad(position, size, rotation, s_Data.WhitePixel, 1.0f, color);
+		DrawRotatedQuad(position, size, rotation, s_Data.WhiteTexture, 1.0f, color);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)

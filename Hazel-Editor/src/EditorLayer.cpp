@@ -5,11 +5,13 @@
 #include "Hazel/Utils/PlatformUtils.h"
 
 #include "ImGuizmo.h"
-
+#include "imgui.h"
 #include "Hazel/Math/Math.h"
 
 #include <chrono>
 
+
+#include <glad/glad.h>
 
 EditorLayer::EditorLayer():
 	Layer("EditorLayer"), m_CameralController(1280.f / 720.f)
@@ -23,13 +25,24 @@ void EditorLayer::OnAttach()
 	HZ_PROFILE_FUNCTION();
 
 	 m_FramebufferSize = { 1280,720 };
+
 	Hazel::FramebufferSpecification fbSpec;
+	fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 	fbSpec.Width = 1280;
 	fbSpec.Height = 720;
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 
 	m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 	m_ActiveScene = CreateRef<Scene>();
+
+	auto commandLineArgs = Application::Get().GetCommandLineArgs();
+	if (commandLineArgs.Count > 1)
+	{
+		auto sceneFilePath = commandLineArgs[1];
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Deserialize(sceneFilePath);
+	}
+
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 #if 0
@@ -100,16 +113,36 @@ void EditorLayer::OnUpdate(Timestep ts)
 	m_CameralController.OnUpdate(ts);
 	m_EditorCamera.OnUpdate(ts);
 
-	m_Framebuffer->Bind();
+
 	//Render
 	Renderer2D::ResetStats();
-	RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+
+	m_Framebuffer->Bind();
+	RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
 	RenderCommand::Clear();
+	 //Clear our entity ID attachment to -1
+	m_Framebuffer->ClearAttachment(1, -1);
 
 	// Update scene
 	//m_ActiveScene->OnUpdateRuntime(ts);
 	m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 
+	auto [mx, my] = ImGui::GetMousePos();
+	mx -= m_ViewportBounds[0].x;
+	my -= m_ViewportBounds[0].y;
+	glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+	my = viewportSize.y - my;
+	int mouseX = (int)mx;
+	int mouseY = (int)my;
+
+	if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+	{
+		int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+		HZ_CORE_WARN("Pixel data = {0}", pixelData);
+		m_HoveredEntity = pixelData <= -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+		
+	}
 
 	m_Framebuffer->Unbind();
 
@@ -207,6 +240,12 @@ void EditorLayer::OnImGuiRender()
 
 
 	ImGui::Begin("Setting");
+
+	std::string name = "None";
+	if (m_HoveredEntity)
+		name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+	ImGui::Text("Hovered Entity: %s", name.c_str());
+
 	//ImGui::SliderFloat("My Float", &m_Float, 0.0f, 180.0f);
 	auto states = Hazel::Renderer2D::GetStats();
 	//visual stats
@@ -220,12 +259,18 @@ void EditorLayer::OnImGuiRender()
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
 	ImGui::Begin("ViewPort");
+
+	auto viewportOffset = ImGui::GetCursorPos(); // Includes tab bar
 	//Resize viewport
 
-	/*auto m_ViewportFocused = ImGui::IsWindowFocused();
-	auto m_ViewportHovered = ImGui::IsWindowHovered();
-	Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
-	Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);*/
+	//这段代码我需要重新看一遍
+	auto m_ViewportFocused = ImGui::IsWindowFocused();
+	 m_ViewportHovered = ImGui::IsWindowHovered();
+	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
+
+
+
 	//如果界面大小更改，全部重新resize一下
 	ImVec2 SpaceAvil = ImGui::GetContentRegionAvail();
 	m_ViewportSize = { SpaceAvil.x, SpaceAvil.y };
@@ -240,9 +285,18 @@ void EditorLayer::OnImGuiRender()
 	uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
+	//GetBounds
+	auto windowSize = ImGui::GetWindowSize();
+	ImVec2 minBound = ImGui::GetWindowPos();
+	minBound.x += viewportOffset.x;
+	minBound.y += viewportOffset.y;
 
-	// Gizmos   scale有bug 后面查找一下
-	
+	ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
+	m_ViewportBounds[0] = { minBound.x, minBound.y };
+	m_ViewportBounds[1] = { maxBound.x, maxBound.y };
+
+
+	// Gizmos   
 	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 	if (selectedEntity && m_GizmoType != -1)
 	{
@@ -291,9 +345,6 @@ void EditorLayer::OnImGuiRender()
 			tc.Scale = scale;
 		}
 	}
-
-
-
 
 
 	ImGui::End();
@@ -392,14 +443,16 @@ void EditorLayer::OnEvent(Event& event)
 	EventDispatcher dispatcher(event);
 	dispatcher.Dispatch<MouseButtonPressed>(HZ_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+	dispatcher.Dispatch<MouseButtonPressed>(HZ_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 }
 
 bool EditorLayer::OnMouseButtonPressed(MouseButtonPressed& e)
 {
 
 	if (e.GetMouseButton() == HZ_MOUSE_BUTTON_LEFT)
-	{		return true; // 表示事件已处理
+	{
+		if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(HZ_KEY_LEFT_ALT))
+			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 	}
-
 	return false;
 }

@@ -21,9 +21,21 @@
 #include "Hazel/Renderer/Camera.h"
 
 namespace Hazel {
+	//main函数里面的argi和count的传参
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			HZ_CORE_ASSERT(index < Count,"Index Out of Count");
+			return Args[index];
+		}
+	};
 class HAZEL_API Application {
 public:	
-	Application(const std::string& name);
+	Application(const std::string& name, ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 	virtual ~Application();
 	void Run();
 	void OnEvent(Event& e);
@@ -31,7 +43,9 @@ public:
 	void PushOverlay(Layer* overlay);
 	void Close();
 	inline static Application& Get() { return *s_Instance; }
-	inline Window& GetWindow(){ return  *m_Window; }
+	Window& GetWindow(){ return  *m_Window; }
+	ImGuiLayer* GetImGuiLayer() {	return m_ImGuiLayer;}
+	ApplicationCommandLineArgs GetCommandLineArgs()const { return m_CommandLineArgs;}
 private:
 	bool OnWindowClose(WindowCloseEvent& e);
 	bool OnWindowResize(WindowResizeEvent& e);
@@ -41,11 +55,12 @@ private:
 	LayerStack m_LayerStack;
 	ImGuiLayer* m_ImGuiLayer;
 
+	ApplicationCommandLineArgs m_CommandLineArgs;
 	bool m_Minimized = false;
 	float m_LastFrameTime = 0.f;
 private:
 	static Application* s_Instance;
 };
 //在客户端将会被定义
-Application* CreateApplication();
+Application* CreateApplication(ApplicationCommandLineArgs args);
 }

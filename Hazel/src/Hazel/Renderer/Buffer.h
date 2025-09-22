@@ -74,7 +74,7 @@ namespace Hazel {
 	public:
 		BufferLayout() {};
 
-		//这个好像是c++11开头的那个新特性
+		//c++11开头的那个新特性
 		BufferLayout(const std::initializer_list<BufferElements>& BufferElements) :m_BufferElements(BufferElements) {
 			CalculateOffsetAndStride();
 		};

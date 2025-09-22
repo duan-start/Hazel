@@ -6,6 +6,8 @@
 #include "Hazel/Events/MouseEvent.h"
 
 #include "Platform/OpenGL/OpenGLContext.h"
+#include <GL/gl.h>    // Windows/Linux
+
 
 #include <GLFW/glfw3.h>
 

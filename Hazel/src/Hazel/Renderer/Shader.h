@@ -7,7 +7,7 @@
 
 
 namespace Hazel {
-	//没有自动全部添加定义，那是一个付费的插件好像是
+	//感觉不是太对！vulkan的shader的uniform（push_const）
 	class Shader
 	{
 	public:

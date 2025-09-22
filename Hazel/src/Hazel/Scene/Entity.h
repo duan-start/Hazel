@@ -17,6 +17,7 @@ namespace Hazel {
 		T& AddComponent(Args&&... args)
 		{
 			//modify: let scene attach the entity ans component
+			//这个现在就能直接加
 			HZ_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
 			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
 			//undo

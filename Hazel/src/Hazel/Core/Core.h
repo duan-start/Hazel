@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#ifdef HZ_PLATFORM_WINDOWS
+//#ifdef HZ_PLATFORM_WINDOWS
 #ifdef HZ_DYNAMIC_LINK
     #ifdef HZ_BUILD_DLL
         #define HAZEL_API _declspec(dllexport)
@@ -10,10 +10,10 @@
       #endif
 #else 
 #define HAZEL_API
-#endif
+//#endif
 
-#else
-       #error Hazel only support Windows !
+//#else
+       //#error Hazel only support Windows !
 #endif
 
 #ifdef HZ_DEBUG
@@ -23,7 +23,7 @@
 #ifdef HZ_ENABLE_ASSETS
 
 #define HZ_ASSERT(x,...) { if(!(x)){HZ_ERROR("Assertion Failed:{0}",__VA_ARGS__);__debugbreak();}}
-#define HZ_CORE_ASSERT(x,...) {if(!(x)){HZ_CORE_ERROR("Assertion Failed:{0}",__VA_ARGS__);__debugbreak();}}
+#define HZ_CORE_ASSERT(x,...) {if(!(x)){HZ_CORE_ERROR("Assertion Failed:{0}",##__VA_ARGS__);__debugbreak();}}
 
 #else
 #define HZ_CORE_ASSERT(x,...)
@@ -44,8 +44,10 @@ namespace Hazel {
     //可能是为了后面自己写一套新的逻辑替代吧（直接改这里面创建指针的形式）
     template <typename T,typename ... Args>
     constexpr Scope<T> CreateScope(Args&& ... args) {
-        //forward和move的区别：
+        //forward和move的区别：(完美转发专用forward和其他情况的泛用move&&)
+        //nice Writing
         return std::make_unique<T>(std::forward<Args>(args)...);
+        
     }
 
 
@@ -55,6 +57,7 @@ namespace Hazel {
     template <typename T, typename ... Args>
     constexpr Ref<T> CreateRef(Args&& ... args) {
         //forward和move的区别：
+        //forward是函数参数的完美转化，是优于多次move的
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 

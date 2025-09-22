@@ -7,3 +7,7 @@ bin-int/
 *.user
 *.filters
 *.vcxproj
+
+Hazel/vendor/VulkanSDK
+Hazel-Editor/assets/cache
+scripts/__pycache__

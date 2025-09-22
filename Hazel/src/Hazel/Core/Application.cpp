@@ -17,7 +17,7 @@ namespace Hazel {
 	Application* Application::s_Instance = nullptr;
 
 
-	Application::Application(const std::string& name) {
+	Application::Application(const std::string& name,ApplicationCommandLineArgs args) {
 		HZ_PROFILE_FUNCTION();
 
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");

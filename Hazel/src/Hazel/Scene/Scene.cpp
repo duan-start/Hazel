@@ -122,7 +122,7 @@ namespace Hazel {
 		{
 			auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color, (int)entity);
 		}
 
 		Renderer2D::EndScene();
@@ -177,7 +177,10 @@ namespace Hazel {
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
+		if (m_ViewportWidth > 0 && m_ViewportHeight > 0) {
 		component.Camera.SetViewPortSize(m_ViewportWidth, m_ViewportHeight);
+		}
+
 	}
 
 	template<>

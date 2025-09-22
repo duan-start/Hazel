@@ -46,9 +46,23 @@ private:
 	std::string ReadFile(const std::string& filepath);
 
 	std::unordered_map<GLenum,std::string> Process(const std::string& source);
-	void Compile(const std::unordered_map<GLenum, std::string>& shaderSource);
+
+	//构建对应的二进制文件（和shader对应）
+	void CompileOrGetVulkanBinaries(const std::unordered_map<GLenum, std::string>& shaderSources);
+	void CompileOrGetOpenGLBinaries();
+	
+	//创建程序link和反射
+	void CreateProgram();
+	void Reflect(GLenum stage, const std::vector<uint32_t>& shaderData);
 private:  
 	uint32_t m_RenderID;  
 	std::string m_Name;
+	std::string m_FilePath;
+
+	std::unordered_map<GLenum, std::vector<uint32_t>> m_VulkanSPIRV;
+	std::unordered_map<GLenum, std::vector<uint32_t>> m_OpenGLSPIRV;
+
+	std::unordered_map<GLenum, std::string> m_OpenGLSourceCode;
+
 };  
 }

@@ -7,6 +7,8 @@
 
 #include <glfw/glfw3.h>
 
+#define GLM_FORCE_QUAT_DATA_WXYZ
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
@@ -67,12 +69,12 @@ namespace Hazel {
 			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
 			m_InitialMousePosition = mouse;
 
-			if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_MIDDLE))
-				MousePan(delta);
-			else if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
-				MouseRotate(delta);
+			//if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_MIDDLE))
+			//	MouseZoom(delta.y);
+			if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
+				MousePan(-delta);
 			else if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_RIGHT))
-				MouseZoom(delta.y);
+				MouseRotate(delta); 
 		}
 
 		UpdateView();
@@ -102,7 +104,7 @@ namespace Hazel {
 	void EditorCamera::MouseRotate(const glm::vec2& delta)
 	{
 		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
-		m_Yaw += yawSign * delta.x * RotationSpeed();
+		m_Yaw -= yawSign * delta.x * RotationSpeed();
 		m_Pitch += delta.y * RotationSpeed();
 	}
 
