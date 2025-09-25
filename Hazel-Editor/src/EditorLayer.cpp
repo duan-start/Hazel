@@ -1,5 +1,6 @@
 ﻿
 #include "EditorLayer.h"
+
 #include "Hazel/Scene/SceneSerializer.h"
 
 #include "Hazel/Utils/PlatformUtils.h"
@@ -10,8 +11,9 @@
 
 #include <chrono>
 
-
-#include <glad/glad.h>
+namespace Hazel {
+extern const std::filesystem::path g_AssetPath;
+}
 
 EditorLayer::EditorLayer():
 	Layer("EditorLayer"), m_CameralController(1280.f / 720.f)
@@ -139,7 +141,7 @@ void EditorLayer::OnUpdate(Timestep ts)
 	if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 	{
 		int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-		HZ_CORE_WARN("Pixel data = {0}", pixelData);
+	//	HZ_CORE_WARN("Pixel data = {0}", pixelData);
 		m_HoveredEntity = pixelData <= -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		
 	}
@@ -295,6 +297,16 @@ void EditorLayer::OnImGuiRender()
 	m_ViewportBounds[0] = { minBound.x, minBound.y };
 	m_ViewportBounds[1] = { maxBound.x, maxBound.y };
 
+	//都是在这个imgui的viewport窗口里面的数据
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+		{
+			const wchar_t* path = (const wchar_t*)payload->Data;
+			OpenScene(std::filesystem::path(g_AssetPath) / path);
+		}
+		ImGui::EndDragDropTarget();
+	}
 
 	// Gizmos   
 	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
@@ -351,7 +363,7 @@ void EditorLayer::OnImGuiRender()
 	ImGui::PopStyleVar();
 
 	m_SceneHierarchyPanel.OnImGuiRender();
-
+	m_ContentBrowserPanel.OnImguiRenderer();
 }
 
 bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -401,6 +413,7 @@ bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 		break;
 
 	}
+	return false;
 }
 
 void EditorLayer::NewScene()
@@ -415,13 +428,18 @@ void EditorLayer::OpenScene()
 	std::string filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 	if (!filepath.empty())
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-		SceneSerializer serializer(m_ActiveScene);
-		serializer.Deserialize(filepath);
+		OpenScene(filepath);
 	}
+}
+
+void EditorLayer::OpenScene(const std::filesystem::path& path)
+{
+	m_ActiveScene = CreateRef<Scene>();
+	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+	SceneSerializer serializer(m_ActiveScene);
+	serializer.Deserialize(path.string());
 }
 
 void EditorLayer::SaveSceneAs()

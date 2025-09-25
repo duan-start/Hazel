@@ -25,7 +25,7 @@ namespace Hazel {
 
 		//比learnopengl 里面的glTexParameteri要更加高级点，可以直接设置对应id的texutr,而不需要手动绑定textre,然后再设置
 		// 设置纹理参数,设置过滤类型（放大过滤和缩小过滤）纹理过大（mag）,纹理过小（min）
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		//设置超出边界的环绕情况
@@ -79,7 +79,7 @@ namespace Hazel {
 
 		//比learnopengl 里面的glTexParameteri要更加高级点，可以直接设置对应id的texutr,而不需要手动绑定textre,然后再设置
 		// 设置纹理参数,设置过滤类型（放大过滤和缩小过滤）纹理过大（mag）,纹理过小（min）
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		//设置超出边界的环绕情况

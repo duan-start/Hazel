@@ -4,6 +4,7 @@
 #include "Hazel/Renderer/Texture.h"
 namespace Hazel {
 
+	//spirtTexture
 	class SubTexture2D
 	{
 	public:

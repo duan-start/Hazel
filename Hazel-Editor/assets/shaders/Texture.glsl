@@ -35,7 +35,7 @@ void main()
 
 #type fragment
 #version 450 core
-
+//原始的不做抗锯齿真的很难看
 layout(location = 0) out vec4 o_Color;
 layout(location = 1) out int o_EntityID;
 
@@ -51,8 +51,6 @@ layout(binding = 0) uniform sampler2D u_Textures[32];
 void main()
 {
 	vec4 texColor = v_Color;
-
-	// RenderDoc 对 sampler 数组反编译支持比较差，但保留你的逻辑
 	switch(int(v_TexIndex))
 	{
 		case  0: texColor *= texture(u_Textures[ 0], v_TexCoord * v_TilingFactor); break;

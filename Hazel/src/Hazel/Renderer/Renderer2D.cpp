@@ -141,8 +141,8 @@ namespace Hazel {
 		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
 		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
-
-
+		//不是450已经不适配spirv了捏！
+		//s_Data.TextureShader = Shader::Create("assets/shaders/YouTube.glsl");
 		// Set first texture slot to 0
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
@@ -501,6 +501,14 @@ namespace Hazel {
 		s_Data.QuadVertexArray->Bind();
 		RenderCommand::DrawIndexed(s_Data.QuadVertexArray);
 #endif
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
+	{
+		if (src.Texture)
+			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);
+		else
+			DrawQuad(transform, src.Color, entityID);
 	}
 
 	//对于齐次方程式来讲，所有的信息都已经包含在里面了

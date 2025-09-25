@@ -2,6 +2,7 @@
 
 #include "Hazel.h"
 #include "../Panels/SceneHierarchyPanel.h"
+#include "../Panels/ContentBrowserPanel.h"
 #include "Hazel/Renderer/EditorCamera.h"
 
 using namespace Hazel;
@@ -24,6 +25,7 @@ private:
 
 	void NewScene();
 	void OpenScene();
+	void OpenScene(const std::filesystem::path& path);
 	void SaveSceneAs();
 private:
 	Ref<Shader> m_SquareShader;
@@ -52,5 +54,6 @@ private:
 	 int m_GizmoType = -1;
 	 // Panels
 	 SceneHierarchyPanel m_SceneHierarchyPanel;
+	 ContentBrowserPanel m_ContentBrowserPanel;
 };
 
