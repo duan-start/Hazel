@@ -17,11 +17,12 @@ namespace Hazel {
 		virtual uint32_t GetRenderID()const override { return m_RendererID; }
 		virtual void SetData(void*, uint32_t size)override;
 
+		virtual bool IsLoaded() const override { return m_IsLoaded; }
 		virtual void Bind(uint32_t slot=0)const;
 	private:
 		uint32_t m_Width, m_Height, m_RendererID;
 		std::string m_path;
-
+		bool m_IsLoaded = false;
 		GLenum m_InternalFormat=0 , m_DataFormat=0 ;
 		
 	};

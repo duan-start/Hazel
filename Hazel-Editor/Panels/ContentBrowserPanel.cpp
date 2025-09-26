@@ -19,7 +19,7 @@ namespace Hazel {
 	void ContentBrowserPanel::OnImguiRenderer()
 	{
 		//Reset
-		static float padding = 0.f;
+		static float padding = 68.f;
 		static float thumbnailSize = 128.0f;
 		float cellSize = thumbnailSize + padding;
 
@@ -33,7 +33,7 @@ namespace Hazel {
 			columnCount = 1;
 
 		ImGui::Begin("Content Browser");
-		ImGui::Columns(columnCount*2, nullptr, false);
+		ImGui::Columns(columnCount-2, nullptr, false);
 
 
 
@@ -82,7 +82,7 @@ namespace Hazel {
 		ImGui::Columns(1);
 		//µ÷Õû
 		ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 16, 512);
-		ImGui::SliderFloat("Padding", &padding, 0, 32);
+		ImGui::SliderFloat("Padding", &padding, 0, 128);
 
 		ImGui::End();
 	}

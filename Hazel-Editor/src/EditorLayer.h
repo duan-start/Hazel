@@ -23,11 +23,24 @@ private:
 	bool OnMouseButtonPressed(MouseButtonPressed& e);
 	bool OnKeyPressed(KeyPressedEvent& e);
 
+	void OnScenePlay();
+	void OnSceneStop();
+
+	// UI Panels
+	void UI_Toolbar();
+
 	void NewScene();
 	void OpenScene();
 	void OpenScene(const std::filesystem::path& path);
 	void SaveSceneAs();
 private:
+	enum class SceneState
+	{
+		Edit = 0, Play = 1
+	};
+	SceneState m_SceneState = SceneState::Edit;
+
+
 	Ref<Shader> m_SquareShader;
 
 	Ref<VertexArray> m_SquareVA;
@@ -47,7 +60,7 @@ private:
 	Entity m_HoveredEntity = {};
 
 	bool m_ViewportHovered;
-
+	bool m_ViewportFocused;
 	glm::vec4 m_SquareColor{ 0.2f,0.6f,0.8f,0.9f };
 	 float m_Float=45.f;
 
@@ -55,5 +68,9 @@ private:
 	 // Panels
 	 SceneHierarchyPanel m_SceneHierarchyPanel;
 	 ContentBrowserPanel m_ContentBrowserPanel;
+
+
+	 // Editor resources
+	 Ref<Texture2D> m_IconPlay, m_IconStop;
 };
 

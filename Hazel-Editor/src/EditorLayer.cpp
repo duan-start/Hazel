@@ -26,8 +26,12 @@ void EditorLayer::OnAttach()
 {
 	HZ_PROFILE_FUNCTION();
 
-	 m_FramebufferSize = { 1280,720 };
 
+
+	m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
+	m_IconStop = Texture2D::Create("Resources/Icons/StopButton.png");
+
+	 m_FramebufferSize = { 1280,720 };
 	Hazel::FramebufferSpecification fbSpec;
 	fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 	fbSpec.Width = 1280;
@@ -112,9 +116,6 @@ void EditorLayer::OnUpdate(Timestep ts)
 	// C++17 起可以这样用，无需指定模板参数
 	//Timer myTimer("Name", []() {});
 
-	m_CameralController.OnUpdate(ts);
-	m_EditorCamera.OnUpdate(ts);
-
 
 	//Render
 	Renderer2D::ResetStats();
@@ -126,9 +127,24 @@ void EditorLayer::OnUpdate(Timestep ts)
 	 //Clear our entity ID attachment to -1
 	m_Framebuffer->ClearAttachment(1, -1);
 
-	// Update scene
-	//m_ActiveScene->OnUpdateRuntime(ts);
-	m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+	switch (m_SceneState)
+	{
+	case SceneState::Edit:
+	{
+		if (m_ViewportFocused)
+			m_CameralController.OnUpdate(ts);
+
+		m_EditorCamera.OnUpdate(ts);
+
+		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+		break;
+	}
+	case SceneState::Play:
+	{
+		m_ActiveScene->OnUpdateRuntime(ts);
+		break;
+	}
+	}
 
 	auto [mx, my] = ImGui::GetMousePos();
 	mx -= m_ViewportBounds[0].x;
@@ -156,12 +172,10 @@ void EditorLayer::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
 
-	//imgui应该自带flush
-	//RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	//RenderCommand::Clear();
+	// Note: Switch this to true to enable dockspace
 	static bool dockspaceOpen = true;
-	static bool opt_fullscreen = true;
-	static bool opt_padding = false;
+	static bool opt_fullscreen_persistant = true;
+	bool opt_fullscreen = opt_fullscreen_persistant;
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
 	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
@@ -169,44 +183,37 @@ void EditorLayer::OnImGuiRender()
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 	if (opt_fullscreen)
 	{
-		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->WorkPos);
-		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 	}
-	else
-	{
-		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
-	}
 
-	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-	// and handle the pass-thru hole, so we ask Begin() to not render a background.
+	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
 	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 		window_flags |= ImGuiWindowFlags_NoBackground;
 
-
-	if (!opt_padding)
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
+	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive, 
+	// all active windows docked into it will lose their parent and become undocked.
+	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
+	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
-	if (!opt_padding)
-		ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
 
 	if (opt_fullscreen)
 		ImGui::PopStyleVar(2);
 
-	// Submit the DockSpace
+	// DockSpace
 	ImGuiIO& io = ImGui::GetIO();
-
-	//有一个初始化的ui大小
 	ImGuiStyle& style = ImGui::GetStyle();
 	float minWinSizeX = style.WindowMinSize.x;
 	style.WindowMinSize.x = 370.0f;
-
 	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 	{
 		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
@@ -219,8 +226,9 @@ void EditorLayer::OnImGuiRender()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-
-
+			// Disabling fullscreen would allow the window to be moved to the front of other windows, 
+			// which we can't undo at the moment without finer window depth/z control.
+			//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);1
 			if (ImGui::MenuItem("New", "Ctrl+N"))
 				NewScene();
 
@@ -230,17 +238,16 @@ void EditorLayer::OnImGuiRender()
 			if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 				SaveSceneAs();
 
-			if (ImGui::MenuItem("Close"))
-				Hazel::Application::Get().Close();
+			if (ImGui::MenuItem("Exit")) Application::Get().Close();
 			ImGui::EndMenu();
 		}
 
 		ImGui::EndMenuBar();
 	}
 
-	ImGui::End();
 
-
+	m_SceneHierarchyPanel.OnImGuiRender();
+	m_ContentBrowserPanel.OnImguiRenderer();
 	ImGui::Begin("Setting");
 
 	std::string name = "None";
@@ -259,6 +266,8 @@ void EditorLayer::OnImGuiRender()
 
 	ImGui::End();
 
+
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
 	ImGui::Begin("ViewPort");
 
@@ -266,7 +275,7 @@ void EditorLayer::OnImGuiRender()
 	//Resize viewport
 
 	//这段代码我需要重新看一遍
-	auto m_ViewportFocused = ImGui::IsWindowFocused();
+	m_ViewportFocused = ImGui::IsWindowFocused();
 	 m_ViewportHovered = ImGui::IsWindowHovered();
 	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
@@ -358,12 +367,11 @@ void EditorLayer::OnImGuiRender()
 		}
 	}
 
-
 	ImGui::End();
 	ImGui::PopStyleVar();
-
-	m_SceneHierarchyPanel.OnImGuiRender();
-	m_ContentBrowserPanel.OnImguiRenderer();
+	
+	UI_Toolbar();
+	ImGui::End();
 }
 
 bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -416,6 +424,46 @@ bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	return false;
 }
 
+void EditorLayer::OnScenePlay()
+{
+	m_SceneState = SceneState::Play;
+}
+
+void EditorLayer::OnSceneStop()
+{
+	m_SceneState = SceneState::Edit;
+}
+
+void EditorLayer::UI_Toolbar()
+{
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+	auto& colors = ImGui::GetStyle().Colors;
+	const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+	const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
+
+	ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+	//changed
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	auto it =ImGui::GetWindowContentRegionMax();
+	float size = ImGui::GetWindowHeight() - 4.0f;
+	Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
+	ImGui::SetCursorPosX((it.x * 0.5) - (size * 0.5f));
+	if (ImGui::ImageButton((ImTextureID)icon->GetRenderID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+	{
+		if (m_SceneState == SceneState::Edit)
+			OnScenePlay();
+		else if (m_SceneState == SceneState::Play)
+			OnSceneStop();
+	}
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+}
+
 void EditorLayer::NewScene()
 {
 	m_ActiveScene = CreateRef<Scene>();
@@ -434,12 +482,20 @@ void EditorLayer::OpenScene()
 
 void EditorLayer::OpenScene(const std::filesystem::path& path)
 {
-	m_ActiveScene = CreateRef<Scene>();
-	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	if (path.extension().string() != ".hazel")
+	{
+		HZ_WARN("Could not load {0} - not a scene file", path.filename().string());
+		return;
+	}
 
-	SceneSerializer serializer(m_ActiveScene);
-	serializer.Deserialize(path.string());
+	Ref<Scene> newScene = CreateRef<Scene>();
+	SceneSerializer serializer(newScene);
+	if (serializer.Deserialize(path.string()))
+	{
+		m_ActiveScene = newScene;
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
 }
 
 void EditorLayer::SaveSceneAs()
@@ -455,9 +511,10 @@ void EditorLayer::SaveSceneAs()
 
 void EditorLayer::OnEvent(Event& event)
 {
-	m_CameralController.OnEvent(event);
-	m_EditorCamera.OnEvent(event);
-
+	if (m_ViewportHovered) {
+		m_CameralController.OnEvent(event);
+		m_EditorCamera.OnEvent(event);
+	}
 	EventDispatcher dispatcher(event);
 	dispatcher.Dispatch<MouseButtonPressed>(HZ_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));

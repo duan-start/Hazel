@@ -50,6 +50,7 @@ namespace Hazel {
 
 			data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		}
+		if(data) m_IsLoaded = true;
 		HZ_CORE_ASSERT(data, "Failed To Load Image");
 		HZ_CORE_ASSERT(width > 0 && height > 0, "Loaded image has zero dimensions.");
 		

@@ -3,6 +3,11 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h"
 
+//probems
+//#define GLM_ENABLE_EXPERIMENTAL
+//#include "glm/gtx/string_cast.hpp"
+
+
 namespace Hazel {
 
 class  HAZEL_API Log

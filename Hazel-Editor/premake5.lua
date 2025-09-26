@@ -10,7 +10,9 @@ project "Hazel-Editor"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
+		"Panels/**.h",
+		"Panels/**.cpp"
 	}
 
 	includedirs
@@ -18,6 +20,7 @@ project "Hazel-Editor"
 		"%{wks.location}/Hazel/vendor/spdlog/include",
 		"%{wks.location}/Hazel/src",
 		"%{wks.location}/Hazel/vendor",
+		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.ImGuizmo}"
