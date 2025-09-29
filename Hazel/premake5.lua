@@ -41,12 +41,15 @@ project "Hazel"
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.VulkanSDK}"
 	}
 
+	--??
 	links
 	{
+		"Box2D",
 		"GLFW",
 		"Glad",
 		"ImGui",

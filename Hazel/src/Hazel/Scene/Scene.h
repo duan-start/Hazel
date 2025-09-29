@@ -5,6 +5,7 @@
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Renderer/EditorCamera.h"
 
+class b2World;
 namespace Hazel {
 	class Entity;
 
@@ -15,6 +16,11 @@ namespace Hazel {
 		~Scene();
 
 		Entity CreateEntity(const std::string& name= "");
+
+		//physical 
+		void OnRuntimeStart();
+		void OnRuntimeStop();
+
 
 		//游戏运行的tick
 		void OnUpdateRuntime(Timestep ts);
@@ -33,6 +39,8 @@ namespace Hazel {
 		uint32_t m_ViewportWidth=0, m_ViewportHeight=0;
 
 	private:
+		b2World* m_PhysicsWorld = nullptr;
+
 		//声明无需定义，甚至不需要前面声明
 		friend class Entity;
 		friend class SceneHierarchyPanel;
