@@ -1,7 +1,7 @@
 #pragma once
 #include "Hazel/Renderer/SceneCamera.h"
-#include "ScriptableEntity.h"
 #include "Hazel/Renderer/Texture.h"
+#include "Hazel/Core/UUID.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -11,7 +11,13 @@
 
 namespace Hazel {
 	struct IDComponent {
-		uint32_t EntityID=entt::null;
+
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+		operator UUID() { return ID; }
+	/*	uint32_t EntityID=entt::null;
 
 		IDComponent() = default;
 		IDComponent(const IDComponent&) = default;
@@ -19,8 +25,8 @@ namespace Hazel {
 			: EntityID(id) {
 		}
 
-		operator uint32_t () { return EntityID; }
-		//operator uint32_t& ()  { return EntityID; }
+		operator uint32_t () { return EntityID; }*/
+		
 	};
 
 	struct TagComponent {
@@ -89,7 +95,8 @@ namespace Hazel {
 
 	//专门创建一个scirpentity，为了实现对应的脚本函数的更新
 	struct NativeScriptComponent {
-		ScriptableEntity* Instance = nullptr;
+		//forward declartion
+		class ScriptableEntity* Instance = nullptr;
 
 		//需要延迟定义的函数
 		ScriptableEntity* (*InstantiateScript)();

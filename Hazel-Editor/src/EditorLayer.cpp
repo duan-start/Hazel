@@ -426,6 +426,8 @@ bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 
 void EditorLayer::OnScenePlay()
 {
+	
+
 	m_SceneState = SceneState::Play;
 	m_ActiveScene->OnRuntimeStart();
 }
@@ -475,6 +477,7 @@ void EditorLayer::NewScene()
 
 void EditorLayer::OpenScene()
 {
+
 	std::string filepath = FileDialogs::OpenFile("Hazel Scene (*.hazel)\0*.hazel\0");
 	if (!filepath.empty())
 	{
@@ -484,6 +487,9 @@ void EditorLayer::OpenScene()
 
 void EditorLayer::OpenScene(const std::filesystem::path& path)
 {
+	if (m_SceneState != SceneState::Edit)
+		OnSceneStop();
+
 	if (path.extension().string() != ".hazel")
 	{
 		HZ_WARN("Could not load {0} - not a scene file", path.filename().string());

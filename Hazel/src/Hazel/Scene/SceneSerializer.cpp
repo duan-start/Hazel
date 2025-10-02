@@ -140,7 +140,7 @@ namespace Hazel {
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap; // Entity
-		out << YAML::Key << "Entity" << YAML::Value << "12837192831273"; // TODO: Entity ID goes here
+		out << YAML::Key << "Entity" << YAML::Value <<entity.GetUUID(); // TODO: Entity ID goes here
 
 		if (entity.HasComponent<TagComponent>())
 		{
@@ -246,14 +246,21 @@ namespace Hazel {
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-		m_Scene->m_Registry.view<IDComponent>().each([&](auto entityID)
-			{
-				Entity entity((entt::entity)(uint32_t)entityID, m_Scene.get() );
-				if (!entity)
-					return;
+		//	auto& registry = m_Context->m_Registry;
 
+		//// 遍历所有有某组件的实体，例如 TagComponent
+		//for (auto entityID : registry.view<TagComponent>()) {
+		//	Entity entity{ entityID, m_Context.get() };
+		//	DrawEntityNode(entity);
+		//}
+		auto& registry = m_Scene->m_Registry;
+		for (auto entityID : registry.view<IDComponent>()) {
+				Entity entity = { entityID, m_Scene.get() };
+				if (!entity)
+					continue;
 				SerializeEntity(out, entity);
-			});
+			};
+
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
@@ -267,6 +274,7 @@ namespace Hazel {
 	}
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
+
 
 		YAML::Node data;
 		try
@@ -299,7 +307,7 @@ namespace Hazel {
 
 				HZ_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
-				Entity deserializedEntity = m_Scene->CreateEntity(name);
+				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid,name);
 
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)

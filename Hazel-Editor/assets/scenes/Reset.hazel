@@ -1,21 +1,12 @@
 Scene: Untitled
 Entities:
-  - Entity: 3659645275943873971
-    TagComponent:
-      Tag: Empty Entity
-    TransformComponent:
-      Translation: [5.12511873, 2.13564134, -2.57378435]
-      Rotation: [0, 0, 0]
-      Scale: [1.7410152, 4.80847597, 1]
-    SpriteRendererComponent:
-      Color: [1, 0, 1, 1]
   - Entity: 12837192831273
     TagComponent:
       Tag: entity1
     TransformComponent:
-      Translation: [-0.0555314794, -0.484620303, 0]
-      Rotation: [0, 0, 0.000277642772]
-      Scale: [0.999963343, 0.999963462, 1]
+      Translation: [-0.0555322468, 5.01400185, 0]
+      Rotation: [0, 0, 0.000277430401]
+      Scale: [0.999963403, 0.999963403, 1]
     SpriteRendererComponent:
       Color: [1, 0, 1, 1]
     Rigidbody2DComponent:

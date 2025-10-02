@@ -8,6 +8,7 @@
 #include "Hazel/Scene/Components.h"
 #include <cstring>
 #include <filesystem>
+#include <iostream>  
 /* The Microsoft C++ compiler is non-compliant with the C++ standard and needs
  * the following definition to disable a security warning on std::strncpy().
  */
@@ -33,11 +34,13 @@ namespace Hazel {
 	{
 		ImGui::Begin("Scene Hierarchy");
 
-		m_Context->m_Registry.view<IDComponent>().each([&](auto entityID)
-			{
-				Entity entity{(entt::entity)(int) entityID , m_Context.get() };
-				DrawEntityNode(entity);
-			});
+		auto& registry = m_Context->m_Registry;
+
+		// 遍历所有有某组件的实体，例如 TagComponent
+		for (auto entityID : registry.view<TagComponent>()) {
+			Entity entity{ entityID, m_Context.get() };
+			DrawEntityNode(entity);
+		}
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			m_SelectionContext = {};
@@ -49,6 +52,24 @@ namespace Hazel {
 				m_Context->CreateEntity("Empty Entity");
 
 			ImGui::EndPopup();
+		}
+
+		//取决于上一个渲染的是否点击，放后面总是有bug，我直接放到前面来了
+		if (m_SelectionContext) {
+			bool entityDeleted = false;
+			if (ImGui::BeginPopupContextWindow(0, 1))
+			{
+				if (ImGui::MenuItem("Delete Entity"))
+					entityDeleted = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (entityDeleted)
+			{
+				m_Context->DestroyEntity(m_SelectionContext);
+				m_SelectionContext = {};
+			}
 		}
 
 		ImGui::End();
@@ -79,14 +100,6 @@ namespace Hazel {
 			m_SelectionContext = entity;
 		}
 
-		bool entityDeleted = false;
-		if (ImGui::BeginPopupContextItem())
-		{
-			if (ImGui::MenuItem("Delete Entity"))
-				entityDeleted = true;
-
-			ImGui::EndPopup();
-		}
 
 		if (opened)
 		{
@@ -97,12 +110,6 @@ namespace Hazel {
 			ImGui::TreePop();
 		}
 
-		if (entityDeleted)
-		{
-			m_Context->DestroyEntity(entity);
-			if (m_SelectionContext == entity)
-				m_SelectionContext = {};
-		}
 	}
 
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
