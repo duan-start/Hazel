@@ -32,7 +32,11 @@ private:
 	void NewScene();
 	void OpenScene();
 	void OpenScene(const std::filesystem::path& path);
+	void SaveScene();
 	void SaveSceneAs();
+	void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
+	void OnDuplicateEntity();
+
 private:
 	enum class SceneState
 	{
@@ -52,6 +56,12 @@ private:
 	Ref<Framebuffer> m_Framebuffer;
 
 	Ref<Scene> m_ActiveScene;
+	Ref<Scene> m_EditorScene;
+	Ref<Scene> m_RunTimeScene;
+
+	std::filesystem::path m_EditorScenePath;
+
+
 	Entity m_SquareEntity, m_CameraEntity, m_SecondCamera;
 
 	bool m_PrimaryCamera = true;

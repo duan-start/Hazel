@@ -40,7 +40,7 @@ void EditorLayer::OnAttach()
 
 	m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 	m_ActiveScene = CreateRef<Scene>();
-
+	m_EditorScene = m_ActiveScene;
 	auto commandLineArgs = Application::Get().GetCommandLineArgs();
 	if (commandLineArgs.Count > 1)
 	{
@@ -401,8 +401,21 @@ bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	case HZ_KEY_S:
 	{
 		if (control)
-			SaveSceneAs();
+		{
+			if (shift)
+				SaveSceneAs();
+			else
+				SaveScene();
+		}
 
+		break;
+	}
+
+	// Scene Commands
+	case HZ_KEY_D:
+	{
+		if (control)
+			OnDuplicateEntity();
 		break;
 	}
 
@@ -427,15 +440,22 @@ bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 void EditorLayer::OnScenePlay()
 {
 	
-
 	m_SceneState = SceneState::Play;
+	//active用来运行，editor用来备份
+	m_ActiveScene = Scene::Copy(m_EditorScene);
 	m_ActiveScene->OnRuntimeStart();
+
+	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 }
 
 void EditorLayer::OnSceneStop()
 {
 	m_SceneState = SceneState::Edit;
+//复原，请注意，这里是指针，所以active和edit是同一份，和play的深度拷贝不同
 	m_ActiveScene->OnRuntimeStop();
+	m_ActiveScene = m_EditorScene;
+
+	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 }
 
 void EditorLayer::UI_Toolbar()
@@ -473,6 +493,7 @@ void EditorLayer::NewScene()
 	m_ActiveScene = CreateRef<Scene>();
 	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	m_EditorScenePath = std::filesystem::path();
 }
 
 void EditorLayer::OpenScene()
@@ -500,10 +521,21 @@ void EditorLayer::OpenScene(const std::filesystem::path& path)
 	SceneSerializer serializer(newScene);
 	if (serializer.Deserialize(path.string()))
 	{
-		m_ActiveScene = newScene;
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_EditorScene = newScene;
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_EditorScene);
+		//这里是指针，
+		m_ActiveScene = m_EditorScene;
+		m_EditorScenePath = path;
 	}
+}
+
+void EditorLayer::SaveScene()
+{
+	if (!m_EditorScenePath.empty())
+		SerializeScene(m_ActiveScene, m_EditorScenePath);
+	else
+		SaveSceneAs();
 }
 
 void EditorLayer::SaveSceneAs()
@@ -511,9 +543,25 @@ void EditorLayer::SaveSceneAs()
 	std::string filepath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0");
 	if (!filepath.empty())
 	{
-		SceneSerializer serializer(m_ActiveScene);
-		serializer.Serialize(filepath);
+		SerializeScene(m_ActiveScene, filepath);
+		m_EditorScenePath = filepath;
 	}
+}
+
+void EditorLayer::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
+{
+	SceneSerializer serializer(scene);
+	serializer.Serialize(path.string());
+}
+
+void EditorLayer::OnDuplicateEntity()
+{
+	if (m_SceneState != SceneState::Edit)
+		return;
+
+	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+	if (selectedEntity)
+		m_EditorScene->DuplicateEntity(selectedEntity);
 }
 
 

@@ -19,7 +19,7 @@ namespace std{
 	template<>
 	struct hash<Hazel::UUID> 
 	{
-		size_t operator()(const Hazel::UUID& uuid) {
+		size_t operator()(const Hazel::UUID& uuid) const{
 			//仿函数的实例化
 			return hash<uint64_t>()((uint64_t)uuid);
 		}

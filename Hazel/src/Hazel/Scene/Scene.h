@@ -15,6 +15,10 @@ namespace Hazel {
 		Scene();
 		~Scene();
 
+		//Copy Scene()实现深度拷贝
+		static Ref<Scene> Copy(Ref<Scene> other);
+		void DuplicateEntity(Entity entity);
+
 		Entity CreateEntity(const std::string& name= "");
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
 		//physical 
