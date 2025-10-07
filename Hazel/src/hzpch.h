@@ -1,5 +1,6 @@
 #pragma once
-//预编译头文件
+//预编译头文件,通用的东西（统一编译，而且不会改变），避免每次都编译（保留在那里）
+//被所有的cpp文件包含，因为声明几乎不会影响cpu的编译时间
 #include <iostream>
 
 #include <memory>

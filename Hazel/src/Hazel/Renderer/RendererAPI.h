@@ -3,7 +3,7 @@
 #include "VertexArray.h"
 
 namespace Hazel {
-
+	//和具体渲染无关的普遍命令，把大多数的东西abstract
 	class RendererAPI
 	{
 	public:

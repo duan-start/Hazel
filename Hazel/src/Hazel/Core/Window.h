@@ -20,7 +20,7 @@ namespace Hazel {
 
 	class HAZEL_API Window {
 	public:
-		//设置回调函数
+		//回调函数的类型
 		using EventCallbackFn = std::function<void(Event&)>;
 
 		virtual ~Window()=default;
@@ -30,6 +30,8 @@ namespace Hazel {
 
 		//Window attributes 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
+
+		//垂直同步，锁定游戏的刷新率和监视器的刷新率，避免屏幕撕裂
 		virtual void SetVSync(bool enabled) = 0;
 		virtual bool IsVSync()const = 0;
 

@@ -5,6 +5,7 @@
 namespace Hazel {
 
 	//spirtTexture
+	//精灵纹理，渲染部分，减少slot的压力
 	class SubTexture2D
 	{
 	public:

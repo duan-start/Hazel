@@ -14,6 +14,7 @@ namespace Hazel {
 	{
 	public:
 		EditorCamera() = default;
+		//透视相机的初始化
 		EditorCamera(float fov, float aspectRatio, float nearClip, float farClip);
 
 		void OnUpdate(Timestep ts);

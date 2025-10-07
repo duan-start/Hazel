@@ -5,6 +5,7 @@ namespace Hazel {
 	class OpenGLVertexBuffer:public VertexBuffer
 	{
 	public:
+
 		OpenGLVertexBuffer(float* vertices, uint32_t size);
 		
 		//batch Rendering

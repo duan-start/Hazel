@@ -1,6 +1,7 @@
 #pragma once
 #include "Hazel/Core/Core.h"
 namespace Hazel {
+	//进行纹理封装
 	class Texture
 	{
 	public:
@@ -14,6 +15,7 @@ namespace Hazel {
 		virtual ~Texture() = default;
 	};
 
+	//2d纹理
 	class Texture2D : public Texture {
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);

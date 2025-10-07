@@ -9,7 +9,7 @@
 
 
 namespace Hazel {
-
+	//后面可以完善，现在的的editor实际上没有用这个类，是散的使用command和renderer2d
 	class Renderer {
 	public:
 		static void Init();
@@ -25,13 +25,15 @@ namespace Hazel {
 	private:
 		//static 的数据之只能类外定义
 		//static RendererAPI::API m_RendererAPI;
+		//不论绘制什么东西，都是必须传给shader的值
+		//？？？
 		struct SceneData{
 			glm::mat4 ViewProjection;
 			float CurrentTime;
 			float SCR_Width;
 			float SCR_Height;
 		};
-
+		//这里只是声明
 		static SceneData* m_SceneData;
 	};
 }

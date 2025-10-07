@@ -29,6 +29,7 @@ namespace Hazel {
 	void OpenGLContext::SwapBuffers()
 	{
 		HZ_PROFILE_FUNCTION();
+		//½»»»»º³åÇø
 		glfwSwapBuffers(m_windowHandle);
 	}
 }

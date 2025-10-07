@@ -19,6 +19,7 @@ namespace Hazel {
 		static void Init();
 		static void Shutdown();
 		static void BeginScene(const OrthographicCamera& camera);
+		//在渲染开始前，设置统一的摄像机
 		static void BeginScene(const EditorCamera& camera);
 		static void BeginScene(const GameCamera& camera, const glm::mat4& transform);
 		static void EndScene();

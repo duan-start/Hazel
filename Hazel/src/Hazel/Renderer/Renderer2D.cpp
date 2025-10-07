@@ -8,72 +8,79 @@
 #include <glm/gtc/type_ptr.hpp>
 namespace Hazel {
 
-	//vetext attribute
+	//正方形的每个顶点的属性
 	struct QuadVertex
-	{
+	{//（local）位置，颜色，采样的坐标，采样的纹理槽（sampler2d）,采样级别（具体逻辑在shader）
+		//还有ID值，用来给mrt给gismos选中
 		glm::vec3 Position;
 		glm::vec4 Color;
-
 		// TODO: texid
 		glm::vec2 TexCoord;
 
 		float TexIndex;
 		//采样级别
 		float TilingFactor;
-
 		//Editor Only
 		int EntityID;
 	};
 
+	//在cpu端（umd）端可以创建的数据及其阈值，用来batch Renderering 一次性上传给所有的gpu的数据
 	struct Renderer2DStorge {
 		//cap
-		//虽然指向的是堆上创建，但是能创建这么大也是挺厉害的了
+		//最大的正方形的数量
+		//顶点数量，索引的数量（绘制是根据索引的，一个方形有6个index）
 		static const uint32_t MaxQuads = 10000;
 		static const uint32_t MaxVertices = MaxQuads * 4;
 		static const uint32_t MaxIndices = MaxQuads * 6;
-		//slots 卡槽
+		
+		//纹理绑定的卡槽的数量
 		static const uint32_t MaxTextureSlots = 32;
 
-		//asset
+		//cpu端实际创建的资源--指针
+		//shader ,vao(解释vbo的数据)，vbo(实际的数据)，手动创建的白色纹理（默认的问题，为了整体系统的协调性）
 		Ref<Shader> TextureShader;
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
 		Ref<Texture2D> WhiteTexture;
 
-		//index
+		//初始化的一个状态
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
 
-		//存储实际纹理的索引
+		//存储实际纹理的索引（有点小巧合吧）
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
 
 		//一个初始的正方形
 		glm::vec4 QuadVertexPositions[4];
 
-
+		//传到shader上面的Uniformbbuffer里面的数据
 		struct CameraData
 		{
 			glm::mat4 ViewProjection;
 		};
 		CameraData CameraBuffer;
+
+		//uniformBuffer的数据(还未上传)
 		Ref<UniformBuffer> CameraUniformBuffer;
+
 		//数据统计 statictis 每帧的数据
 		Renderer2D::statistics states;
 
 	};
 
+	//全局唯一的，一次性用来传输的，思路就会清晰点，按这个逻辑直接填充就好了
 	static Renderer2DStorge s_Data;
 
 	void Renderer2D::Init()
 	{
 		HZ_PROFILE_FUNCTION();
 		
-		//创建vao
+		//创建vao,cpu端指针
 		s_Data.QuadVertexArray = (Hazel::VertexArray::Create());
 
-		//创建vbo状态，预留的空间很充足，但是第一遍并没有上传数据
+		//创建vbo，cpu端指针，预留好最大的内存
 		s_Data.QuadVertexBuffer = Hazel::VertexBuffer::Create(s_Data.MaxVertices*sizeof(QuadVertex));
 
 		//设置顶点属性
@@ -87,7 +94,7 @@ namespace Hazel {
 				{ ShaderDataType::Float,  "a_Fra"},
 				{ ShaderDataType::Int,  "a_EntID"}
 			};
-
+			//vbo设置好空间和属性
 			s_Data.QuadVertexBuffer->SetLayout(layout);
 		}
 
@@ -102,6 +109,7 @@ namespace Hazel {
 		//这里的编码表示一定要逆时针传入绘制的点（尤其是四边形）
 		//设置固定的index值
 		uint32_t offset = 0;
+		//因为一次性传入的四边形的四个顶点，index保证逆时针绘制
 		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
 		{
 			quadIndices[i + 0] = offset + 0;
@@ -115,9 +123,10 @@ namespace Hazel {
 			offset += 4;
 		}
 		
-		//将创建的索引数据复制到IndexBuffer（注意是复制而不是引用）
+		//cpu端的数据上传到gpu对应的ID里面去
 		Ref<IndexBuffer> quadIB = IndexBuffer::Creat(quadIndices, s_Data.MaxIndices);
 		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
+
 		delete[] quadIndices;
 
 		//Shader
@@ -152,6 +161,7 @@ namespace Hazel {
 		s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
+		//正式定义                     可以对类型使用sizeof sizeof(int)
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DStorge::CameraData), 0);
 	}
 
@@ -162,7 +172,6 @@ namespace Hazel {
 		//初始化对应的参数（shutdown）
 		//s_Data.QuadIndexCount = 0;
 		//s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
-
 		//s_Data.TextureSlotIndex = 1;
 	}
 
@@ -173,11 +182,13 @@ namespace Hazel {
 		//Todu:Camera(u_ViewProjection)
 		// Init
 		//set和upload的区别：set可以在缓冲区中设定，但是upload就是直接将数据传输到gpu上面了
+		//所以我这里是不太严谨的
 		s_Data.TextureShader->Bind();
+		//对标upload实际上
 		s_Data.TextureShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		StartNewBactch();
+
 		//s_Data.TextureShader->UnBind();
-		
 		//index（用户指定）和初始化其他结构体变量
 		//s_Data.QuadIndexCount = 0;
 		//s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
@@ -200,6 +211,7 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 		//会有危险吗
+		//这个transform是campera的pos
 		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DStorge::CameraData),0);
 
@@ -218,7 +230,7 @@ namespace Hazel {
 		//统一batching Rendering 保证批处理逻辑
 		Flush();
 	}
-
+	//调用绘制逻辑
 	void Renderer2D::Flush()
 	{  
 		////contion
@@ -234,14 +246,17 @@ namespace Hazel {
 		if (s_Data.QuadIndexCount == 0)
 			return; // Nothing to draw
 
+		//指针的加减法，因为我们是64位，一个指针的大小是8
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
+		//正式上传数据
 		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
 
-		// Bind textures
+		// 绑定所有的texture
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			s_Data.TextureSlots[i]->Bind(i);
-
+		//绑定shader
 		s_Data.TextureShader->Bind();
+		//绘制需要indexbuffer
 		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
 		//s_Data.Stats.DrawCalls++;
 	}
@@ -250,7 +265,7 @@ namespace Hazel {
 	void Renderer2D::StartNewBactch()
 	{
 		//EndScene();
-		//new set
+		//初始化设置
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
@@ -517,34 +532,38 @@ namespace Hazel {
 		DrawQuad(transform, s_Data.WhiteTexture,1.0f,color,Entity);
 	}
 
+	//就拿你当典型了
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor,int Entity)
 	{	
 		//textureIndex
 		float textureIndex = 0.0f;
+		//判断该纹理是否被添加过
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-		{
+		{//判断指针指向的数据（而不是指针指向的地址），所以内部进行了一个重载
 			if (*s_Data.TextureSlots[i].get() == *texture.get())
 			{
 				textureIndex = (float)i;
 				break;
 			}
 		}
-
+		//这个一个新的纹理
 		if (textureIndex == 0.0f)
 		{
+			//添加到纹理槽上
 			textureIndex = (float)s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
 			s_Data.TextureSlotIndex++;
 		}
 
 		//编译已知常量
+		//这是纹理的边界
 		constexpr glm::vec2 textureCoords[] = {
 			{0,0},
 			{1,0},
 			{1,1},
 			{0,1}
 		};
-
+		//实时设置vbo的数据
 		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[0];
 		s_Data.QuadVertexBufferPtr->Color = tintColor;
 		s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[0];

@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-
+//这个文件一般就是全局的一些宏，进行一些全局的封装，或者预编译的条件之类
 //#ifdef HZ_PLATFORM_WINDOWS
 #ifdef HZ_DYNAMIC_LINK
     #ifdef HZ_BUILD_DLL

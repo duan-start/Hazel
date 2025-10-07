@@ -2,7 +2,7 @@
 #include "GameCamera.h"
 
 namespace Hazel {
-	
+	//这是现在主要的一条道路，一个相机里面存了两份的东西，感觉是有点臃肿的
 	class SceneCamera:public GameCamera
 	{
 	public:

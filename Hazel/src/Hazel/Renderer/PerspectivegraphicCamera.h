@@ -3,6 +3,7 @@
 #include "Camera.h"
 
 namespace Hazel {
+	//这也是另一条道路，现在确实也没怎么用到
 	class PerspectivegraphicCamera : public Camera{
 	public:
 		PerspectivegraphicCamera(float fov,float aspect,float zNear=0.1,float zFar=100.f);

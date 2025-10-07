@@ -3,12 +3,19 @@
 #include <glad/glad.h>
 
 namespace Hazel {
+	//基础设置
+	//允许混合，混合的模式， 允许深度测试（after fragshader）
 	void OpenGLRendererAPI::Init()
 	{
 		HZ_PROFILE_FUNCTION(); 
+
+		//先做深度测试（如果被遮挡了，就直接丢弃）
+		//然后在做Blend
+		//这就是为什么我们在绘制半透明的物体的时候要先绘制后面（画家算法），就是为了防止在被丢弃（实际确实会被丢弃）
 		glEnable(GL_BLEND);
-		//为什么这里加上这个函数反而导致显示不正常
-		//因为这个函数设置了如何混合的具体参数（最终是依赖你的pixelshader的a值进行设定的，所以）
+
+		//因为这个函数设置了如何混合的具体参数（最终是依赖你的pixelshader的a值进行设定的）
+		//自己的src alpha,背景的1-src  alpha
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 	}

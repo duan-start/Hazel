@@ -5,7 +5,7 @@
 #include "entt.hpp"
 
 namespace Hazel {
-	
+	//entity µÄ°ü×°
 	class Entity
 	{
 	public:

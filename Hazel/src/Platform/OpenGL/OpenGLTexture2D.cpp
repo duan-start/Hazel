@@ -89,6 +89,7 @@ namespace Hazel {
 
 		// 正式上传纹理数据 （cpu->gpu）
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+		//cpu端的数据释放
 		stbi_image_free(data);
 	}
 
@@ -97,7 +98,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 		glDeleteTextures(1, &m_RendererID);
 	}
-
+	//判断纹理是否相同--是不是在gpu端已经开辟过
     bool OpenGLTexture2D::operator==(const Texture& other) const  
     {  
        return m_RendererID == ((OpenGLTexture2D&)other).m_RendererID;  
@@ -110,6 +111,7 @@ namespace Hazel {
 		uint32_t bpp = 4;
 		HZ_CORE_ASSERT(size==m_Width*m_Height*bpp,"Wrong Texture Size");
 		// 正式上传纹理数据 （cpu->gpu）
+		//现在只是上传了一个白色的纹理（rgba）
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 
 	}

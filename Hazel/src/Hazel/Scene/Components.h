@@ -61,7 +61,8 @@ namespace Hazel {
 				* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0, 1, 0 })
 				* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0, 0, 1 });*/
 			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
-
+			//model矩阵内部的乘法顺序，先做scale，再做rotation,最后是translate.
+			// 如果先做rotate,再做scale的话，会变形
 			return glm::translate(glm::mat4(1.0f), Translation)
 				* rotation
 				* glm::scale(glm::mat4(1.0f), Scale);

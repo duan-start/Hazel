@@ -5,11 +5,18 @@
 
 #include "Renderer2D.h"
 namespace Hazel {
+	//Renderer---RenderCommad和Renderer2D。
+	//通用命令和绘制命令分开
+
+
 	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData;
+	//这个Renderer基本上就只用了 这一个函数
 	void Renderer::Init()
 	{
 		HZ_PROFILE_FUNCTION();
+		//调用opengl的普遍设置，开启深度测试之类的
 		RenderCommand::Init();
+		//专用的2d渲染器的设置和数据初始化，vao,vbo之类的
 		Renderer2D::Init();
 	}
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)

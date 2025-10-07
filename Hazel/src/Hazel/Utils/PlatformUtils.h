@@ -8,7 +8,9 @@ namespace Hazel {
 	{
 	public:
 		// These return empty strings if cancelled
+		//返回选中的地址
 		static std::string OpenFile(const char* filter);
+		//
 		static std::string SaveFile(const char* filter);
 	};
 

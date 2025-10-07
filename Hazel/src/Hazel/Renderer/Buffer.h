@@ -70,11 +70,12 @@ namespace Hazel {
 
 	};
 
+	//缓冲区的格式布局，专门放在vbo里面，传给vao时进行顶点属性设置的，以后就不用挨个设置顶点属性了，只要设置好这个东西就好了
 	class BufferLayout {
 	public:
 		BufferLayout() {};
 
-		//c++11开头的那个新特性
+		//Initializer List进行初始化，能够可变长
 		BufferLayout(const std::initializer_list<BufferElements>& BufferElements) :m_BufferElements(BufferElements) {
 			CalculateOffsetAndStride();
 		};

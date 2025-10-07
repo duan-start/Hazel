@@ -17,6 +17,7 @@ namespace Hazel {
 
 		//Copy Scene()实现深度拷贝
 		static Ref<Scene> Copy(Ref<Scene> other);
+		//实现实体的复制
 		void DuplicateEntity(Entity entity);
 
 		Entity CreateEntity(const std::string& name= "");

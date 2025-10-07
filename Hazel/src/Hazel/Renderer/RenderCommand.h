@@ -7,6 +7,7 @@ namespace Hazel {
 	//renderer 和api的中间层类
 	class RenderCommand {
 	public:
+		//基础设置
 		inline static void Init() {
 			s_RendererAPI->Init();
 		}

@@ -3,6 +3,8 @@
 #include "Camera.h"
 
 namespace Hazel {
+	//这个是另一条道路，现在未被使用
+	//但是我觉得这个更加合理
 	class OrthographicCamera :public Camera {
 	public:
 		

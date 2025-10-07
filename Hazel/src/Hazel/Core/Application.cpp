@@ -9,11 +9,10 @@
 
 namespace Hazel {
 
-
-
-	//这个的用法
+	//绑定对应的函数指针，其中x是是一个函数（指针），this是显示替换的参数1
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
-
+	
+	//static 数据如果不inline的话需要在外部定义
 	Application* Application::s_Instance = nullptr;
 
 
@@ -21,12 +20,17 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
+		//类内构造函数进行初始化，多态指针，父类指针指向子类对象（）
+		//static 的数据虽然不能在类内初始化，但是能够在类内改变值
 		s_Instance = this;
+		//base，创建窗口，设置事件回调，创建imguilayer
+		//同样是多态的窗口
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 		//按理是要在析构函数中delete掉的，
 		m_ImGuiLayer = new ImGuiLayer();
 
+		//渲染器的初始化
 		Renderer::Init();
 		PushOverlay(m_ImGuiLayer);
 		std::cout << "m_ImGuiLayer\n";
@@ -42,18 +46,19 @@ namespace Hazel {
 	//设置事件回调函数
 	void Application::OnEvent(Event& e) {
 		HZ_PROFILE_FUNCTION();
-
+		//优先自己处理函数事件
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
-
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
 
 		
 		//HZ_CORE_TRACE("{0}", e);
+		//从尾端到前面，逐一传递事件进行处理
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it) {
 		//	HZ_CORE_TRACE("Layer order: {}", (*it)->GetName());
 			(*it)->OnEvent(e);
 		//	HZ_CORE_TRACE("event: {} ", e.Handled);
+			//如果处理成功，直接退出就好了
 			if (e.Handled) break;  // 关键：立即终止
 		}
 	}
@@ -98,7 +103,7 @@ namespace Hazel {
 	void Application::Close() {
 		m_Running = false;
 	}
-
+	//核心更新逻辑
 	void Application::Run() {
 
 		HZ_PROFILE_FUNCTION();
@@ -108,15 +113,18 @@ namespace Hazel {
 			HZ_PROFILE_SCOPE("RunLoop");
 
 			float time = glfwGetTime();
+			//这个time 和m_LastFrameTime是一个运行的事件
+			//根据差值得到这一帧的时候，然后去tick物理
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			//自定义的层栈的更新
+			//层栈更新
 			if (!m_Minimized) {
 			HZ_PROFILE_SCOPE("LayerStack Update");
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate(timestep);
 			}
+
 			//ImGui的更新
 			m_ImGuiLayer->Begin();
 			{
@@ -125,10 +133,9 @@ namespace Hazel {
 			for (Layer* layer : m_LayerStack)
 				layer->OnImGuiRender();
 			}
-
-				m_ImGuiLayer->End();
-				//auto [mx, my] = Input::GetMousePosition();
-				//HZ_CORE_TRACE("{0}, {1}", mx, my);
+			m_ImGuiLayer->End();
+			//auto [mx, my] = Input::GetMousePosition();
+			//HZ_CORE_TRACE("{0}, {1}", mx, my);
 
 			//窗口画面的更新
 			m_Window->OnUpdate();
