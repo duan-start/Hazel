@@ -8,6 +8,15 @@
 #include <glm/gtc/type_ptr.hpp>
 namespace Hazel {
 
+	struct CircleVertex {
+		glm::vec3 WorldPosition;
+		glm::vec3 LocalPosition;
+		glm::vec4 Color;
+		float Thickness;
+		float Fade;
+		int EntityID;
+	};
+
 	//正方形的每个顶点的属性
 	struct QuadVertex
 	{//（local）位置，颜色，采样的坐标，采样的纹理槽（sampler2d）,采样级别（具体逻辑在shader）
@@ -38,15 +47,24 @@ namespace Hazel {
 
 		//cpu端实际创建的资源--指针
 		//shader ,vao(解释vbo的数据)，vbo(实际的数据)，手动创建的白色纹理（默认的问题，为了整体系统的协调性）
-		Ref<Shader> TextureShader;
+		Ref<Shader> QuadShader;
+		Ref<Shader> CircleShader;
+
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
 		Ref<Texture2D> WhiteTexture;
+
+		Ref<VertexArray> CircleVertexArray;
+		Ref<VertexBuffer> CircleVertexBuffer;
 
 		//初始化的一个状态
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
+
+		uint32_t CircleIndexCount = 0;
+		CircleVertex* CircleVertexBufferBase = nullptr;
+		CircleVertex* CircleVertexBufferPtr = nullptr;
 
 		//存储实际纹理的索引（有点小巧合吧）
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
@@ -129,19 +147,34 @@ namespace Hazel {
 
 		delete[] quadIndices;
 
-		//Shader
-		//s_Data.TextureShader = Hazel::Shader::Create("assets/shaders/Texture.glsl");
-#if OLDPATH
-		//Texture OldPath
-		//设置采样器的卡槽
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetUniformInt("u_texture", 0);
-		//创建一个纹理
-		s_Data.WhitePixel = Texture2D::Create(1, 1);
-		//这里是8位
-		uint32_t white = 0xffffffff;
-		s_Data.WhitePixel->SetData(&white, sizeof(uint32_t));
-#endif
+		//Circle
+		s_Data.CircleVertexArray = (Hazel::VertexArray::Create());
+		s_Data.CircleVertexBuffer = Hazel::VertexBuffer::Create(s_Data.MaxVertices * sizeof(CircleVertex));
+
+		//设置顶点属性
+		{
+			Hazel::BufferLayout layout = {
+				//QuadVertex Set
+				{ ShaderDataType::Float3, "a_WorldPos"},
+				{ ShaderDataType::Float3, "a_LocalPos" },
+				{ ShaderDataType::Float4, "a_Color" },
+				{ ShaderDataType::Float,  "a_Thickness"},
+				{ ShaderDataType::Float,  "a_Fade"},
+				{ ShaderDataType::Int,  "a_EntID"}
+			};
+			//vbo设置好空间和属性
+			s_Data.CircleVertexBuffer->SetLayout(layout);
+		}
+
+		//vao绑定vbo(没有数据的)，但是有空间和属性的
+		s_Data.CircleVertexArray->AddVertexBuffer(s_Data.CircleVertexBuffer);
+
+		//创建一个专门放数据的数组（堆上），使用原始指针是因为传给opengl的时候
+		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
+		s_Data.CircleVertexArray->SetIndexBuffer(quadIB);
+		
+		
+//shader
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
@@ -149,7 +182,8 @@ namespace Hazel {
 		int32_t samplers[s_Data.MaxTextureSlots];
 		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
-		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+		s_Data.QuadShader = Shader::Create("assets/shaders/Texture.glsl");
+		s_Data.CircleShader = Shader::Create("assets/shaders/Circle.glsl");
 		//不是450已经不适配spirv了捏！
 		//s_Data.TextureShader = Shader::Create("assets/shaders/YouTube.glsl");
 		// Set first texture slot to 0
@@ -169,12 +203,14 @@ namespace Hazel {
 	void Renderer2D::Shutdown()
 	{
 		delete[] s_Data.QuadVertexBufferBase;
+		delete[] s_Data.CircleVertexBufferBase;
 		//初始化对应的参数（shutdown）
 		//s_Data.QuadIndexCount = 0;
 		//s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 		//s_Data.TextureSlotIndex = 1;
 	}
 
+	//discard
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -183,9 +219,9 @@ namespace Hazel {
 		// Init
 		//set和upload的区别：set可以在缓冲区中设定，但是upload就是直接将数据传输到gpu上面了
 		//所以我这里是不太严谨的
-		s_Data.TextureShader->Bind();
+		s_Data.QuadShader->Bind();
 		//对标upload实际上
-		s_Data.TextureShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data.QuadShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		StartNewBactch();
 
 		//s_Data.TextureShader->UnBind();
@@ -210,9 +246,9 @@ namespace Hazel {
 	void Renderer2D::BeginScene(const GameCamera& camera, const glm::mat4& transform)
 	{
 		HZ_PROFILE_FUNCTION();
-		//会有危险吗
 		//这个transform是campera的pos
 		s_Data.CameraBuffer.ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		//上传camerea的数据到gpu;
 		s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DStorge::CameraData),0);
 
 		StartNewBactch();
@@ -221,44 +257,62 @@ namespace Hazel {
 	void Renderer2D::EndScene()
 	{
 		HZ_PROFILE_FUNCTION();
-
-		//设置顶点指针属性和传输数据是可以分开的（但是前者一定要在程序的前面）
-		//传输实际的数据到GPU上已经设置好的VBO里面
-		//uint32_t dataSize = (uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase;
-		//s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
-
-		//统一batching Rendering 保证批处理逻辑
 		Flush();
 	}
 	//调用绘制逻辑
 	void Renderer2D::Flush()
 	{  
-		////contion
-		//s_Data.TextureShader->Bind();
-		////绑定所有的卡槽
-		//for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++) {
-		//	s_Data.TextureSlots[i]->Bind(i);
-		//}
-		////绘制
-		//RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
-		//s_Data.states.DrawCalls++;
 
-		if (s_Data.QuadIndexCount == 0)
-			return; // Nothing to draw
+		if (s_Data.QuadIndexCount)
+		{
+			//指针的加减法，因为我们是64位，一个指针的大小是8
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
+			//正式上传数据
+			s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
 
-		//指针的加减法，因为我们是64位，一个指针的大小是8
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
-		//正式上传数据
-		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+			// 绑定所有的texture
+			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+				s_Data.TextureSlots[i]->Bind(i);
+			//绑定shader
+			s_Data.QuadShader->Bind();
+			//绘制需要indexbuffer
+			RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
+			s_Data.states.DrawCalls++;
+		}
+		if (s_Data.CircleIndexCount)
+		{
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.CircleVertexBufferPtr - (uint8_t*)s_Data.CircleVertexBufferBase);
+			s_Data.CircleVertexBuffer->SetData(s_Data.CircleVertexBufferBase, dataSize);
 
-		// 绑定所有的texture
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			s_Data.TextureSlots[i]->Bind(i);
-		//绑定shader
-		s_Data.TextureShader->Bind();
-		//绘制需要indexbuffer
-		RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
-		//s_Data.Stats.DrawCalls++;
+			s_Data.CircleShader->Bind();
+			RenderCommand::DrawIndexed(s_Data.CircleVertexArray, s_Data.CircleIndexCount);
+			s_Data.states.DrawCalls++;
+		}
+	}
+
+	void Renderer2D::DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thickness, float fade, int entityID)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		// TODO: implement for circles
+		// if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
+		// 	NextBatch();
+
+		for (size_t i = 0; i < 4; i++)
+		{
+			s_Data.CircleVertexBufferPtr->WorldPosition = transform * s_Data.QuadVertexPositions[i];
+			s_Data.CircleVertexBufferPtr->LocalPosition = s_Data.QuadVertexPositions[i] * 2.0f;
+			s_Data.CircleVertexBufferPtr->Color = color;
+			s_Data.CircleVertexBufferPtr->Thickness = thickness;
+			s_Data.CircleVertexBufferPtr->Fade = fade;
+			s_Data.CircleVertexBufferPtr->EntityID = entityID;
+			s_Data.CircleVertexBufferPtr++;
+		}
+
+		s_Data.CircleIndexCount += 6;
+
+		s_Data.states.QuadCount++;
+	
 	}
 
 	//hack
@@ -269,6 +323,9 @@ namespace Hazel {
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVertexBufferPtr = s_Data.CircleVertexBufferBase;
 
 	}
 

@@ -27,6 +27,8 @@ namespace Hazel {
 		//绘制
 		static void Flush();
 
+	//CIrcle
+		static void DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thicness = 1.0, float fade = 0.02, int entityID = -1);
 
 	//基础绘制属性
 	//static : color

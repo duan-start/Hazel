@@ -37,10 +37,11 @@ namespace Hazel {
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray,uint32_t indexCount)
 	{
+		vertexArray->Bind();
 		//给用户一个自由度，默认渲染所有的indexCount(input Count=0),也允许用户指定渲染的个数
 		uint32_t count = indexCount ? indexCount:vertexArray->GetIndexBuffer()->GetCount() ;
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 		//一定需要手动释放吗
-		glBindTexture(GL_TEXTURE_2D, 0);
+		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
