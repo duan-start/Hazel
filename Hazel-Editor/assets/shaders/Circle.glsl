@@ -60,17 +60,21 @@ layout (location = 4) in flat int v_EntityID;
 
 void main()
 {
+	//smoothstep是用来消除锯齿的，整个范围的一个映射
     // Calculate distance and fill circle with white
     float distance = 1.0 - length(Input.LocalPosition);
+	//外圈smooth
     float circle = smoothstep(0.0, Input.Fade, distance);
+	//内圈smooth 和半径确定，（做了一个取放）
     circle *= smoothstep(Input.Thickness + Input.Fade, Input.Thickness, distance);
 
+//这样能在对应的frambuffer上不输出，而不仅仅是输出黑色
 	if (circle == 0.0)
 		discard;
 
     // Set output color
     o_Color = Input.Color;
-	//ͨ������͸���ȵĴ�С����Բ����С
+	//ͨ������͸���ȵĴ�С����Բ����С
 	o_Color.a *= circle;
 
 	o_EntityID = v_EntityID;

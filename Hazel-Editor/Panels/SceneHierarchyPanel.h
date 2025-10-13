@@ -7,6 +7,7 @@
 
 namespace Hazel {
 	//场景层次图，主要是需要对应的场景，还有选中的实体（不同的绘制方式）
+	//Editor 专用
 	class SceneHierarchyPanel
 	{
 	public:

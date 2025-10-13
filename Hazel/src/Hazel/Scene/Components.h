@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Hazel/Renderer/SceneCamera.h"
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Core/UUID.h"
@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-//ʵ�������Ӧ�����
+//实体和他对应的组件
 namespace Hazel {
 
 	struct CircleRendererComponent {
@@ -72,8 +72,8 @@ namespace Hazel {
 				* glm::rotate(glm::mat4(1.0f), Rotation.y, { 0, 1, 0 })
 				* glm::rotate(glm::mat4(1.0f), Rotation.z, { 0, 0, 1 });*/
 			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
-			//model�����ڲ��ĳ˷�˳������scale������rotation,�����translate.
-			// �������rotate,����scale�Ļ��������
+			//model矩阵内部的乘法顺序，先做scale，再做rotation,最后是translate.
+			// 如果先做rotate,再做scale的话，会变形
 			return glm::translate(glm::mat4(1.0f), Translation)
 				* rotation
 				* glm::scale(glm::mat4(1.0f), Scale);
@@ -97,7 +97,7 @@ namespace Hazel {
 	struct CameraComponent {
 		//glm::mat4 Transform{ 1.0f };
 		SceneCamera Camera;
-		//�Ƿ��������ӽ�
+		//是否启动主视角
 		bool Primary = true;
 		bool FixedAspectRatio = false;
 
@@ -105,42 +105,73 @@ namespace Hazel {
 		CameraComponent(const CameraComponent&) = default;
 	};
 
-	//ר�Ŵ���һ��scirpentity��Ϊ��ʵ�ֶ�Ӧ�Ľű������ĸ���
+	//专门创建一个scirpentity，为了实现对应的脚本函数的更新
 	struct NativeScriptComponent {
-		//forward declartion
+		//forward declartion and definition
 		class ScriptableEntity* Instance = nullptr;
 
-		//��Ҫ�ӳٶ���ĺ���
+		//声明函数指针类型，实现晚绑定
 		ScriptableEntity* (*InstantiateScript)();
 		void (*DestroyScript)(NativeScriptComponent*);
 		
-		//BindFunction(��Ӧ��class)
+		//BindFunction(对应的class)
 		template<typename T>
 		void Bind(){
-			//���ڻ��಻��ʵ������������ֱ��ʹ�õ���dynamic_cast �����ܿ������һ�㣬����ʱ��ԭ�򣩣���static_cast �Ǳ���ʱ������
-			InstantiateScript = []() { return dynamic_cast<ScriptableEntity*>(new T()); };
+			//由于基类不能实例化，所以我直接使用的是dynamic_cast （性能开销会大一点，运行时的原因，自己写的确实不合理，因为这一般是父类转子类用的），而static_cast 是编译时的语言（这个才是）
+			//dynamic_cast 是 C++ 中 运行时类型检查和安全转换的运算符，它主要用于多态类型的指针或引用之间的转换。（有虚函数的类）
+			//总结一下，dynamic_cast 一般是用来解决“运行时安全访问子类特有成员或功能”的问题，也就是 多态类型下的向下转型（Downcast）。
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
 			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
 		}
 
 	};
 
+	//动力学的运动特性
 	struct Rigidbody2DComponent
-	{
+	{    
+		//	> ⚙️ 在物理引擎（如 Box2D）中：
+		//> -`Static` 质量无限大，不受力。
+		//> -`Dynamic` 有质量、受重力、会碰撞。
+		//> -`Kinematic` 不受力，但可以自己通过速度或代码驱动移动。							
 		enum class BodyType { Static = 0, Dynamic, Kinematic };
 		BodyType Type = BodyType::Static;
 		bool FixedRotation = false;
 
-		// Storage for runtime
+		//这是一个运行时指针，指向底层物理引擎创建出来的“真实刚体对象”
 		void* RuntimeBody = nullptr;
 
 		Rigidbody2DComponent() = default;
 		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
 	};
 
+	//碰撞的特性
 	struct BoxCollider2DComponent
 	{
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		glm::vec2 Size = { 0.5f, 0.5f };
+
+		// TODO(Yan): move into physics material in the future maybe
+		//密度
+		float Density = 1.0f;
+		//摩擦力
+		float Friction = 0.5f;
+		//能量回复
+		float Restitution = 0.0f;
+		//能量计算阈值
+		float RestitutionThreshold = 0.5f;
+
+		// Storage for runtime
+		void* RuntimeFixture = nullptr;
+
+		BoxCollider2DComponent() = default;
+		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
+	};
+
+
+	struct CircleCollider2DComponent
+	{
+		glm::vec2 Offset = { 0.0f, 0.0f };
+		float Radius = 0.5f;
 
 		// TODO(Yan): move into physics material in the future maybe
 		float Density = 1.0f;
@@ -151,10 +182,9 @@ namespace Hazel {
 		// Storage for runtime
 		void* RuntimeFixture = nullptr;
 
-		BoxCollider2DComponent() = default;
-		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
+		CircleCollider2DComponent() = default;
+		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
-
 
 
 }

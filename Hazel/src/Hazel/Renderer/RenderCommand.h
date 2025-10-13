@@ -18,9 +18,17 @@ namespace Hazel {
 		inline static void Clear() { s_RendererAPI->Clear(); }
 		inline static void SetClearColor(const glm::vec4& color) { s_RendererAPI->SetClearColor(color); }
 
+		//trangles
 		inline static	void DrawIndexed(const Ref<VertexArray>& vertexArray,uint32_t indexCount=0) {
 			s_RendererAPI->DrawIndexed(vertexArray,indexCount);
 		}
+		//Lines
+		inline static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) {
+			s_RendererAPI->DrawLines(vertexArray, indexCount);
+		};
+		inline static void SetLineWidth(float width) {
+			s_RendererAPI->SetLineWidth(width);
+		};
 	private:
 		static RendererAPI* s_RendererAPI;
 	};

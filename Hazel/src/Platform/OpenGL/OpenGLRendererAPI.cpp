@@ -18,6 +18,7 @@ namespace Hazel {
 		//自己的src alpha,背景的1-src  alpha
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_LINE_SMOOTH);
 	}
 	void OpenGLRendererAPI::Clear()
 	{
@@ -35,6 +36,11 @@ namespace Hazel {
 		glClearColor(color.x, color.y, color.z, color.w);
 	}
 
+	void OpenGLRendererAPI::SetLineWidth(float width)
+	{
+		glLineWidth(width);
+	}
+
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray,uint32_t indexCount)
 	{
 		vertexArray->Bind();
@@ -43,5 +49,10 @@ namespace Hazel {
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 		//一定需要手动释放吗
 		//glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	void OpenGLRendererAPI::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	{
+		vertexArray->Bind();
+		glDrawArrays(GL_LINES, 0, indexCount);
 	}
 }

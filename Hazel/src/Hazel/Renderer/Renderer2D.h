@@ -30,6 +30,17 @@ namespace Hazel {
 	//CIrcle
 		static void DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thicness = 1.0, float fade = 0.02, int entityID = -1);
 
+	//Line 
+		static void DrawLine(const glm::vec3& p0,const glm::vec3& p1, const glm::vec4& color, int entityID = -1);
+
+	//Line TO Rect
+		static void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, int entityID = -1);
+		static void DrawRect(const glm::mat4& transform, const glm::vec4& color, int entityID = -1);
+
+// aatribute
+		static float GetLineWidth();
+		static void SetLineWidth(float width);
+
 	//ª˘¥°ªÊ÷∆ Ù–‘
 	//static : color
 		static void DrawQuad(const glm::vec3& position,const glm::vec2& size,const glm::vec4& color);
@@ -64,10 +75,12 @@ namespace Hazel {
 
 		struct statistics {
 			uint32_t QuadCount = 0;
+			uint32_t CircleCount = 0;
+			uint32_t LineCount = 0;
 			uint32_t DrawCalls = 0;
 
-			uint32_t GetTotalVertexCount() { return QuadCount * 4; }
-			uint32_t GetTotalIndexCount() { return QuadCount * 6; }
+			uint32_t GetTotalVertexCount() { return (QuadCount+ CircleCount) * 4+ LineCount*2; }
+			uint32_t GetTotalIndexCount() { return  (QuadCount + CircleCount) * 6 + LineCount * 2; }
 		};
 
 		static statistics GetStats();

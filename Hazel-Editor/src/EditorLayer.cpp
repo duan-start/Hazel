@@ -11,7 +11,14 @@
 
 #include <chrono>
 
-namespace Hazel {
+//这行的逻辑其实是：
+//using namespace Hazel; 先把 Hazel 命名空间“引入当前作用域”；
+//然后你声明了一个全局变量 g_AssetPath。
+//问题是：
+//这个 extern 声明并没有放进 Hazel 命名空间！
+//它只是当前作用域的一个“全局”声明。
+//extern const std::filesystem::path g_AssetPath;
+ namespace Hazel {
 extern const std::filesystem::path g_AssetPath;
 }
 
@@ -27,10 +34,11 @@ void EditorLayer::OnAttach()
 	HZ_PROFILE_FUNCTION();
 
 
-
+	//2D纹理创建
 	m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
 	m_IconStop = Texture2D::Create("Resources/Icons/StopButton.png");
 
+	//帧缓冲创建和绑定
 	 m_FramebufferSize = { 1280,720 };
 	Hazel::FramebufferSpecification fbSpec;
 	fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
@@ -124,6 +132,8 @@ void EditorLayer::OnUpdate(Timestep ts)
 	m_Framebuffer->Bind();
 	RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
 	RenderCommand::Clear();
+
+	
 	 //Clear our entity ID attachment to -1
 	m_Framebuffer->ClearAttachment(1, -1);
 
