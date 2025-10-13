@@ -16,7 +16,7 @@ namespace Hazel {
 		virtual bool operator==(const Texture& other) const override;
 		virtual uint32_t GetRenderID()const override { return m_RendererID; }
 		virtual void SetData(void*, uint32_t size)override;
-
+		virtual std::string GetPath()const override {	return m_path;}
 		virtual bool IsLoaded() const override { return m_IsLoaded; }
 		virtual void Bind(uint32_t slot=0)const;
 	private:

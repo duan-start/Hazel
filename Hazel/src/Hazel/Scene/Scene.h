@@ -27,7 +27,13 @@ namespace Hazel {
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 
+		template<typename... Components>
+		auto GetAllEntitiesWith()
+		{
+			return m_Registry.group<>(entt::get<Components...>);
+		}
 
+		
 		//游戏运行的tick
 		void OnUpdateRuntime(Timestep ts);
 		//编辑器进行编辑的tick

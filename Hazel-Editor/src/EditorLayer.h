@@ -37,6 +37,7 @@ private:
 	void SerializeScene(Ref<Scene> scene, const std::filesystem::path& path);
 	void OnDuplicateEntity();
 
+	void OnOverlayRender();
 private:
 	enum class SceneState
 	{
@@ -68,6 +69,7 @@ private:
 	OrthographicCameraController m_CameralController;
 	EditorCamera m_EditorCamera;
 	Entity m_HoveredEntity = {};
+	bool m_ShowPhysicsColliders = false;
 
 	bool m_ViewportHovered;
 	bool m_ViewportFocused;

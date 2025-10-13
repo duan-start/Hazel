@@ -130,7 +130,7 @@ void EditorLayer::OnUpdate(Timestep ts)
 
 
 	m_Framebuffer->Bind();
-	RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
+	RenderCommand::SetClearColor(glm::vec4(0.0f, 0.f, 0.f, 1.0f));
 	RenderCommand::Clear();
 
 	
@@ -171,6 +171,9 @@ void EditorLayer::OnUpdate(Timestep ts)
 		m_HoveredEntity = pixelData <= -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		
 	}
+
+	//render with entity =-1;
+	OnOverlayRender();
 
 	m_Framebuffer->Unbind();
 
@@ -276,7 +279,9 @@ void EditorLayer::OnImGuiRender()
 
 	ImGui::End();
 
-
+	ImGui::Begin("Settings");
+	ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
+	ImGui::End();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
 	ImGui::Begin("ViewPort");
@@ -572,6 +577,60 @@ void EditorLayer::OnDuplicateEntity()
 	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 	if (selectedEntity)
 		m_EditorScene->DuplicateEntity(selectedEntity);
+}
+
+void EditorLayer::OnOverlayRender()
+{
+	//renderer the rect
+	if (m_SceneState == SceneState::Play)
+	{
+		Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
+		Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().Camera, camera.GetComponent<TransformComponent>().GetTransform());
+	}
+	else
+	{
+		Renderer2D::BeginScene(m_EditorCamera);
+	}
+
+	if (m_ShowPhysicsColliders)
+	{
+		// Box Colliders
+		{
+			auto group = m_ActiveScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+			for (auto entity : group)
+			{
+				auto [tc, bc2d] = group.get<TransformComponent, BoxCollider2DComponent>(entity);
+
+				glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
+				glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+					* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+					* glm::scale(glm::mat4(1.0f), scale);
+
+				Renderer2D::DrawRect(transform, glm::vec4(0, 1, 0, 1));
+			}
+		}
+
+		// Circle Colliders
+		{
+			auto group = m_ActiveScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
+			for (auto entity : group)
+			{
+				auto [tc, cc2d] = group.get<TransformComponent, CircleCollider2DComponent>(entity);
+
+				glm::vec3 translation = tc.Translation + glm::vec3(cc2d.Offset, 0.001f);
+				glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);
+
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+					* glm::scale(glm::mat4(1.0f), scale);
+
+				Renderer2D::DrawCircle(transform, glm::vec4(0, 0, 1, 1), 0.02f);
+			}
+		}
+	}
+
+	Renderer2D::EndScene();
 }
 
 
