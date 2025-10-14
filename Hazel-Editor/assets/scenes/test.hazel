@@ -4,7 +4,7 @@ Entities:
     TagComponent:
       Tag: Empty Entity
     TransformComponent:
-      Translation: [-3.60591698, 1.77318418, 0]
+      Translation: [-2.8278091, 11.5319271, -0.100000001]
       Rotation: [0, 0, 2.35069394]
       Scale: [3, 3, 1]
     SpriteRendererComponent:

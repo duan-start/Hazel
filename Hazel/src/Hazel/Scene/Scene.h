@@ -23,10 +23,15 @@ namespace Hazel {
 
 		Entity CreateEntity(const std::string& name= "");
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
-		//physical 
+		//Runtime
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 
+		//将物理的tick从Runtime 里面单独出来tick
+		void OnSimulationStart();
+		void OnSimulationStop();
+
+		void OnUpdateSimulation(Timestep ts,EditorCamera& camera);
 		template<typename... Components>
 		auto GetAllEntitiesWith()
 		{
@@ -49,6 +54,14 @@ namespace Hazel {
 		template<typename T>
 		//为对应的实体添加对应的组件
 		void OnComponentAdded(Entity entity,T& component);
+
+		//为后续的3dphysical做准备
+		//2d physical tick
+		void OnPhysics2DStart();
+		void OnPhysics2DStop();
+
+		//render tick
+		void RenderScene(EditorCamera& camera);
 	private:
 		entt::registry m_Registry;
 		//

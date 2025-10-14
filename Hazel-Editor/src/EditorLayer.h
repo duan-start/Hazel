@@ -25,7 +25,7 @@ private:
 
 	void OnScenePlay();
 	void OnSceneStop();
-
+	void OnSceneSimulate();
 	// UI Panels
 	void UI_Toolbar();
 
@@ -41,7 +41,7 @@ private:
 private:
 	enum class SceneState
 	{
-		Edit = 0, Play = 1
+		Edit = 0, Play = 1, Simulate = 2
 	};
 	SceneState m_SceneState = SceneState::Edit;
 
@@ -83,6 +83,6 @@ private:
 
 
 	 // Editor resources
-	 Ref<Texture2D> m_IconPlay, m_IconStop;
+	 Ref<Texture2D> m_IconPlay, m_IconStop, m_IconSimulate;
 };
 

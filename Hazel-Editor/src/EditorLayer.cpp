@@ -37,6 +37,7 @@ void EditorLayer::OnAttach()
 	//2D纹理创建
 	m_IconPlay = Texture2D::Create("Resources/Icons/PlayButton.png");
 	m_IconStop = Texture2D::Create("Resources/Icons/StopButton.png");
+	m_IconSimulate = Texture2D::Create("Resources/Icons/SimulateButton.png");
 
 	//帧缓冲创建和绑定
 	 m_FramebufferSize = { 1280,720 };
@@ -152,6 +153,13 @@ void EditorLayer::OnUpdate(Timestep ts)
 	case SceneState::Play:
 	{
 		m_ActiveScene->OnUpdateRuntime(ts);
+		break;
+	}
+	case SceneState::Simulate:
+	{
+		m_EditorCamera.OnUpdate(ts);
+
+		m_ActiveScene->OnUpdateSimulation(ts, m_EditorCamera);
 		break;
 	}
 	}
@@ -454,6 +462,9 @@ bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 
 void EditorLayer::OnScenePlay()
 {
+
+if (m_SceneState == SceneState::Simulate)
+		OnSceneStop();
 	
 	m_SceneState = SceneState::Play;
 	//active用来运行，editor用来备份
@@ -465,10 +476,28 @@ void EditorLayer::OnScenePlay()
 
 void EditorLayer::OnSceneStop()
 {
+
+	if (m_SceneState == SceneState::Play)
+		m_ActiveScene->OnRuntimeStop();
+	else if (m_SceneState == SceneState::Simulate)
+		m_ActiveScene->OnSimulationStop();
+
 	m_SceneState = SceneState::Edit;
 //复原，请注意，这里是指针，所以active和edit是同一份，和play的深度拷贝不同
-	m_ActiveScene->OnRuntimeStop();
 	m_ActiveScene = m_EditorScene;
+
+	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+}
+
+void EditorLayer::OnSceneSimulate()
+{
+	if (m_SceneState == SceneState::Play)
+		OnSceneStop();
+
+	m_SceneState = SceneState::Simulate;
+
+	m_ActiveScene = Scene::Copy(m_EditorScene);
+	m_ActiveScene->OnSimulationStart();
 
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 }
@@ -486,17 +515,39 @@ void EditorLayer::UI_Toolbar()
 
 	ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	//changed
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-	auto it =ImGui::GetWindowContentRegionMax();
+
+	bool toolbarEnabled = (bool)m_ActiveScene;
+
+	ImVec4 tintColor = ImVec4(1, 1, 1, 1);
+	if (!toolbarEnabled)
+		tintColor.w = 0.5f;
+
+
 	float size = ImGui::GetWindowHeight() - 4.0f;
-	Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
-	ImGui::SetCursorPosX((it.x * 0.5) - (size * 0.5f));
-	if (ImGui::ImageButton((ImTextureID)icon->GetRenderID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0))
+
+	//绘制第一个图标（编辑和模拟）
 	{
-		if (m_SceneState == SceneState::Edit)
-			OnScenePlay();
-		else if (m_SceneState == SceneState::Play)
-			OnSceneStop();
+		Ref<Texture2D> icon = (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate) ? m_IconPlay : m_IconStop;
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+		if (ImGui::ImageButton((ImTextureID)icon->GetRenderID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+		{
+			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate)
+				OnScenePlay();
+			else if (m_SceneState == SceneState::Play)
+				OnSceneStop();
+		}
+	}
+	//编辑第二个图标（编辑和运行）
+	ImGui::SameLine();
+	{
+		Ref<Texture2D> icon = (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play) ? m_IconSimulate : m_IconStop;		//ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+		if (ImGui::ImageButton((ImTextureID)icon->GetRenderID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
+		{
+			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play)
+				OnSceneSimulate();
+			else if (m_SceneState == SceneState::Simulate)
+				OnSceneStop();
+		}
 	}
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor(3);
@@ -585,6 +636,8 @@ void EditorLayer::OnOverlayRender()
 	if (m_SceneState == SceneState::Play)
 	{
 		Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
+		if (!camera)
+			return;
 		Renderer2D::BeginScene(camera.GetComponent<CameraComponent>().Camera, camera.GetComponent<TransformComponent>().GetTransform());
 	}
 	else
@@ -608,7 +661,7 @@ void EditorLayer::OnOverlayRender()
 					* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 					* glm::scale(glm::mat4(1.0f), scale);
 
-				Renderer2D::DrawRect(transform, glm::vec4(0, 1, 0, 1));
+				Renderer2D::DrawRect(transform, glm::vec4(1, 0.5, 0, 1));
 			}
 		}
 
