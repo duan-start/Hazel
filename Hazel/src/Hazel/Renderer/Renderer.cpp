@@ -2,26 +2,32 @@
 #include "Renderer.h"
 #include <GLFW/glfw3.h>
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 #include "Renderer2D.h"
+
+
 namespace Hazel {
 	//Renderer---RenderCommad和Renderer2D。
 	//通用命令和绘制命令分开
+	Renderer* Renderer::s_Instance = new Renderer();
+	RendererAPI* Renderer::s_RendererAPI = new OpenGLRendererAPI;
 
-
+	//maybe?  -Duan
 	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData;
 	//这个Renderer基本上就只用了 这一个函数
+	//不能在static 函数里面定义类内的static 成员
 	void Renderer::Init()
 	{
 		HZ_PROFILE_FUNCTION();
 		//调用opengl的普遍设置，开启深度测试之类的
-		RenderCommand::Init();
+		s_RendererAPI->Init();
 		//专用的2d渲染器的设置和数据初始化，vao,vbo之类的
 		Renderer2D::Init();
 	}
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 	{
-		RenderCommand::SetViewport(0,0,width,height);
+		s_RendererAPI->SetViewport(0,0,width,height);
 	}
 	void Renderer::BeginScene(const GameCamera& camera, const glm::mat4& transform)
 	{
@@ -39,6 +45,7 @@ namespace Hazel {
 	void Renderer::EndScene()
 	{
 	}
+	//这个还是需要的
 	void Renderer::Submit(const Ref<Shader>& shader,const Ref<VertexArray>& vertexArray,const glm::mat4& transform)
 	{	
 		shader->Bind();
@@ -51,8 +58,11 @@ namespace Hazel {
 		//std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformFloat("iTime", m_SceneData->CurrentTime);
 		//std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformVec2("iResolution", glm::vec2(m_SceneData->SCR_Width, m_SceneData->SCR_Height));
 
-		RenderCommand::DrawIndexed(vertexArray);
+		s_RendererAPI->DrawIndexed(vertexArray,0);
 		shader->UnBind();
+	}
+	void Renderer::WaitAndRender()
+	{
 	}
 	//RendererAPI::API Renderer::m_RendererAPI = RendererAPI::API::OpenGL;
 }

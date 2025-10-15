@@ -131,8 +131,8 @@ void EditorLayer::OnUpdate(Timestep ts)
 
 
 	m_Framebuffer->Bind();
-	RenderCommand::SetClearColor(glm::vec4(0.0f, 0.f, 0.f, 1.0f));
-	RenderCommand::Clear();
+	Renderer::SetClearColor(glm::vec4(0.0f, 0.f, 0.f, 1.0f));
+	Renderer::Clear();
 
 	
 	 //Clear our entity ID attachment to -1

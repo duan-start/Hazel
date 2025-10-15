@@ -156,9 +156,6 @@
     <ClInclude Include="src\Hazel\Renderer\PerspectivegraphicCamera.h">
       <Filter>src\Hazel\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\Renderer\RenderCommand.h">
-      <Filter>src\Hazel\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hazel\Renderer\Renderer.h">
       <Filter>src\Hazel\Renderer</Filter>
     </ClInclude>
@@ -1499,6 +1496,7 @@
     </ClInclude>
     <ClInclude Include="src\Hazel\Core\UUID.h" />
     <ClInclude Include="src\Hazel\Renderer\Renderer3D.h" />
+    <ClInclude Include="src\Hazel\Renderer\RenderCommandQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Core\Application.cpp">
@@ -1544,9 +1542,6 @@
       <Filter>src\Hazel\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Renderer\PerspectivegraphicCamera.cpp">
-      <Filter>src\Hazel\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Hazel\Renderer\RenderCommand.cpp">
       <Filter>src\Hazel\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Renderer\Renderer.cpp">
@@ -1629,5 +1624,6 @@
     </ClCompile>
     <ClCompile Include="src\Hazel\Core\UUID.cpp" />
     <ClCompile Include="src\Hazel\Renderer\Renderer3D.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\RenderCommandQueue.cpp" />
   </ItemGroup>
 </Project>

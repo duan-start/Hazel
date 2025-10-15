@@ -1,8 +1,8 @@
 #include "hzpch.h"
 #include "Renderer2D.h"
+#include "Renderer.h"
 #include "Hazel/Renderer/UniformBuffer.h"
 #include "Shader.h"
-#include "RenderCommand.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include <glm/gtc/type_ptr.hpp>
@@ -323,7 +323,7 @@ namespace Hazel {
 			//绑定shader
 			s_Data.QuadShader->Bind();
 			//绘制需要indexbuffer
-			RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
+			Renderer::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
 			s_Data.states.DrawCalls++;
 		}
 		//Circle
@@ -333,7 +333,7 @@ namespace Hazel {
 			s_Data.CircleVertexBuffer->SetData(s_Data.CircleVertexBufferBase, dataSize);
 
 			s_Data.CircleShader->Bind();
-			RenderCommand::DrawIndexed(s_Data.CircleVertexArray, s_Data.CircleIndexCount);
+			Renderer::DrawIndexed(s_Data.CircleVertexArray, s_Data.CircleIndexCount);
 			s_Data.states.DrawCalls++;
 		}
 		//Line
@@ -342,8 +342,8 @@ namespace Hazel {
 			s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
 
 			s_Data.LineShader->Bind();
-			RenderCommand::SetLineWidth(s_Data.LineWidth);
-			RenderCommand::DrawLines(s_Data.LineVertexArray, s_Data.LineIndexCount);
+			Renderer::SetLineWidth(s_Data.LineWidth);
+			Renderer::DrawLines(s_Data.LineVertexArray, s_Data.LineIndexCount);
 			s_Data.states.DrawCalls++;
 		}
 	}

@@ -226,7 +226,10 @@ namespace Hazel {
 		}
 		
 		//Render tick
+	//std::thread RenderThread(&Scene::RenderScene, this, camera);
+	//RenderThread.join();
 		RenderScene(camera);
+
 	}
 
 

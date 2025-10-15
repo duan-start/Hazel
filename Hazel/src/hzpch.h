@@ -3,6 +3,7 @@
 //被所有的cpp文件包含，因为声明几乎不会影响cpu的编译时间
 #include <iostream>
 
+#include <thread>
 #include <memory>
 #include <utility>
 #include <algorithm>
