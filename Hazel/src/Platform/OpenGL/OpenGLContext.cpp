@@ -20,11 +20,11 @@ namespace Hazel {
 		//使用断言完成是否加载成功
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-		//收集显卡信息
+		//收集显卡信息,如果不设置opengl的话，一般是会给默认最高版本的，并且是兼容模式
 		HZ_CORE_INFO("HZ_CORE_INFO:");
 		HZ_CORE_INFO("OpenGL VENDOR:{0}",glGetString(GL_VENDOR));
 		HZ_CORE_INFO("OpenGL VERSION:{0}",glGetString(GL_VERSION));
-		HZ_CORE_INFO("OpenGL :");
+
 	}
 	void OpenGLContext::SwapBuffers()
 	{

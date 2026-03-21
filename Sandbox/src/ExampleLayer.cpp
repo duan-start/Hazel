@@ -42,7 +42,7 @@ ExampleLayer::ExampleLayer()
 	uint32_t Index[] = { 0, 1, 2,   // first triangle
 	1, 2, 3    // second triangle
 	};
-	m_IndexBuffer = (Hazel::IndexBuffer::Creat(Index, sizeof(Index) / sizeof(uint32_t)));
+	m_IndexBuffer = (Hazel::IndexBuffer::Create(Index, sizeof(Index) / sizeof(uint32_t)));
 	m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
 
@@ -125,12 +125,12 @@ void ExampleLayer::OnUpdate(Hazel::Timestep ts)  {
 
 	m_CameralController.OnUpdate(ts);
 	///---------------------------------------------
-	Hazel::RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
-	Hazel::RenderCommand::Clear();
+	Hazel::Renderer::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
+	Hazel::Renderer::Clear();
 
 	//HZ_TRACE("{}", m_Rotation);
 	//这里我又hack了，这个宽高传给shader进行初始话的方法我只想到耦合m_window
-	Hazel::Renderer::BeginScene(m_CameralController.GetCamera(), { 1280,720 });
+	Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
 
 	//hack
 	auto& youTube = m_ShaderLib.Get("Youtube");

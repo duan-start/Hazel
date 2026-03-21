@@ -6,7 +6,7 @@
 #include "Hazel/Events/keyEvent.h"
 #include "Hazel/Events/ApplicationEvent.h"
 namespace Hazel {
-	//这个是存抄案例的
+	//ImguiExameple
 	class HAZEL_API ImGuiLayer :public Layer {
 	public:
 		ImGuiLayer();

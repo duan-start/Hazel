@@ -3,7 +3,7 @@ project "Hazel"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "off"
---这里是不是有点问题 应该是MTD->static debug
+--这里是不是有点问题 应该是MTD<->Mutul Thread_safe(static) debug
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -11,6 +11,7 @@ project "Hazel"
 	pchheader "hzpch.h"
 	pchsource "src/hzpch.cpp"
 
+	-- 直接插入到Hazel项目里面一起编译
 	files
 	{
 		"src/**.h",
@@ -34,6 +35,7 @@ project "Hazel"
 	{
 		"src",
 		"vendor/spdlog/include",
+		"vendor/assimp/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
@@ -46,7 +48,8 @@ project "Hazel"
 		"%{IncludeDir.VulkanSDK}"
 	}
 
-	--??
+	-- 编译的顺序（添加引用）
+	-- 本质上是使用动态库链接的方式进行编译
 	links
 	{
 		"Box2D",
@@ -54,9 +57,10 @@ project "Hazel"
 		"Glad",
 		"ImGui",
 		"yaml-cpp",
+		"vendor/assimp/X64/assimp-vc143-mtd.lib",
 		"opengl32.lib"
 	}
-
+-- 针对特定文件下，不使用预编译头文件
 	filter "files:vendor/ImGuizmo/**.cpp"
 	flags { "NoPCH" }
 

@@ -74,9 +74,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 		EventDispatcher dispatcher(e);
 
-		//这样hack真的可以吗，感觉是轮询而不是选择
 		dispatcher.Dispatch<MouseScrolledEvent>(HZ_BIND_EVENT_FN(OrthographicCameraController::OnMouseScrolled));
-
 		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OrthographicCameraController::OnWindowResized));
 
 	}

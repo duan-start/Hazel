@@ -49,8 +49,8 @@ void GameLayer::OnUpdate(Hazel::Timestep ts)
 	}
 
 	// Render
-	Hazel::RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.1f, 1 });
-	Hazel::RenderCommand::Clear();
+	Hazel::Renderer::SetClearColor({ 0.0f, 0.0f, 0.1f, 1 });
+	Hazel::Renderer::Clear();
 
 	Hazel::Renderer2D::BeginScene(*m_Camera);
 	m_Level.OnRender(*m_Camera);

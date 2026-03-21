@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Components.h"
 #include "ScriptableEntity.h"
+#include "Hazel/Renderer/Renderer.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
 #include <glm/glm.hpp>
@@ -325,7 +326,7 @@ namespace Hazel {
 					}
 				}
 
-				Renderer2D::EndScene();
+				Renderer::EndScene();
 			}
 		}
 
@@ -446,6 +447,11 @@ namespace Hazel {
 
 	void Scene::RenderScene(EditorCamera& camera)
 	{
+
+		//Renderer3D
+		Renderer::BeginScene(camera);
+		Renderer::RenderMesh("assets/Meshes/backpack.obj");
+		Renderer::EndScene();
 		//有一个通用的EditorCamera
 		//根据entity的状态直接绘制
 		Renderer2D::BeginScene(camera);
@@ -476,7 +482,7 @@ namespace Hazel {
 			}
 		}
 
-		Renderer2D::EndScene();
+		Renderer::EndScene();
 	}
 
 	//未来可以特化添加，只是现在并没有，用的是componentAdd的那个泛化版本

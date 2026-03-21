@@ -40,7 +40,7 @@ void EditorLayer::OnAttach()
 	m_IconSimulate = Texture2D::Create("Resources/Icons/SimulateButton.png");
 
 	//帧缓冲创建和绑定
-	 m_FramebufferSize = { 1280,720 };
+	m_FramebufferSize = { 1280,720 };
 	Hazel::FramebufferSpecification fbSpec;
 	fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 	fbSpec.Width = 1280;
@@ -142,8 +142,8 @@ void EditorLayer::OnUpdate(Timestep ts)
 	{
 	case SceneState::Edit:
 	{
-		if (m_ViewportFocused)
-			m_CameralController.OnUpdate(ts);
+		//if (m_ViewportFocused)
+			//m_CameralController.OnUpdate(ts);
 
 		m_EditorCamera.OnUpdate(ts);
 
@@ -194,13 +194,12 @@ void EditorLayer::OnImGuiRender()
 	HZ_PROFILE_FUNCTION();
 
 	// Note: Switch this to true to enable dockspace
+//Copy
 	static bool dockspaceOpen = true;
 	static bool opt_fullscreen_persistant = true;
 	bool opt_fullscreen = opt_fullscreen_persistant;
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
-	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-	// because it would be confusing to have two docking targets within each others.
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 	if (opt_fullscreen)
 	{
@@ -214,15 +213,9 @@ void EditorLayer::OnImGuiRender()
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 	}
 
-	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
 	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 		window_flags |= ImGuiWindowFlags_NoBackground;
 
-	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive, 
-	// all active windows docked into it will lose their parent and become undocked.
-	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
-	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
 	ImGui::PopStyleVar();
@@ -243,13 +236,11 @@ void EditorLayer::OnImGuiRender()
 
 	style.WindowMinSize.x = minWinSizeX;
 
+//设置文件操作窗口
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			// Disabling fullscreen would allow the window to be moved to the front of other windows, 
-			// which we can't undo at the moment without finer window depth/z control.
-			//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);1
 			if (ImGui::MenuItem("New", "Ctrl+N"))
 				NewScene();
 
@@ -266,48 +257,44 @@ void EditorLayer::OnImGuiRender()
 		ImGui::EndMenuBar();
 	}
 
-
+//资产内容浏览器的更新
 	m_SceneHierarchyPanel.OnImGuiRender();
 	m_ContentBrowserPanel.OnImguiRenderer();
-	ImGui::Begin("Setting");
 
+//调试信息
+	ImGui::Begin("Statics");
 	std::string name = "None";
 	if (m_HoveredEntity)
 		name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 	ImGui::Text("Hovered Entity: %s", name.c_str());
-
-	//ImGui::SliderFloat("My Float", &m_Float, 0.0f, 180.0f);
 	auto states = Hazel::Renderer2D::GetStats();
-	//visual stats
 	ImGui::Text("Renderer2D stats: ");
 	ImGui::Text("DrawCalls: %d", states.DrawCalls);
 	ImGui::Text("QuadCount: %d", states.QuadCount);
 	ImGui::Text("QuadVertex: %d", states.GetTotalVertexCount());
 	ImGui::Text("QuadIndex: %d", states.GetTotalIndexCount());
-
 	ImGui::End();
 
-	ImGui::Begin("Settings");
+//物理边界
+	ImGui::Begin("Setting");
 	ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
 	ImGui::End();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
-	ImGui::Begin("ViewPort");
 
+//渲染主要视图
+	ImGui::Begin("ViewPort");
 	auto viewportOffset = ImGui::GetCursorPos(); // Includes tab bar
 	//Resize viewport
-
 	//这段代码我需要重新看一遍
 	m_ViewportFocused = ImGui::IsWindowFocused();
 	 m_ViewportHovered = ImGui::IsWindowHovered();
 	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
-
-
-
 	//如果界面大小更改，全部重新resize一下
 	ImVec2 SpaceAvil = ImGui::GetContentRegionAvail();
 	m_ViewportSize = { SpaceAvil.x, SpaceAvil.y };
+	//重新ReSize，并且松开鼠标左键的话
 	if (glm::distance(m_FramebufferSize, glm::vec2(SpaceAvil.x, SpaceAvil.y)) > 1.0f && !Hazel::Input::IsMouseButtonPressed(0)) {
 		m_FramebufferSize = { SpaceAvil.x, SpaceAvil.y };
 		m_Framebuffer->Resize(SpaceAvil.x, SpaceAvil.y);
@@ -315,7 +302,6 @@ void EditorLayer::OnImGuiRender()
 		m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 		m_ActiveScene->OnViewportResize((uint32_t)SpaceAvil.x, (uint32_t)SpaceAvil.y);
 	}
-
 	uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
@@ -324,7 +310,6 @@ void EditorLayer::OnImGuiRender()
 	ImVec2 minBound = ImGui::GetWindowPos();
 	minBound.x += viewportOffset.x;
 	minBound.y += viewportOffset.y;
-
 	ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
 	m_ViewportBounds[0] = { minBound.x, minBound.y };
 	m_ViewportBounds[1] = { maxBound.x, maxBound.y };
@@ -340,7 +325,7 @@ void EditorLayer::OnImGuiRender()
 		ImGui::EndDragDropTarget();
 	}
 
-	// Gizmos   
+// Gizmos   
 	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 	if (selectedEntity && m_GizmoType != -1)
 	{
@@ -350,7 +335,7 @@ void EditorLayer::OnImGuiRender()
 		float windowWidth = (float)ImGui::GetWindowWidth();
 		float windowHeight = (float)ImGui::GetWindowHeight();
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-
+		//在runtime绘制是没有道理的
 		// Runtime Camera
 		/*auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
 		const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
@@ -381,6 +366,7 @@ void EditorLayer::OnImGuiRender()
 		if (ImGuizmo::IsUsing())
 		{
 			glm::vec3 translation, rotation, scale;
+			//属性分解
 			Math::DecomposeTransform(transform, translation, rotation, scale);
 
 			glm::vec3 deltaRotation = rotation - tc.Rotation;
@@ -397,6 +383,7 @@ void EditorLayer::OnImGuiRender()
 	ImGui::End();
 }
 
+//按键事件设置
 bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 {
 	// Shortcuts
@@ -501,7 +488,7 @@ void EditorLayer::OnSceneSimulate()
 
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 }
-
+//顶部工具栏构建
 void EditorLayer::UI_Toolbar()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));

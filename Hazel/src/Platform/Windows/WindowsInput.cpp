@@ -6,6 +6,7 @@
 
 
 namespace Hazel {
+	//子类实现
 	Input* Input::s_Instance = new WindowsInput();
 
 bool WindowsInput::IsKeyPressedImpl(int keycode)

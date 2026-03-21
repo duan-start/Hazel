@@ -1,10 +1,9 @@
 #include "hzpch.h"
 #include "Platform/OpenGL/OpenGLFramebuffer.h"
-
 #include <glad/glad.h>
 
 namespace Hazel {
-
+	//width  height
 	static const uint32_t s_MaxFramebufferSize = 8192;
 
 	namespace Utils {
@@ -95,30 +94,32 @@ namespace Hazel {
 	{
 		for (auto spec : m_Specification.Attachments.Attachments)
 		{
+			//设置好纹理的格式（深度的和颜色的）
 			if (!Utils::IsDepthFormat(spec.TextureFormat))
 				m_ColorAttachmentSpecifications.emplace_back(spec);
 			else
 				m_DepthAttachmentSpecification = spec;
 		}
-
+		//重新创建
 		Invalidate();
 	}
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
 		glDeleteFramebuffers(1, &m_RendererID);
+		//删除颜色附件个深度附件
 		glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
 		glDeleteTextures(1, &m_DepthAttachment);
 	}
 
 	void OpenGLFramebuffer::Invalidate()
 	{
+		//如果已经拥有，则全部删除
 		if (m_RendererID)
 		{
 			glDeleteFramebuffers(1, &m_RendererID);
 			glDeleteTextures(m_ColorAttachments.size(), m_ColorAttachments.data());
 			glDeleteTextures(1, &m_DepthAttachment);
-
 			m_ColorAttachments.clear();
 			m_DepthAttachment = 0;
 		}
@@ -183,7 +184,6 @@ namespace Hazel {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
 
-
 	}
 
 	void OpenGLFramebuffer::Unbind()
@@ -205,6 +205,7 @@ namespace Hazel {
 		Invalidate();
 	}
 
+	//实现entityID的成功读取
 	int OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
 	{
 		HZ_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(),"Wrong");
@@ -213,7 +214,6 @@ namespace Hazel {
 		int pixelData;
 		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
 		return pixelData;
-
 	}
 
 	void OpenGLFramebuffer::ClearAttachment(uint32_t attachmentIndex, int value)

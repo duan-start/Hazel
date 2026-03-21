@@ -19,17 +19,18 @@ namespace Hazel {
 
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
+		//类内如果有定义的话，就会自动inline
+		float GetDistance() const { return m_Distance; }
+		void SetDistance(float distance) { m_Distance = distance; }
 
-		inline float GetDistance() const { return m_Distance; }
-		inline void SetDistance(float distance) { m_Distance = distance; }
-
-		inline void SetViewportSize(float width, float height) {
+		void SetViewportSize(float width, float height) {
 			HZ_CORE_ASSERT(width > 0 && height > 0,"Wrong Camera");
 			m_ViewportWidth = width; m_ViewportHeight = height; UpdateProjection(); }
 
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		glm::mat4 GetViewProjection() const { return m_Projection * m_ViewMatrix; }
-
+		//如果没有定义的话，inline根本没有用
+		//所以只有static函数才需要inline,还有如果头文件定义的话
 		glm::vec3 GetUpDirection() const;
 		glm::vec3 GetRightDirection() const;
 		glm::vec3 GetForwardDirection() const;
@@ -49,7 +50,7 @@ namespace Hazel {
 		void MouseRotate(const glm::vec2& delta);
 		void MouseZoom(float delta);
 
-		glm::vec3 CalculatePosition() const;
+		glm::vec3 CalculatePosition() const; 
 
 		std::pair<float, float> PanSpeed() const;
 		float RotationSpeed() const;

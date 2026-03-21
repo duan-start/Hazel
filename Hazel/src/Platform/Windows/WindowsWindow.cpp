@@ -18,7 +18,7 @@ namespace Hazel {
 	//全局唯一资源，保证只生成一个窗口资源
 	static bool s_GLFWInitialized = false;
 
-	//这个设计模式是工厂模式
+	//简单工厂模式(不需要单独去维护一个工厂类)
 	Window* Window::Create(const WindowProps& props) {
 		//cpp里面放依赖和子类
 		return new WindowsWindow(props);
@@ -59,22 +59,15 @@ namespace Hazel {
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		}
 	
-		//这里可以改一下接口调用
+		//设置初始化（为openGL配置窗口上下文）
 		m_Context = new OpenGLContext(m_Window);
-		//我突然发现我已经把这个扔到了初始化中了 m_Context->Init();
-		//说白了就是以下
-		//glfwMakeContextCurrent(m_Window);
-		//int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		////使用断言完成是否加载成功
-		//HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
-		
-		//将我们的数据指针传递给glfw，和glfwGetWindowUserPointer是配合使用的的
+		//将数据中指针保存在windows（attached）,方便随时存取
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
-    //利用glfw里面的回调函数绑定我们自己的事件处理函数
+    //实际事件由操作系统获得（glfw捕获），利用捕获的信息生成引擎端的实际事件，利用绑定的引擎端事件处理机制
+		//改变窗口大小的回调函数
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) {
-	//拿到对应的
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 			data.Width = width;
 			data.Height = height;
@@ -172,6 +165,7 @@ namespace Hazel {
 			//glfw开启垂直同步的函数
 			glfwSwapInterval(1);
 		else
+			//不设置垂直同步
 			glfwSwapInterval(0);
 		m_Data.VSync = enabled;
 	}

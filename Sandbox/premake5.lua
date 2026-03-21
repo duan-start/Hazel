@@ -16,16 +16,19 @@ project "Sandbox"
 	includedirs
 	{
 		"%{wks.location}/Hazel/vendor/spdlog/include",
+		"%{wks.location}/Hazel/vendor/assimp/include",
 		"%{wks.location}/Hazel/src",
 		"%{wks.location}/Hazel/vendor",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}"
 	}
 
-	links
-	{
-		"Hazel"
-	}
+	links 
+	{ 
+        "Hazel",
+        "Hazel/vendor/assimp/win64/assimp.lib"
+    }
+
 
 	filter "system:windows"
 		systemversion "latest"

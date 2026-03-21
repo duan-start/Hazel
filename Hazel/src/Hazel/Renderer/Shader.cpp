@@ -38,6 +38,7 @@ namespace Hazel {
 
 	void ShaderLibrary::Add(const std::string& name, const Ref<Shader>& shader)
 	{
+		m_Shaders[name] = shader;
 	}
 
 	Ref<Shader> ShaderLibrary::Get(const std::string& name)

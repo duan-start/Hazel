@@ -45,7 +45,6 @@ private:
 	};
 	SceneState m_SceneState = SceneState::Edit;
 
-
 	Ref<Shader> m_SquareShader;
 
 	Ref<VertexArray> m_SquareVA;

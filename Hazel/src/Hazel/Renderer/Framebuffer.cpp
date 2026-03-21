@@ -5,7 +5,7 @@
 #include "Platform/OpenGL/OpenGLFramebuffer.h"
 namespace Hazel {
 
-
+//简单工厂+构建器（简单模式）
 	Ref<Framebuffer> Hazel::Framebuffer::Create(const FramebufferSpecification& speci)
 	{
 		switch (Renderer::GetAPI()) {

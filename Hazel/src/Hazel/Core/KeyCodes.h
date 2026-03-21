@@ -1,6 +1,8 @@
 #pragma once
 
 namespace Hazel {
+	//设置自己的按键系统，不用专门编译，都是宏
+	//脱离GLFW的依赖，方便后续扩展（如果不使用GLFW）
 #define HZ_KEY_UNKNOWN            -1
 
 	/* Printable keys */

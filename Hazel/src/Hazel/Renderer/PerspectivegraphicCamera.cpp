@@ -13,7 +13,7 @@ namespace Hazel {
 		m_ProjectionMatrix = (glm::perspective(screen.x, screen.y, screen.z, screen.w));
 		RecalculateViewMatrix();
 	}
-	void PerspectivegraphicCamera::SetRotation(const glm::vec4& rotation)
+	void PerspectivegraphicCamera::SetRotation(const glm::vec3& rotation)
 	{
 		m_Rotation = rotation;
 		RecalculateViewMatrix();
@@ -26,7 +26,7 @@ namespace Hazel {
 	void PerspectivegraphicCamera::RecalculateViewMatrix() 
 	{
 		//正面计算,由于这边是设置摄像机的位置，后面要做逆，所以是先旋转后平移，从右自左
-		glm::mat4 transform = glm::translate(glm::mat4(1.0), m_Position) * glm::rotate(glm::mat4(1.0), glm::radians(m_Rotation.w), glm::vec3(m_Rotation.x, m_Rotation.y, m_Rotation.z));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0), m_Position) * glm::rotate(glm::mat4(1.0), glm::radians(m_Rotation.z), glm::vec3(0.f,0.f,1.f));
 
 		m_ViewMatrix = glm::inverse(transform);
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;

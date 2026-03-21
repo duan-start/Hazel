@@ -8,6 +8,7 @@ namespace Hazel {
 		Mat3,Mat4,
 		Bool,
 	};
+	//工具函数，全局，计算字节大小
 	static uint32_t GetSize(ShaderDataType& type) {
 		switch (type) {
 		case ShaderDataType::None:				return 4 * 0;
@@ -27,29 +28,29 @@ namespace Hazel {
 		return 0;
 	}
 
-
+	//每个顶点的属性状态
 	struct BufferElements {
-		//因为设置一种顶点属性，我们需要
-		//1. index：顶点属性的索引，通常对应于顶点着色器中的 layout(location = index)。
-		//2. size：每个顶点属性的组件数量，可以是1、2、3或4。
-		//3. type：数据类型，如 GL_FLOAT、GL_INT 等。
+		//设置顶点属性所需要的参数：
+		//1. index：顶点属性的索引，对应于顶点着色器中的 layout(location = index)。nope
+		//2. size：每个属性对应的数量（也就是count,如vec3->3）
+		//3. type：数据类型，如 GL_FLOAT、GL_INT (一般都是GL_FLOAT)
 		//4. normalized：是否将整数数据归一化到[0, 1] 或[-1, 1] 范围。
-		//5. stride：每个顶点之间的字节偏移量。如果所有顶点属性紧密排列，可以设置为0。
-		//5. pointer：数据在缓冲区中的偏移量，通常是一个字节偏移量。
-		//然后由于index没有必要，Size大小实际是给下一个elements用的
+		//5. stride：每个顶点之间的字节偏移量。(理解为到下一个顶点的同样的数据中的字节量)
+		//6. offset：(const void *)字节偏移量,表示该属性的起始偏移量 
 		BufferElements() {};
 
-		//这种struct 里面的成员和枚举的都是首字母大写
+		//数据成员首字母大写
 		std::string Name;
+
 		uint32_t Offset;
 		uint32_t Size;
 		ShaderDataType Type;
 		bool Normalized;
+		//分离情况--看看哪些参数是需要前面参数的信息才能求出来的
 		BufferElements(ShaderDataType type ,const std::string& name,bool normalized=false):Name(name), Offset(0), Size(GetSize(type)), Type(type),Normalized(normalized)
 		{
-
 		}
-
+		//获取这个类型代表多少个分量，设置size的时候用
 		uint32_t GetComponentCount()const {
 			switch (Type) {
 			case ShaderDataType::Float :	return 1;
@@ -70,7 +71,7 @@ namespace Hazel {
 
 	};
 
-	//缓冲区的格式布局，专门放在vbo里面，传给vao时进行顶点属性设置的，以后就不用挨个设置顶点属性了，只要设置好这个东西就好了
+	//缓冲区的格式布局，vbo和vao通信的基础，vector<attribute>
 	class BufferLayout {
 	public:
 		BufferLayout() {};
@@ -83,22 +84,19 @@ namespace Hazel {
 		inline uint32_t GetStride()const { return m_Stride; }
 
 		inline const std::vector<BufferElements>& Get() const{ return m_BufferElements; }
+
 		std::vector<BufferElements>::iterator begin() {
-			return m_BufferElements
-				.begin();
+			return m_BufferElements.begin();
 		}
 		std::vector<BufferElements>::iterator end() {
-			return m_BufferElements
-				.end();
+			return m_BufferElements.end();
 		}
 
 		std::vector<BufferElements>::const_iterator begin() const{
-		  return m_BufferElements
-				.begin();
+		  return m_BufferElements.begin();
 		}
 		std::vector<BufferElements>::const_iterator end() const {
-			return m_BufferElements
-				.end();
+			return m_BufferElements.end();
 		}
 		
 	private:
@@ -107,44 +105,59 @@ namespace Hazel {
 			m_Stride = 0;
 			//计算偏移量和字符
 			for (auto& element : m_BufferElements) {
-				//偏移量就是直接记录到上次的对应的(所以单独记录了offset和element.offset)，
-				// 至于这个stride就是必须得加上所有的Size()
+				//该元素的的偏移量=sizeof(former)
 				element.Offset = offset;
 				offset += element.Size;
+				//该bufferlayout的步长=sizeof(all)
 				m_Stride += element.Size;
 			}
 		}
 	private:
 		std::vector<BufferElements> m_BufferElements;
+		//m_Stride是统一的
 		uint32_t m_Stride = 0;
 	};
 
 
-
+	//vbo buffer 
 	class VertexBuffer
 	{
 	public:
 		virtual ~VertexBuffer();
 		virtual	void Bind()const = 0;
 		virtual void UBind()const = 0;
+		//填充数据
 		virtual void SetData(const void* data, uint32_t size) = 0;
 		virtual const BufferLayout& GetLayout() const = 0;
-		virtual void SetLayout(const BufferLayout& layout) = 0;
-		static Ref<VertexBuffer> Create(float* vertices,uint32_t size);
 		
-		//batch Rendering 
-		static Ref<VertexBuffer> Create(uint32_t size);
+		//设置布局，实现和vao之间的通信（vao layout设置）---core
+		virtual void SetLayout(const BufferLayout& layout) = 0;
+
+		static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
+		//只开辟内存，不填充数据
+		static Ref<VertexBuffer> Create(uint32_t size=0);
 
 	};
-	
+	//同上
 	class IndexBuffer
 	{
 	public:
 		virtual ~IndexBuffer();
 		virtual	void Bind()const = 0;
 		virtual void UBind()const = 0;
+
+		//填充数据
+		virtual void SetData(const void* buffer, uint32_t size)=0 ;
+
+		//also virtual void SetData(const void* buffer,uint32_t size,uint32_t offset)//都是以字节为单位
+		//但是其实如果是针对我们这种，我们直接放在cpu上搜集好，然后一次性传输上去（不需要分多次传输）
+
+
 		virtual uint32_t GetCount() const = 0;
-		static Ref<IndexBuffer> Creat(uint32_t* indices, uint32_t count);
+
+		static Ref<IndexBuffer> Create(uint32_t count = 0);
+		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
+
 	};
 
 }

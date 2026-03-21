@@ -5,11 +5,13 @@
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
 
-//前向声明
-class b2World;
+//前向声明,降低编译之间的依赖
+class b2World;	
+
+
 namespace Hazel {
 	class Entity;
-	//场景，实体的组合（与实体交互的类，实体复制，视口重置），tick的主要场所
+	//实体的容器
 	class Scene
 	{
 	public:
@@ -18,55 +20,60 @@ namespace Hazel {
 
 		//Copy Scene()实现深度拷贝
 		static Ref<Scene> Copy(Ref<Scene> other);
-		//实现实体的复制
+
+//实体操作
+		//实体的复制
 		void DuplicateEntity(Entity entity);
-
+		//创建实体
 		Entity CreateEntity(const std::string& name= "");
+		//创建拥有特定id的实体
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
-		//Runtime
-		void OnRuntimeStart();
-		void OnRuntimeStop();
-
-		//将物理的tick从Runtime 里面单独出来tick
-		void OnSimulationStart();
-		void OnSimulationStop();
-
-		void OnUpdateSimulation(Timestep ts,EditorCamera& camera);
+		//删除实体
+		void DestroyEntity(Entity entity);
+//查找实体
+		//获取某些特征的实体
 		template<typename... Components>
 		auto GetAllEntitiesWith()
 		{
 			return m_Registry.group<>(entt::get<Components...>);
 		}
+		//获取主相机实体
+		Entity GetPrimaryCameraEntity();
+//Set
+		//RuntimeSet
+		void OnRuntimeStart();
+		void OnRuntimeStop();
+		//模拟Set
+		void OnSimulationStart();
+		void OnSimulationStop();
 
-		
-		//游戏运行的tick
+//Tick
+		//模拟tick(物理tick)
+		void OnUpdateSimulation(Timestep ts,EditorCamera& camera);
+		//游戏运行的tick(摄像机由客户端进行设置)
 		void OnUpdateRuntime(Timestep ts);
-		//编辑器进行编辑的tick
+		//编辑器进行编辑的tick（摄像机由引擎端进行指定）
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
 
+//Viewport
 		//这个是ui的大小，最后渲染出纹理之后再重新分布到ui上，能够保证完全不变型
 		void OnViewportResize(uint32_t width, uint32_t height);
-		//删除实体内容
-		void DestroyEntity(Entity entity);
-		Entity GetPrimaryCameraEntity();
-
 	private:
+		//实体组件添加
 		template<typename T>
-		//为对应的实体添加对应的组件
 		void OnComponentAdded(Entity entity,T& component);
 
-		//为后续的3dphysical做准备
 		//2d physical tick
 		void OnPhysics2DStart();
 		void OnPhysics2DStop();
 
-		//render tick
+		//Render tick
 		void RenderScene(EditorCamera& camera);
 	private:
+		//实体注册表
 		entt::registry m_Registry;
-		//
+		//UI
 		uint32_t m_ViewportWidth=0, m_ViewportHeight=0;
-
 	private:
 		b2World* m_PhysicsWorld = nullptr;
 

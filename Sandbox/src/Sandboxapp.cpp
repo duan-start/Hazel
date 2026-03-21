@@ -5,15 +5,15 @@
 #include "Hazel/Core/EntryPoint.h"
 
 #include "GameTest/GameLayer.h"
-#include "Sandbox2D.h"
+//#include "Sandbox2D.h"
 #include "ExampleLayer.h"
 
 class Sandbox : public Hazel::Application {
 public:
 	Sandbox():Application("Sandbox") {
-		PushLayer(new Sandbox2D());
+		//PushLayer(new Sandbox2D());
 
-		//PushOverlay(new ExampleLayer());
+		PushLayer(new ExampleLayer());
 		
 		// GameTest
 		//PushOverlay(new GameLayer());
@@ -23,6 +23,6 @@ public:
 	}
 };
  
-Hazel::Application* Hazel::CreateApplication() {
+Hazel::Application* Hazel::CreateApplication(ApplicationCommandLineArgs args) {
 	return new Sandbox();
 }

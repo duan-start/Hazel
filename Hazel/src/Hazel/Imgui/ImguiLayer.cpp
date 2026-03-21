@@ -1,11 +1,11 @@
 ﻿#include "hzpch.h"
 #include "ImguiLayer.h"
 
-//#include "glad/glad.h"
+#include "glad/glad.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
-//#include "Platform/OpenGL/ImguiOpenglRender.h"
+
 #include "GLFW/glfw3.h"
 #include "Hazel/Core/Application.h"
 #include "ImGuizmo.h"
@@ -121,7 +121,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		static bool show = true;
-		//ImGui::ShowDemoWindow(&show);
+		ImGui::ShowDemoWindow(&show);
 	}
 
 

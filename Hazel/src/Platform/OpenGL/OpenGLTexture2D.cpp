@@ -20,12 +20,11 @@ namespace Hazel {
 		// 创建OpenGL纹理 ,这个决定的是gpu如何解读和存储这个纹理
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 
-		//设置gpu 里面的数据格式（internal）
-		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height); // 使用新的变量名  
-
-		//比learnopengl 里面的glTexParameteri要更加高级点，可以直接设置对应id的texutr,而不需要手动绑定textre,然后再设置
+		//开辟空间和大小，设置显卡数据存储格式（无需绑定，新版写法）
+		//第二个参数是设置mipmaplevels
+		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height); 
 		// 设置纹理参数,设置过滤类型（放大过滤和缩小过滤）纹理过大（mag）,纹理过小（min）
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		//设置超出边界的环绕情况
@@ -87,7 +86,7 @@ namespace Hazel {
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		// 正式上传纹理数据 （cpu->gpu）
+		// 正式上传纹理数据 （cpu->gpu）,unsigned_byte决定cpu端数据的存储
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 		//cpu端的数据释放
 		stbi_image_free(data);
@@ -118,6 +117,8 @@ namespace Hazel {
 	void OpenGLTexture2D::Bind(uint32_t slot) const
 	{
 		HZ_PROFILE_FUNCTION();
+		//同样是现代纹理风格
+		//不需要glActiveTexture
 		glBindTextureUnit(slot,m_RendererID);
 	}
 }

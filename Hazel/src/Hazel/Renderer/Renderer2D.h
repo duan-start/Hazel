@@ -12,21 +12,22 @@
 #include "Hazel/Scene/Components.h"
 
 namespace Hazel {
-
+	//提交渲染命令按理也是只和rendererCommand交互
+	//重构ing
+	//全部是static，不需要实例化
 	class Renderer2D
 	{
 	public:
+		
 		static void Init();
 		static void Shutdown();
+		//在绘制画面之前，先确定整个场景的相机的位置
 		static void BeginScene(const OrthographicCamera& camera);
-		//在渲染开始前，设置统一的摄像机
 		static void BeginScene(const EditorCamera& camera);
 		static void BeginScene(const GameCamera& camera, const glm::mat4& transform);
+		//endScene，实现DrawCall调用
 		static void EndScene();
 		
-		//绘制
-		static void Flush();
-
 	//CIrcle
 		static void DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thicness = 1.0, float fade = 0.02, int entityID = -1);
 
@@ -88,6 +89,8 @@ namespace Hazel {
 
 	private:
 		//hack function
+		//绘制
+		static void Flush();
 		static void StartNewBactch();
 	};
 }

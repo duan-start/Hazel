@@ -19,11 +19,12 @@
 namespace Hazel {
 	//将工具类的函数全部抽出来单独放
 	namespace Utils {
-		//Only Used By This File
+		//一个shader里面只有两个vertext和fragment(或者三个)
 		//stirng --对应的shader（GL_enum）的类型
 		static GLenum ShaderTypeFromString(const std::string& type) {
 			if (type == "vertex") return GL_VERTEX_SHADER;
 			if (type == "fragment" || type == "pixel") return GL_FRAGMENT_SHADER;
+			if (type == "geometry") return GL_GEOMETRY_SHADER;
 
 			HZ_CORE_ASSERT(false, "Unknown Shader Type");
 			return 0;
@@ -32,18 +33,17 @@ namespace Hazel {
 		//根据文件的路径读取具体的string stream
 		static std::string ReadFile(const std::string& filepath) {
 			std::string result;
-			std::ifstream in(filepath, std::ios::in, std::ios::binary);
-
+			//二进制读取，crlf的换行符是\r\n(windows);Linux的是\n;（打开文件）
+			std::ifstream in(filepath, std::ios::in|std::ios::binary);
 			if (in) {
 				//查找末尾，偏移量为0
 				in.seekg(0, std::ios::end);
-				//利用当前的位置resize()
+				//当前的位置就是[0,end),字符的数量
 				result.resize(in.tellg());
 				in.seekg(0, std::ios::beg);
 				//全部读取
 				in.read(&result[0], result.size());
 				in.close();
-
 			}
 			else { HZ_CORE_ERROR("Failed To Open FilePath '{0}' ", filepath); }
 			return  result;
@@ -127,9 +127,12 @@ namespace Hazel {
 		}
 
 		// Extract name from filepath
+		//找到 \ /任意一个都可以
 		auto lastSlash = filepath.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		//反向查找
 		auto lastDot = filepath.rfind('.');
+		//太酷了
 		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
 		m_Name = filepath.substr(lastSlash, count);
 	}
@@ -186,41 +189,33 @@ namespace Hazel {
 		return result;
 	}
 
-	//TODO: bind the shaderID with source code
+	//将整个string分割成为对应的shader类型
 	std::unordered_map<GLenum, std::string> OpenGLShader::Process(const std::string& source)
 	{
-		/*1.	typeToken 的硬编码问题：
-?	typeToken 被硬编码为 "#type vertex"，这意味着代码只能处理一种类型的着色器。如果需要支持其他类型（如 fragment），需要额外处理。
-2.	source.substr 的边界问题：
-?	source.substr(begin, eol - begin) 假设 eol 总是大于 begin，但如果 typeToken 的格式不正确，可能会导致 eol - begin 为负值，从而引发运行时错误。
-3.	find_first_not_of 和 find 的返回值未验证：
-?	nextLinePos 和 pos 的返回值未检查是否为 std::string::npos，这可能导致后续的 substr 操作失败。
-4.	ShaderTypeFromString 的返回值未验证：
-?	ShaderTypeFromString(type) 的返回值直接用作键值插入 shaderSources，如果返回值无效（如 0），可能会导致逻辑错误。
-5.	source.substr 的范围计算问题：
-?	source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos)) 的逻辑复杂且容易出错，尤其是当 pos 为 std::string::npos 时。
-		*/
-
 		HZ_PROFILE_FUNCTION();
-
 		std::unordered_map<GLenum, std::string> shaderSources;
-		
 
 		const char* typeToken = "#type";
 		size_t typeTokenLength = strlen(typeToken);
-		size_t pos = source.find(typeToken, 0); //Start of shader type declaration line
+		//找到第一次的#type其实位置
+		size_t pos = source.find(typeToken, 0); 
+		//结束原因：读取位置到了最后一位
 		while (pos != std::string::npos)
-		{
-			size_t eol = source.find_first_of("\r\n", pos); //End of shader type declaration line
+		{	//找到pos为起点的当前这行的换行符
+			size_t eol = source.find_first_of("\r\n", pos); 
 			HZ_CORE_ASSERT(eol != std::string::npos, "Syntax error");
-			size_t begin = pos + typeTokenLength + 1; //Start of shader type name (after "#type " keyword)
+			//Start of shader type name (after "#type " keyword)
+			size_t begin = pos + typeTokenLength + 1;
 			std::string type = source.substr(begin, eol - begin);
 			HZ_CORE_ASSERT(Utils::ShaderTypeFromString(type), "Invalid shader type specified");
-
-			size_t nextLinePos = source.find_first_not_of("\r\n", eol); //Start of shader code after shader type declaration line
+			//从eol位置开始，找到第一个不是换行符的数据（实际的data）
+			size_t nextLinePos = source.find_first_not_of("\r\n", eol); 
+			//如果已经结束了，就直接报错（因为shader里面必须有实际的数据）
 			HZ_CORE_ASSERT(nextLinePos != std::string::npos, "Syntax error");
-			pos = source.find(typeToken, nextLinePos); //Start of next shader type declaration line
-
+			//寻找下一个type,作为结尾
+			//如果找不到的话，会返回npos;(一个无穷大的数)
+			pos = source.find(typeToken, nextLinePos); 
+			//进行实际的数据填充，确保距离有意义
 			shaderSources[Utils::ShaderTypeFromString(type)] = (pos == std::string::npos) ? source.substr(nextLinePos) : source.substr(nextLinePos, pos - nextLinePos);
 		}
 
@@ -241,14 +236,17 @@ namespace Hazel {
 		std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
 		auto& shaderData = m_VulkanSPIRV;
 		shaderData.clear();
+		//结构化完美绑定
 		for (auto&& [stage, source] : shaderSources)
 		{
 			std::filesystem::path shaderFilePath = m_FilePath;
 			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedVulkanFileExtension(stage));
 
+			//已经存在改二进制文件
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
 			if (in.is_open())
 			{
+				//查找文件的实际大小，并resize(避免多次push)
 				in.seekg(0, std::ios::end);
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
@@ -283,7 +281,6 @@ namespace Hazel {
 		
 
 	shaderData[GL_FRAGMENT_SHADER];
-
 		for (auto&& [stage, data] : shaderData)
 			Reflect(stage, data);
 	}
@@ -303,12 +300,14 @@ namespace Hazel {
 
 		shaderData.clear();
 		m_OpenGLSourceCode.clear();
+		//多个stage
 		for (auto&& [stage, spirv] : m_VulkanSPIRV)
 		{
 			std::filesystem::path shaderFilePath = m_FilePath;
 			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedOpenGLFileExtension(stage));
 
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
+			//如果二进制文件存在的话
 			if (in.is_open())
 			{
 				in.seekg(0, std::ios::end);
@@ -319,12 +318,16 @@ namespace Hazel {
 				data.resize(size / sizeof(uint32_t));
 				in.read((char*)data.data(), size);
 			}
+			//反编译回去，并重新编译成oepngl源码
 			else
 			{
+				//初始化反编译器，并编译回glsl
 				spirv_cross::CompilerGLSL glslCompiler(spirv);
 				m_OpenGLSourceCode[stage] = glslCompiler.compile();
+
 				auto& source = m_OpenGLSourceCode[stage];
 
+				//利用shaderc的compile进行编译，而不是利用opengl自带的
 				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), m_FilePath.c_str());
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 				{

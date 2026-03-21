@@ -27,11 +27,13 @@ workspace "Hazel"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+-- 里面必须得有对应的premakefile ，这样才能同一组织到。sln里面
 group "Dependencies"
 	include "vendor/bin"
 	include "Hazel/vendor/Box2D"
 	include "Hazel/vendor/GLFW"
 	include "Hazel/vendor/Glad"
+	-- include "Hazel/vendor/assimp"
 	include "Hazel/vendor/imgui"
 	include "Hazel/vendor/yaml-cpp"
 group ""

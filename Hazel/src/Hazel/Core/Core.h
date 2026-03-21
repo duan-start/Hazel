@@ -28,7 +28,7 @@
 #else
 #define HZ_CORE_ASSERT(x,...)
 #define HZ_ASSERT(x,...)
-#endif // HZ_ENABLE_ASSETS
+#endif 
 
  
 #define BIT(x) (1<<x) 
@@ -41,13 +41,11 @@ namespace Hazel {
     template<typename T>
     using Scope = std::unique_ptr<T>;
 
-    //允许使用多个参数创建对应的指针，这里做了一个模板，但是没太明白重要性在哪
-    //感觉就算不封装也没什么关系
-    //可能是为了后面自己写一套新的逻辑替代吧（直接改这里面创建指针的形式）
+    //允许使用多个参数创建对应的指针
     template <typename T,typename ... Args>
+    //Args&&模板既可以绑定左值，又可以绑定右值
     constexpr Scope<T> CreateScope(Args&& ... args) {
-        //forward和move的区别：(完美转发专用forward和其他情况的泛用move&&)
-        //nice Writing
+        //forward和move的区别：(完美转发专用forward，右值引用绑定右值)
         return std::make_unique<T>(std::forward<Args>(args)...);
         
     }
@@ -58,8 +56,7 @@ namespace Hazel {
 
     template <typename T, typename ... Args>
     constexpr Ref<T> CreateRef(Args&& ... args) {
-        //forward和move的区别：
-        //forward是函数参数的完美转化，是优于多次move的
+        //forward是函数参数的完美转换，优于move（单独右值绑定）
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 

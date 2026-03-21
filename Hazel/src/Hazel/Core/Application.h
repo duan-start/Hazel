@@ -43,19 +43,18 @@ public:
 	virtual ~Application();
 	//核心的循环逻辑
 	void Run();
-	//事件处理机制，里面创建一个dispatch,用来晚绑定的对应的函数
-	//接受一个事件并进行处理
+	//事件处理机制，动态获得事件的实际类型，通过模板轮询来设置对应的处理机制（以及向不同的layer处理）
 	void OnEvent(Event& e);
-	//这个就是不同的页面，用来进行不同的事件处理和捕获
-	//正常的push
+	
 	void PushLayer(Layer* layer);
 	//直接push到最上面
-	void PushOverlay(Layer* overlay);
+	void PushOverLayer(Layer* overlay);
 
 	//直接close
 	void Close();
 	//为了获得对应私有变量的数据，这个是全局唯一的数据资源
 	inline static Application& Get() { return *s_Instance; }
+
 	//获得对应的窗口资源
 	Window& GetWindow(){ return  *m_Window; }
 	//活得对应的imguilayer
@@ -71,6 +70,9 @@ private:
 	//窗口，imguilayer,layerstack(用来存layers,)
 	//这个窗口也是封装过后的
 	std::unique_ptr<Window> m_Window;
+
+
+
 	bool m_Running = true;
 	//layer的容器
 	LayerStack m_LayerStack;
@@ -82,9 +84,9 @@ private:
 	//wait a minute
 	float m_LastFrameTime = 0.f;
 private:
-	//类内唯一，
+	//单例设计
 	static Application* s_Instance;
 };
-//在客户端将会被定义，如果在类内定义的话，就必须知道子类是什么，但是这里就不需要知道，延迟了
+//函数声明，延迟定义
 Application* CreateApplication(ApplicationCommandLineArgs args);
 }

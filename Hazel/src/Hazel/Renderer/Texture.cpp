@@ -2,7 +2,7 @@
 #include "Texture.h"  
 #include "Renderer.h"  
 
-#include "Platform/OpenGL/OpenGLTexture2D.h" // 修复了文件扩展名缺失的问题  
+#include "Platform/OpenGL/OpenGLTexture2D.h" 
 
 namespace Hazel {
 	Ref<Texture2D> Texture2D::Create(uint32_t width, uint32_t height)
@@ -25,4 +25,31 @@ namespace Hazel {
 	HZ_CORE_ASSERT(false,"UnKnow RendererAPI");  
 	return nullptr;  
 }  
+
+
+
+	void TextureLibrary::Add(const std::string& name, const Ref<Texture>& texture)
+	{
+		m_Textures[name] = texture;
+	}
+
+	Ref<Texture> TextureLibrary::Get(const std::string& name)
+	{
+		HZ_CORE_ASSERT(Exists(name), "Shader does not exists");
+		return m_Textures[name];
+	}
+
+
+	void TextureLibrary::Load(const std::string& filepath)
+	{
+		Ref<Texture> texture = Texture2D::Create(filepath);
+		auto& name = texture->GetName();
+		HZ_CORE_ASSERT(!Exists(name), "Shader has been already exists");
+		Add(name,texture);
+	}
+
+	bool TextureLibrary::Exists(const std::string& name) const
+	{
+		return  m_Textures.find(name) != m_Textures.end();
+	}
 }

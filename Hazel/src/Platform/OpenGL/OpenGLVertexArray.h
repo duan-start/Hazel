@@ -21,12 +21,13 @@ namespace Hazel {
 			return m_IndexBuffer;
 		};
 	private:
-		//保存引用
-		//cpu端的handel
+		//handleId
 		uint32_t m_RendererID;
 
-		//由于opengl状态机的原因，在添加关系时我们必须立即绑定其他的
+		//vao实际是用来引用这里面的数据（多个vbo个一个ibo）
 		std::vector<Ref<VertexBuffer>> m_VertexBuffers;
+		int m_AttributeIndex{};
+
 		Ref<IndexBuffer> m_IndexBuffer;
 	};
 }

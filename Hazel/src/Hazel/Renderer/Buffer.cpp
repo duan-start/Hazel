@@ -35,11 +35,20 @@ namespace Hazel {
 	{
 	}
 
-	Ref<IndexBuffer> IndexBuffer::Creat(uint32_t* indices, uint32_t count)
+	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count)
 	{
 		switch (Renderer::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLIndexBuffer> (indices, count);
+		}
+		HZ_CORE_ASSERT(false, "Unknown RenderAPI"); return nullptr;
+	}
+
+	Ref<IndexBuffer> IndexBuffer::Create(uint32_t count)
+	{
+		switch (Renderer::GetAPI()) {
+		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
+		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLIndexBuffer>(count);
 		}
 		HZ_CORE_ASSERT(false, "Unknown RenderAPI"); return nullptr;
 	}

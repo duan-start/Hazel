@@ -20,8 +20,6 @@ namespace Hazel {
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
-
-
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -61,6 +59,15 @@ namespace Hazel {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count*sizeof(uint32_t), indices, GL_STATIC_DRAW);
 	}
 
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count): m_RenderID(0), m_Count(count)
+	{	
+		HZ_PROFILE_FUNCTION();
+		glCreateBuffers(1, &m_RenderID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RenderID);
+		//将数据复制并传输到gpu上
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
+	}
+
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
 		HZ_PROFILE_FUNCTION();
@@ -82,5 +89,11 @@ namespace Hazel {
 	uint32_t OpenGLIndexBuffer::GetCount() const
 	{
 		return m_Count;
+	}
+	void OpenGLIndexBuffer::SetData(const void* buffer, uint32_t size)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RenderID);
+		//将数据复制并传输到gpu上
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0,size , buffer);
 	}
 }

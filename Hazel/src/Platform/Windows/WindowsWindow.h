@@ -19,7 +19,7 @@ namespace Hazel {
 		inline uint32_t GetWidth() const override { return m_Data.Width; }
 		inline uint32_t GetHeight() const override { return m_Data.Height; }
 		
-		//运行时实时处理，实际是一种函数（这个函数里面包括多个事件处理逻辑）处理多个事件（每个事件都用这个函数处理，并且利用事件发生的信息，生成hazel端的事件）
+		//实时更改Data里面的回调函数，也就是实时更改事件处理逻辑
 		virtual void SetEventCallback(const EventCallbackFn& callback) override {//
 		 m_Data.EventCallback = callback;
 		}
@@ -32,12 +32,13 @@ namespace Hazel {
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
+		//渲染上下文
 		GraphicsContext* m_Context;
 		struct WindowData {
 			std::string Title;
 			unsigned int Width, Height;
 			bool VSync;
-
+			//这其实是观察者模式的一个简单的实现，简单的通知（传递，1对1）
 			EventCallbackFn EventCallback;
 		};
 		WindowData m_Data;

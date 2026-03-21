@@ -9,7 +9,7 @@
 
 namespace Hazel {
 
-	//绑定对应的函数指针，其中x是是一个函数（指针），this是显示替换的参数1
+	//函数指针签名更改，使用this是显示替换的参数1。x(this,a)->x(a);(对外部暴露的接口)
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 	
 	//static 数据如果不inline的话需要在外部定义
@@ -20,46 +20,48 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
-		//类内构造函数进行初始化，多态指针，父类指针指向子类对象（）
-		//static 的数据虽然不能在类内初始化，但是能够在类内改变值
+		//类内构造函数进行初始化，多态指针，父类指针指向子类对象（这个是给子类集成实现多态的）
 		s_Instance = this;
-		//base，创建窗口，设置事件回调，创建imguilayer
-		//同样是多态的窗口
+
+		//Important
+		//Init Window,设置data里面的回调函数，实现事件的传递处理
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
-		//按理是要在析构函数中delete掉的，
-		m_ImGuiLayer = new ImGuiLayer();
 
-		//渲染器的初始化
+		//Init ImguiLayer(Imgui是一个状态机)
+		//所有的ImguiRender都是基于第一个Imgui的状态
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverLayer(m_ImGuiLayer);
+
+		//Init Render
 		Renderer::Init();
-		PushOverlay(m_ImGuiLayer);
-		std::cout << "m_ImGuiLayer\n";
+
 	}
 
 	Application:: ~Application() {
 		HZ_PROFILE_FUNCTION();
 
 		//不用写，这个实际上实在laystack手动删除，在那个地方管理生命周期
-		//delete m_ImGuiLayer;  // 手动释放 m_ImGuiLayer
+		//delete m_ImGuiLayer;  
 	}
 
-	//设置事件回调函数
+	//Application处理事件的手段，通过阻塞式的方法逐个处理（每个事件都去轮询1.不同事件类型2.不同层栈）
 	void Application::OnEvent(Event& e) {
 		HZ_PROFILE_FUNCTION();
-		//优先自己处理函数事件
+		//设置处理事件的类（保存这个事件）
 		EventDispatcher dispatcher(e);
+		//设置处理对应事件的逻辑
+		//为了保证函数指针的签名相同，这里用bind实现了函数的adapt，保证函数能够成功绑定到对应指针
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
 
 		
-		//HZ_CORE_TRACE("{0}", e);
-		//从尾端到前面，逐一传递事件进行处理
+		//从尾端到前面，逐Layer 实现传递事件进行处理
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it) {
-		//	HZ_CORE_TRACE("Layer order: {}", (*it)->GetName());
 			(*it)->OnEvent(e);
 		//	HZ_CORE_TRACE("event: {} ", e.Handled);
-			//如果处理成功，直接退出就好了
-			if (e.Handled) break;  // 关键：立即终止
+			//如果处理成功，直接退出
+			if (e.Handled) break;  
 		}
 	}
 
@@ -71,7 +73,7 @@ namespace Hazel {
 		layer->OnAttach();
 	}
 
-	void Application::PushOverlay(Layer* overlay)
+	void Application::PushOverLayer(Layer* overlay)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -112,30 +114,31 @@ namespace Hazel {
 
 			HZ_PROFILE_SCOPE("RunLoop");
 
+
 			float time = glfwGetTime();
-			//这个time 和m_LastFrameTime是一个运行的事件
-			//根据差值得到这一帧的时候，然后去tick物理
+
+			//用上一帧的时间去tick物理
+			//会存在一点问题
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			//层栈更新
+			//逻辑，动画，渲染的离屏更新
 			if (!m_Minimized) {
 			HZ_PROFILE_SCOPE("LayerStack Update");
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate(timestep);
 			}
 
-			//ImGui的更新
+			//ImGui的更新，状态机（绘制到屏幕的状态更新，2DUI）
 			m_ImGuiLayer->Begin();
 			{
 			HZ_PROFILE_SCOPE("LayerStack OnImGuiRender");
 
-			for (Layer* layer : m_LayerStack)
+			for (Layer* layer : m_LayerStack) {
 				layer->OnImGuiRender();
 			}
+			}
 			m_ImGuiLayer->End();
-			//auto [mx, my] = Input::GetMousePosition();
-			//HZ_CORE_TRACE("{0}, {1}", mx, my);
 
 			//窗口画面的更新
 			m_Window->OnUpdate();

@@ -3,6 +3,7 @@
 #include "Hazel/Core/Layer.h"
 
 namespace Hazel {
+	//layer的顺序代表渲染的顺序，同时也反向代表事件处理（传递的顺序）
 	class HAZEL_API LayerStack
 	{
 	public:

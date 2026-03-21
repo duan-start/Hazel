@@ -35,6 +35,8 @@ namespace Hazel {
 // 这里面以后可以扩展放一些新的图形学的渲染的一些方法
 	class ShaderLibrary {
 	public:
+		inline static void Init() { ShaderLib = CreateRef<ShaderLibrary>(); }
+		inline static Ref<ShaderLibrary>& GetLib() { return ShaderLib; }
 		void Add(const Ref<Shader>& shader);
 		void Add(const std::string& name, const Ref<Shader>& shader);
 		Ref<Shader> Get(const std::string& name);
@@ -44,8 +46,16 @@ namespace Hazel {
 
 		bool Exists(const std::string& name) const;
 
+		ShaderLibrary() {	
+			//2DShaderInit
+			Load("assets/shaders/Texture.glsl");
+			Load("assets/shaders/Circle.glsl");
+			Load("assets/shaders/Line.glsl");
+			Load("assets/shaders/Pbr.glsl");
+		}
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
+		inline static Ref<ShaderLibrary> ShaderLib = nullptr;
 	};
 }
 
