@@ -140,7 +140,7 @@ namespace Hazel {
 			}
 			m_ImGuiLayer->End();
 
-			//窗口画面的更新
+			//事件捕获和窗口画面更新
 			m_Window->OnUpdate();
 
 		}

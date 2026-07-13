@@ -11,6 +11,10 @@ namespace Hazel {
 			None =0,
 			OpenGL=1
 		};
+
+		struct Capabilities {
+			float MaxAnisotropy=0;
+		};
 	public:
 		virtual void Init() = 0;
 		virtual void Clear() = 0;
@@ -22,12 +26,12 @@ namespace Hazel {
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount) = 0;
 		//Lines
 		virtual void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) =0;
-
 		inline static API GetAPI() { return s_API; }
-
+		
 
 	private:
 		static API s_API;
+		
 	};
 }
 

@@ -52,6 +52,7 @@ namespace Hazel {
 			Load("assets/shaders/Circle.glsl");
 			Load("assets/shaders/Line.glsl");
 			Load("assets/shaders/Pbr.glsl");
+			Load("assets/shaders/SkyBox.glsl");
 		}
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_Shaders;

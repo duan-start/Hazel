@@ -4,21 +4,40 @@
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
-
+#include "Hazel/Renderer/Texture.h"
 //前向声明,降低编译之间的依赖
 class b2World;	
 
 
 namespace Hazel {
+
+
+	struct Environment
+	{
+		Ref<TextureCube> SkyMap;
+		//Ref<TextureCube> IrradianceMap;
+
+		static Environment Load(const std::string& filepath);
+	};
+
+	struct Light
+	{
+		glm::vec3 Direction;
+		glm::vec3 Radiance;
+
+		float Multiplier = 1.0f;
+	};
+
+
 	class Entity;
-	//实体的容器
+	//实体的容器,渲染的最大单位（==level）
 	class Scene
 	{
 	public:
 		Scene();
 		~Scene();
 
-		//Copy Scene()实现深度拷贝
+//Copy Scene()实现深度拷贝
 		static Ref<Scene> Copy(Ref<Scene> other);
 
 //实体操作
@@ -58,6 +77,8 @@ namespace Hazel {
 //Viewport
 		//这个是ui的大小，最后渲染出纹理之后再重新分布到ui上，能够保证完全不变型
 		void OnViewportResize(uint32_t width, uint32_t height);
+
+		void LoadEnvironmentMap(const std::string& filePath) { m_Environment = Environment::Load(filePath); }
 	private:
 		//实体组件添加
 		template<typename T>
@@ -74,10 +95,14 @@ namespace Hazel {
 		entt::registry m_Registry;
 		//UI
 		uint32_t m_ViewportWidth=0, m_ViewportHeight=0;
+
+		//cubeMap
+		Environment m_Environment;
 	private:
+		//物理世界
 		b2World* m_PhysicsWorld = nullptr;
 
-		//声明无需定义，甚至不需要前面声明
+		//声明无需定义，甚至不需要前面声明(没有编译之间的内存依赖)
 		friend class Entity;
 		friend class SceneHierarchyPanel;
 		friend class SceneSerializer;

@@ -7,7 +7,7 @@
 #include "RendererCommand.h"
 #include "RenderCommandQueue.h"
 #include "Hazel/Core/Window.h"
-
+#include "Hazel/Renderer/Texture.h"
 
 namespace Hazel {
 	//Renderer3D
@@ -41,7 +41,10 @@ namespace Hazel {
 		//trangles
 		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) ;
 
+		//Renderer
 		static void RenderMesh(const std::string& filePath);
+		static void RenderSkyMap(const Ref<Texture> skyMap);
+
 		//Lines
 		static void SetLineWidth(float width) ;
 		static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) ;

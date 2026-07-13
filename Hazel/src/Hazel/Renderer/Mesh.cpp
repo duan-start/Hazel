@@ -91,8 +91,8 @@ namespace Hazel {
 				//QuadVertex Set
 				{ ShaderDataType::Float3, "a_Pos"},
 				{ ShaderDataType::Float3, "a_Nor" },
-				{ ShaderDataType::Float3, "Tan" },
-				{ ShaderDataType::Float3,  "Bin"},
+				{ ShaderDataType::Float3, "a_Tan" },
+				{ ShaderDataType::Float3,  "a_Bin"},
 				//a_Fra代表的是平铺因子
 				{ ShaderDataType::Float2,  "a_Tex"},
 			};
@@ -116,17 +116,15 @@ namespace Hazel {
 
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
+		
 
+		//INFO
 		{
 			HZ_CORE_WARN("Mesh Loaded: {0}", filename);
 			HZ_CORE_WARN("  Vertices: {0} (Size: {1} bytes)", m_Vertices.size(), m_Vertices.size() * sizeof(Vertex));
 			HZ_CORE_WARN("  Indices:  {0}", m_Indices.size() * 3);
-
-			// 看看第一个顶点的坐标，确认不是 (0,0,0) 或者极其离谱的数
-			if (!m_Vertices.empty()) {
-				HZ_CORE_TRACE("  First Vertex Pos: {0}, {1}, {2}", m_Vertices[0].Position.x, m_Vertices[0].Position.y, m_Vertices[0].Position.z);
-			}
 		}
+
 	}
 
 	Mesh::~Mesh()

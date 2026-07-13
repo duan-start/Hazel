@@ -246,20 +246,12 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		//Todu:Camera(u_ViewProjection)
-		// Init
-		//set和upload的区别：set可以在缓冲区中设定，但是upload就是直接将数据传输到gpu上面了
-		//所以我这里是不太严谨的
+		//Todu:Camera(u_ViewProjection)  //old
 		s_Data.QuadShader->Bind();
 		//对标upload实际上
 		s_Data.QuadShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		StartNewBactch();
 
-		//s_Data.TextureShader->UnBind();
-		//index（用户指定）和初始化其他结构体变量
-		//s_Data.QuadIndexCount = 0;
-		//s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
-		//s_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer2D::BeginScene(const EditorCamera& camera)

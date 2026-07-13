@@ -4,6 +4,7 @@
 
 namespace Hazel{
 
+	//实现资产和界面的拖拽交互
 	class ContentBrowserPanel
 	{
 	public:

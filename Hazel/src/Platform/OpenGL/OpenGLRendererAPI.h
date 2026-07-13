@@ -14,5 +14,9 @@ namespace Hazel {
 		//Lines
 		virtual void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) override;
 		
+		static Capabilities GetCapabilities() ;
+
+	private:
+		inline static Capabilities s_Capabilities;
 	};
 }

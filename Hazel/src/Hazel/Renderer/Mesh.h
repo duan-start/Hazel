@@ -31,7 +31,6 @@ namespace Hazel {
 		inline const std::string& GetFilePath() const { return m_FilePath; }
 
 		inline const std::shared_ptr<VertexArray>& GetVertexArray() const { return m_VertexArray; };
-
 		
 	private:
 		std::shared_ptr<VertexArray> m_VertexArray;
@@ -39,8 +38,6 @@ namespace Hazel {
 		std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
-
-
 
 		std::string m_FilePath;
 

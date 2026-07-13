@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Hazel/Renderer/SceneCamera.h"
+#include "Hazel/Renderer/Mesh.h"
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Core/UUID.h"
 
@@ -11,6 +12,14 @@
 
 //实体和他对应的组件
 namespace Hazel {
+	struct MeshRendererComponent {
+		Ref<Mesh> MeshRender;
+		//Material
+
+		MeshRendererComponent() = default;
+		MeshRendererComponent(const MeshRendererComponent&) = default;
+	};
+
 
 	struct CircleRendererComponent {
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -147,10 +156,12 @@ namespace Hazel {
 	//碰撞的特性
 	struct BoxCollider2DComponent
 	{
+		//相对于物体中心点的偏移
 		glm::vec2 Offset = { 0.0f, 0.0f };
+		//半高和半宽
 		glm::vec2 Size = { 0.5f, 0.5f };
 
-		// TODO(Yan): move into physics material in the future maybe
+		// TODO(Yan): move into physics material in the future maybe（okk）
 		//密度
 		float Density = 1.0f;
 		//摩擦力
@@ -161,6 +172,7 @@ namespace Hazel {
 		float RestitutionThreshold = 0.5f;
 
 		// Storage for runtime
+		//和物理引擎相互关联
 		void* RuntimeFixture = nullptr;
 
 		BoxCollider2DComponent() = default;
@@ -170,6 +182,7 @@ namespace Hazel {
 
 	struct CircleCollider2DComponent
 	{
+		//同样以及半径
 		glm::vec2 Offset = { 0.0f, 0.0f };
 		float Radius = 0.5f;
 

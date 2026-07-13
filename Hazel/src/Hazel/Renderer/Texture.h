@@ -2,6 +2,13 @@
 #include "Hazel/Core/Core.h"
 #include <unordered_map>
 namespace Hazel {
+	enum class TextureFormat
+	{
+		None = 0,
+		RGB = 1,
+		RGBA = 2,
+	};
+
 	//进行纹理封装
 	class Texture
 	{
@@ -23,6 +30,12 @@ namespace Hazel {
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
 		static Ref<Texture2D> Create(const std::string& path);
+	};
+
+	class TextureCube :public Texture {
+	public:
+		static Ref<TextureCube> Create(const std::string& path);
+		virtual TextureFormat GetFormat()const=0;
 	};
 
 

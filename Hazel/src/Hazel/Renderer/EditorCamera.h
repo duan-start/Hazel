@@ -67,10 +67,11 @@ namespace Hazel {
 		glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };
 
 		float m_Distance = 10.0f;
-
+		float m_CameraTranslationSpeed = 0.1f;
 		//这是经典的图形学表示的方位角，也是欧拉角的常用方式
 		//实际上四元数能用来表示旋转，但是在分解的时候还是转成欧拉角的形式直接用来表示就好了
 		//而且glm这几种属性相互转化的函数   四元数-》4*4矩阵-》欧拉角（这一块还需要具体的理解，尤其是单位之间的转化）
+
 		float m_Pitch = 0.0f, m_Yaw = 0.0f;
 
 		float m_ViewportWidth = 1280, m_ViewportHeight = 720;

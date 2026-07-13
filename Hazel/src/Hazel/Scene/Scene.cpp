@@ -46,8 +46,11 @@ namespace Hazel {
 		template<typename Component>
 		static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
 		{
+			//Component就是任意type
+			//找到拥有对应组件的实体
+			//然后依次拷贝
 			auto view = src.view<Component>();
-			//这里面的e是任何一个有component的实体
+			
 			for (auto e : view)
 			{
 				//根据uuid得到src的实际的entityid
@@ -56,6 +59,7 @@ namespace Hazel {
 				//所以不能只是同时出现（渲染） 也确实不会
 				UUID uuid = src.get<IDComponent>(e).ID;
 				//HZ_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
+				//找到目标注册表里面对应的实体
 				entt::entity dstEnttID = enttMap.at(uuid);
 				//去src里面找到对应的实体的组件
 				auto& component = src.get<Component>(e);
@@ -110,18 +114,21 @@ namespace Hazel {
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
-		//创建指针
+		//创建指针对象
 		Ref<Scene> newScene = CreateRef<Scene>();
 
 		//Camera设置aspect Ration
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
+		//获取注册表
 		auto& srcSceneRegistry = other->m_Registry;
 		auto& dstSceneRegistry = newScene->m_Registry;
+		//设置资源表
 		std::unordered_map<UUID, entt::entity> enttMap;
 
-		// Create entities in new scene
+		// 利用UUID创建相同的对象（由于并不跨Scene通信，所以我们是允许UUID重复的（Scene唯一），而且这样最高效，能够精准找到对应的实体）
+		//搜集所有对象
 		auto idView = srcSceneRegistry.view<IDComponent>();
 		for (auto e : idView)
 		{
@@ -131,7 +138,9 @@ namespace Hazel {
 			enttMap[uuid] = (entt::entity)newEntity;
 		}
 
-		// Copy components (except IDComponent and TagComponent)
+		// 注册表里面所有（的组件）的复制（依据组件去找实体，然后根据相同的UUID精准复制到对应的实体上）
+		//场景复制有两种思想，一种是遍历entity进行多个componmet复制（好理解但低效）
+		//二是遍历Component进行进行多个Entity的一个Componment（cache友好，基于UUID进行entity匹配)
 		Utils::CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		Utils::CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		Utils::CopyComponent<CircleRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
@@ -143,12 +152,14 @@ namespace Hazel {
 		return newScene;
 	}
 
-	//实体的复制（组件的复制）
+	//实体复制（组件复制）
 	void Scene::DuplicateEntity(Entity entity)
 	{
+		//创建一个新实体（由于是同一场景下，所以UUID要重新生成）
 		std::string name = entity.GetName();
 		Entity newEntity = CreateEntity(name);
 
+		//实体之间的组件复制
 		Utils::CopyComponentIfExists<TransformComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<CircleRendererComponent>(newEntity, entity);
@@ -158,46 +169,52 @@ namespace Hazel {
 		Utils::CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<CircleCollider2DComponent>(newEntity, entity);
 	}
-
+	// 创建新实体
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		return CreateEntityWithUUID(UUID(), name);
 	}
-
+	//指定UUID进行实体创建
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
+		//创建实体
 		Entity entity(m_Registry.create(), this);
+		//添加基础组件
 		entity.AddComponent<TransformComponent>();
 		entity.AddComponent<IDComponent>(uuid);
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
+
 		return entity;
 	}
 
+	//这里只是其中一个，游戏里面不仅有物理还有音效等等（而且这是开始设置，并不是tick）
 	void Scene::OnRuntimeStart()
-	{//physical set
+	{
+		//物理模拟
 		OnSimulationStart();
 	}
 
 	void Scene::OnRuntimeStop()
 	{
+		//物理结束
 		OnSimulationStop();
 	}
 
+	//物理Start
 	void Scene::OnSimulationStart()
 	{
-		//#Ifdef 3D.....
-		// OnPhysics3DStart();
-	
-		//2D
+
 		OnPhysics2DStart();
 	}
 
+	//物理结束
 	void Scene::OnSimulationStop()
 	{
 		OnPhysics2DStop();
 	}
 
+	//物理Tick
 	void Scene::OnUpdateSimulation(Timestep ts,EditorCamera& camera)
 	{
 		// Physics update
@@ -217,7 +234,7 @@ namespace Hazel {
 			auto& transform = entity.GetComponent<TransformComponent>();
 			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-			//把 Rigidbody2DComponent 里的运行时指针（通用指针void*）转换成 Box2D 的刚体指针
+			//把 Rigidbody2DComponent 里的运行时指针（通用指针void*）转换成 Box2D 的刚体指针（这个已经在attach里面进行设置了）
 			b2Body* body = (b2Body*)rb2d.RuntimeBody;
 			//获取运行结果（物体在物理引擎的位置）
 			const auto& position = body->GetPosition();
@@ -227,14 +244,12 @@ namespace Hazel {
 		}
 		
 		//Render tick
-	//std::thread RenderThread(&Scene::RenderScene, this, camera);
-	//RenderThread.join();
 		RenderScene(camera);
 
 	}
 
 
-	//游戏的ticK
+	//根据游戏指定的摄像机(游戏的runTime)进行tick(游戏画面的Tick)
 	void Scene::OnUpdateRuntime(Timestep ts)
 	{
 		//为每一个有这个组件的实体进行lamda（即按脚本的更新）
@@ -331,18 +346,19 @@ namespace Hazel {
 		}
 
 	}
-
+	//根据编辑器Camera进行tick(编辑器画面的tick)
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
 		RenderScene(camera);
 	}
 
+	//设置宽高比
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 
-		// Resize our non-FixedAspectRatio cameras
+		// Resize our non-FixedAspectRatio cameras（统一修改）
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
 		{
@@ -353,7 +369,7 @@ namespace Hazel {
 
 	}
 
-
+	//删除实体
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);
@@ -374,10 +390,12 @@ namespace Hazel {
 		return {};
 	}
 
+	//物理世界模拟的开始设置
 	void Scene::OnPhysics2DStart()
 	{
+		//设置新世界（重力）
 		m_PhysicsWorld = new b2World({ 0.0f, -9.8f });
-
+		//找到刚体组件
 		auto view = m_Registry.view<Rigidbody2DComponent>();
 		for (auto e : view)
 		{
@@ -385,19 +403,25 @@ namespace Hazel {
 			auto& transform = entity.GetComponent<TransformComponent>();
 			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
+			//刚体定义清单（就是creatInfo）
 			b2BodyDef bodyDef;
 			bodyDef.type = Utils::Rigidbody2DTypeToBox2DBody(rb2d.Type);
 			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
 			bodyDef.angle = transform.Rotation.z;
 
+			//指向真实物体的指针（通过这个这个世界进行管理和控制）
 			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 			body->SetFixedRotation(rb2d.FixedRotation);
+			//开始指向
 			rb2d.RuntimeBody = body;
 
+
+			//设置碰撞盒
 			if (entity.HasComponent<BoxCollider2DComponent>())
 			{
 				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
 
+				//形状
 				b2PolygonShape boxShape;
 				//碰撞盒的大小
 				//boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
@@ -410,7 +434,7 @@ namespace Hazel {
 
 				// 创建带偏移的碰撞盒
 				boxShape.SetAsBox(halfWidth, halfHeight, boxCenter, 0.0f);
-
+				//材质属性
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &boxShape;
 				fixtureDef.density = bc2d.Density;
@@ -424,10 +448,12 @@ namespace Hazel {
 			{
 				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
 
+				//形状
 				b2CircleShape circleShape;
 				circleShape.m_p.Set(cc2d.Offset.x, cc2d.Offset.y);
 				circleShape.m_radius = cc2d.Radius * transform.Scale.x;
 
+				//材质属性
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &circleShape;
 				fixtureDef.density = cc2d.Density;
@@ -439,18 +465,25 @@ namespace Hazel {
 		}
 	}
 
+	//物理世界结束的删除
 	void Scene::OnPhysics2DStop()
 	{
 		delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;
 	}
 
+	//Editor进行RendererTick的实际内容
 	void Scene::RenderScene(EditorCamera& camera)
 	{
 
 		//Renderer3D
 		Renderer::BeginScene(camera);
-		Renderer::RenderMesh("assets/Meshes/backpack.obj");
+		
+
+		if (m_Environment.SkyMap)
+			Renderer::RenderSkyMap(m_Environment.SkyMap);
+		else HZ_CORE_INFO("NO SkyMap");
+	//	Renderer::RenderMesh("assets/Meshes/backpack.obj");
 		Renderer::EndScene();
 		//有一个通用的EditorCamera
 		//根据entity的状态直接绘制
@@ -482,10 +515,10 @@ namespace Hazel {
 			}
 		}
 
-		Renderer::EndScene();
+		Renderer2D::EndScene();
 	}
 
-	//未来可以特化添加，只是现在并没有，用的是componentAdd的那个泛化版本
+	//Todo:设置回调通知（Now These are garbage）
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
@@ -542,5 +575,11 @@ namespace Hazel {
 	template<>
 	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
 	{
+	}
+
+	Environment Environment::Load(const std::string& filepath)
+	{
+		auto skyMap = TextureCube::Create(filepath);
+		return { skyMap };
 	}
 }

@@ -55,4 +55,10 @@ namespace Hazel {
 		vertexArray->Bind();
 		glDrawArrays(GL_LINES, 0, indexCount);
 	}
+	RendererAPI::Capabilities OpenGLRendererAPI::GetCapabilities()
+	{
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &s_Capabilities.MaxAnisotropy);
+		return s_Capabilities;
+
+	}
 }

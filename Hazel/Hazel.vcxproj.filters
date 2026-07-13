@@ -150,6 +150,9 @@
     <ClInclude Include="src\Hazel\Renderer\GraphicsContext.h">
       <Filter>src\Hazel\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hazel\Renderer\Mesh.h">
+      <Filter>src\Hazel\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Hazel\Renderer\OrthographicCamera.h">
       <Filter>src\Hazel\Renderer</Filter>
     </ClInclude>
@@ -169,6 +172,12 @@
       <Filter>src\Hazel\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\Renderer\RendererAPI.h">
+      <Filter>src\Hazel\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\Renderer\RendererCommand.h">
+      <Filter>src\Hazel\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hazel\Renderer\RendererScene.h">
       <Filter>src\Hazel\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Hazel\Renderer\SceneCamera.h">
@@ -1500,9 +1509,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hazel\Renderer\RendererCommand.h" />
-    <ClInclude Include="src\Hazel\Renderer\RendererScene.h" />
-    <ClInclude Include="src\Hazel\Renderer\Mesh.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLTextureCube.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Core\Application.cpp">
@@ -1544,6 +1551,9 @@
     <ClCompile Include="src\Hazel\Renderer\GameCamera.cpp">
       <Filter>src\Hazel\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hazel\Renderer\Mesh.cpp">
+      <Filter>src\Hazel\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Hazel\Renderer\OrthographicCamera.cpp">
       <Filter>src\Hazel\Renderer</Filter>
     </ClCompile>
@@ -1563,6 +1573,12 @@
       <Filter>src\Hazel\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Renderer\RendererAPI.cpp">
+      <Filter>src\Hazel\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\Renderer\RendererCommand.cpp">
+      <Filter>src\Hazel\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hazel\Renderer\RendererScene.cpp">
       <Filter>src\Hazel\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Hazel\Renderer\SceneCamera.cpp">
@@ -1634,8 +1650,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hazel\Renderer\RendererCommand.cpp" />
-    <ClCompile Include="src\Hazel\Renderer\RendererScene.cpp" />
-    <ClCompile Include="src\Hazel\Renderer\Mesh.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLTextureCube.cpp" />
   </ItemGroup>
 </Project>

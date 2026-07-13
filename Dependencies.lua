@@ -8,6 +8,7 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 --%{}会去找系统的环境变量（类似在终端里面的访问）
 IncludeDir = {}
 IncludeDir["stb_image"] = "%{wks.location}/Hazel/vendor/stb_image"
+IncludeDir["assimp"] = "%{wks.location}/Hazel/vendor/assimp/include"
 IncludeDir["yaml_cpp"] = "%{wks.location}/Hazel/vendor/yaml-cpp/include"
 IncludeDir["Box2D"] = "%{wks.location}/Hazel/vendor/Box2D/include"
 IncludeDir["GLFW"] = "%{wks.location}/Hazel/vendor/GLFW/include"
@@ -25,9 +26,11 @@ LibraryDir = {}
 
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_Debug"] = "%{wks.location}/Hazel/vendor/VulkanSDK/Lib"
-
+LibraryDir["assimp"] = "%{wks.location}/Hazel/vendor/assimp/X64"
 --利用上面已经定义好的去找到对应的库
 Library = {}
+Library["Assimp"]="%{LibraryDir.assimp}/assimp-vc143-mtd.lib"
+
 Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
 Library["VulkanUtils"] = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"
 

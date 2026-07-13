@@ -11,7 +11,7 @@
 
 
 namespace YAML {
-
+	//自定义保存和读取的方式
 	template<>
 	struct convert<glm::vec2>
 	{
@@ -20,6 +20,7 @@ namespace YAML {
 			Node node;
 			node.push_back(rhs.x);
 			node.push_back(rhs.y);
+			//表示横向存储[]
 			node.SetStyle(EmitterStyle::Flow);
 			return node;
 		}
@@ -92,7 +93,8 @@ namespace Hazel {
 
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
 	{
-		out << YAML::Flow;
+		out << YAML::Flow;//写在一行里面
+		//小括号，内部会生成局部node并销毁
 		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
 		return out;
 	}
@@ -136,7 +138,7 @@ namespace Hazel {
 	}
 
 
-
+	//序列化单独实体（if判断所有包括的组件）
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap; // Entity
@@ -166,6 +168,7 @@ namespace Hazel {
 			out << YAML::EndMap; // TransformComponent
 		}
 
+		//这个比较精髓
 		if (entity.HasComponent<CameraComponent>())
 		{
 			out << YAML::Key << "CameraComponent";
@@ -266,24 +269,28 @@ namespace Hazel {
 	}
 
 
-
+	//初始化保存场景引用
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 		: m_Scene(scene)
 	{
 	}
+
+	//序列化输出
 	bool SceneSerializer::Serialize(const std::string& filepath)
 	{
+
+		//如果你没有特意写 out << YAML::Flow，yaml-cpp 默认会使用这种风格。在这种模式下：
+		//BeginMap / EndMap：不显示大括号{}。它是靠换行和缩进来表示层级关系的。
+		//BeginSeq / EndSeq：不显示方括号[]。它用 短横杠 - 来表示列表中的每一项。
+
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
+
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		//	auto& registry = m_Context->m_Registry;
 
-		//// 遍历所有有某组件的实体，例如 TagComponent
-		//for (auto entityID : registry.view<TagComponent>()) {
-		//	Entity entity{ entityID, m_Context.get() };
-		//	DrawEntityNode(entity);
-		//}
+		//// 找一个所有实体都包含的组件（Component）,去遍历实体（进行序列化）
 		auto& registry = m_Scene->m_Registry;
 		for (auto entityID : registry.view<IDComponent>()) {
 				Entity entity = { entityID, m_Scene.get() };
@@ -295,21 +302,26 @@ namespace Hazel {
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
+		//创建文件并写入str
 		std::ofstream fout(filepath);
 		fout << out.c_str();
 		return true;
 	}
+
+	//未完成
 	bool SceneSerializer::SerializeRuntime(const std::string& filepath)
 	{
 		return true;
 	}
+
+
+	//从对应的文件（string）里面序列化数据，并根据里面的数据进行scene的初始化
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
-
-
 		YAML::Node data;
 		try
 		{
+			//读取string
 			data = YAML::LoadFile(filepath);
 		}
 		catch (YAML::ParserException e)
@@ -317,16 +329,19 @@ namespace Hazel {
 			return false;
 		}
 
-
+		//找到key节点
 		if (!data["Scene"])
 			return false;
 
+		//找到对应的value(并进行强制类型转换)
 		std::string sceneName = data["Scene"].as<std::string>();
 		HZ_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
+		//node(key+value)
 		auto entities = data["Entities"];
 		if (entities)
 		{
+			//好吧node里面居然也能嵌套当一个容器（map和seq）
 			for (auto entity : entities)
 			{
 				uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
@@ -337,9 +352,10 @@ namespace Hazel {
 					name = tagComponent["Tag"].as<std::string>();
 
 				HZ_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
-
+				//创建实体
 				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid,name);
 
+				//利用存储的数据进行对应组件的初始化和实体组件挂载
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
 				{

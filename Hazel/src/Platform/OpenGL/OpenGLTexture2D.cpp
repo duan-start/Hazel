@@ -40,7 +40,7 @@ namespace Hazel {
 		int height, width, channels;
 		//由于默认图像的坐标和opengl是y轴相反的，（uv坐标）
 		//所以这边直接反转stbi处理的图像的信息
-		stbi_set_flip_vertically_on_load(1);
+		stbi_set_flip_vertically_on_load(true);
 
 		stbi_uc* data = nullptr;
 		{

@@ -17,6 +17,7 @@
 #endif
 
 namespace Hazel {
+	//const 默认static 链接
 	extern const std::filesystem::path g_AssetPath;
 
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
@@ -24,10 +25,11 @@ namespace Hazel {
 		SetContext(context);
 	}
 
+	//设置选中的场景
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		m_Context = context;
-		m_SelectionContext = {};
+		m_SelectiedEntity = {};
 	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
@@ -42,12 +44,14 @@ namespace Hazel {
 			DrawEntityNode(entity);
 		}
 
+		// 如果点击了窗口空白处，则取消选中
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_SelectionContext = {};
+			m_SelectiedEntity = {};
 
 		// Right-click on blank space
 		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
+			//如果点击菜单
 			if (ImGui::MenuItem("Create Empty Entity"))
 				m_Context->CreateEntity("Empty Entity");
 
@@ -55,7 +59,7 @@ namespace Hazel {
 		}
 
 		//取决于上一个渲染的是否点击，放后面总是有bug，我直接放到前面来了
-		if (m_SelectionContext) {
+		if (m_SelectiedEntity) {
 			bool entityDeleted = false;
 			if (ImGui::BeginPopupContextWindow(0, 1))
 			{
@@ -67,17 +71,18 @@ namespace Hazel {
 
 			if (entityDeleted)
 			{
-				m_Context->DestroyEntity(m_SelectionContext);
-				m_SelectionContext = {};
+				m_Context->DestroyEntity(m_SelectiedEntity);
+				m_SelectiedEntity = {};
 			}
 		}
 
 		ImGui::End();
 
+		//进行属性绘制
 		ImGui::Begin("Properties");
-		if (m_SelectionContext)
+		if (m_SelectiedEntity)
 		{
-			DrawComponents(m_SelectionContext);
+			DrawComponents(m_SelectiedEntity);
 		}
 
 		ImGui::End();
@@ -85,22 +90,24 @@ namespace Hazel {
 
 	void SceneHierarchyPanel::SetSelectedEntity(Entity entity)
 	{
-		m_SelectionContext = entity;
+		m_SelectiedEntity = entity;
 	}
 
+	//绘制节点
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-		ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = ((m_SelectiedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 		flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 		if (ImGui::IsItemClicked())
 		{
-			m_SelectionContext = entity;
+			m_SelectiedEntity = entity;
 		}
 
 
+		//如果展开的话
 		if (opened)
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -112,6 +119,7 @@ namespace Hazel {
 
 	}
 
+	//绘制控制面板（主要是统一格式风格）
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -178,6 +186,7 @@ namespace Hazel {
 		ImGui::PopID();
 	}
 
+	//绘制
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
@@ -219,6 +228,7 @@ namespace Hazel {
 		}
 	}
 
+	//绘制组件
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 		if (entity.HasComponent<TagComponent>())
@@ -244,8 +254,8 @@ namespace Hazel {
 		{
 			if (ImGui::MenuItem("Camera"))
 			{
-				if (!m_SelectionContext.HasComponent<CameraComponent>())
-					m_SelectionContext.AddComponent<CameraComponent>();
+				if (!m_SelectiedEntity.HasComponent<CameraComponent>())
+					m_SelectiedEntity.AddComponent<CameraComponent>();
 				else
 					HZ_CORE_WARN("This entity already has the Camera Component!");
 				ImGui::CloseCurrentPopup();
@@ -253,45 +263,45 @@ namespace Hazel {
 
 			if (ImGui::MenuItem("Sprite Renderer"))
 			{
-				if (!m_SelectionContext.HasComponent<SpriteRendererComponent>())
-					m_SelectionContext.AddComponent<SpriteRendererComponent>();
+				if (!m_SelectiedEntity.HasComponent<SpriteRendererComponent>())
+					m_SelectiedEntity.AddComponent<SpriteRendererComponent>();
 				else
 					HZ_CORE_WARN("This entity already has the Sprite Renderer Component!");
 				ImGui::CloseCurrentPopup();
 			}
 
-			if (!m_SelectionContext.HasComponent<CircleRendererComponent>())
+			if (!m_SelectiedEntity.HasComponent<CircleRendererComponent>())
 			{
 				if (ImGui::MenuItem("Circle Renderer"))
 				{
-					m_SelectionContext.AddComponent<CircleRendererComponent>();
+					m_SelectiedEntity.AddComponent<CircleRendererComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
 
-			if (!m_SelectionContext.HasComponent<Rigidbody2DComponent>())
+			if (!m_SelectiedEntity.HasComponent<Rigidbody2DComponent>())
 			{
 				if (ImGui::MenuItem("Rigidbody 2D"))
 				{
-					m_SelectionContext.AddComponent<Rigidbody2DComponent>();
+					m_SelectiedEntity.AddComponent<Rigidbody2DComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
 
-			if (!m_SelectionContext.HasComponent<BoxCollider2DComponent>())
+			if (!m_SelectiedEntity.HasComponent<BoxCollider2DComponent>())
 			{
 				if (ImGui::MenuItem("Box Collider 2D"))
 				{
-					m_SelectionContext.AddComponent<BoxCollider2DComponent>();
+					m_SelectiedEntity.AddComponent<BoxCollider2DComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
 
-			if (!m_SelectionContext.HasComponent<CircleCollider2DComponent>())
+			if (!m_SelectiedEntity.HasComponent<CircleCollider2DComponent>())
 			{
 				if (ImGui::MenuItem("Circle Collider 2D"))
 				{
-					m_SelectionContext.AddComponent<CircleCollider2DComponent>();
+					m_SelectiedEntity.AddComponent<CircleCollider2DComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
@@ -379,6 +389,7 @@ namespace Hazel {
 				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
+					//接受资产拖拽（CONTENT_BROWSER_ITEM是暗号）
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
@@ -390,6 +401,7 @@ namespace Hazel {
 							HZ_WARN("Could not load texture {0}", texturePath.filename().string());
 
 					}
+					
 					ImGui::EndDragDropTarget();
 
 				}

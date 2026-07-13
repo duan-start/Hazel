@@ -29,6 +29,7 @@ EditorLayer::EditorLayer():
 
 }
 	
+//资产初始化
 void EditorLayer::OnAttach()
 {
 	HZ_PROFILE_FUNCTION();
@@ -40,24 +41,38 @@ void EditorLayer::OnAttach()
 	m_IconSimulate = Texture2D::Create("Resources/Icons/SimulateButton.png");
 
 	//帧缓冲创建和绑定
+
+	//参数设定
 	m_FramebufferSize = { 1280,720 };
 	Hazel::FramebufferSpecification fbSpec;
+	//设定3个附件
 	fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 	fbSpec.Width = 1280;
 	fbSpec.Height = 720;
+
+	//正式创建
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 
+	//创建摄像机（固定）
 	m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+	//创建场景并进行初始化设定
 	m_ActiveScene = CreateRef<Scene>();
+	
+	m_ActiveScene->LoadEnvironmentMap("assets/env/Debug.tga");
+
 	m_EditorScene = m_ActiveScene;
+
+	//终端命令参数，允许直接打开对应的路径
 	auto commandLineArgs = Application::Get().GetCommandLineArgs();
 	if (commandLineArgs.Count > 1)
 	{
+		//进行Scene的序列化
 		auto sceneFilePath = commandLineArgs[1];
 		SceneSerializer serializer(m_ActiveScene);
 		serializer.Deserialize(sceneFilePath);
 	}
 
+	//设置当前的主要Scene
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 #if 0
@@ -116,6 +131,7 @@ void EditorLayer::OnDetach()
 
 }
 
+//Tick核心
 void EditorLayer::OnUpdate(Timestep ts)
 {
 	
@@ -126,37 +142,43 @@ void EditorLayer::OnUpdate(Timestep ts)
 	//Timer myTimer("Name", []() {});
 
 
-	//Render
+	//重置统计的信息
 	Renderer2D::ResetStats();
 
-
+	//每次bind的时候不仅bind，还重新设置了viewport的大小
 	m_Framebuffer->Bind();
 	Renderer::SetClearColor(glm::vec4(0.0f, 0.f, 0.f, 1.0f));
 	Renderer::Clear();
 
 	
-	 //Clear our entity ID attachment to -1
+	 //Clear our entity ID attachment to -1 （因为默认是0的话是代表对应的entityID的）
+	//是根据entityID进行选中的
 	m_Framebuffer->ClearAttachment(1, -1);
 
+	//根据不同的场景状态进行tick
 	switch (m_SceneState)
 	{
+		//编辑器的状态，纯渲染，没有物理模拟
 	case SceneState::Edit:
 	{
 		//if (m_ViewportFocused)
 			//m_CameralController.OnUpdate(ts);
-
+		if (m_ViewportFocused)
 		m_EditorCamera.OnUpdate(ts);
 
 		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 		break;
 	}
+	//游戏的状态
 	case SceneState::Play:
 	{
 		m_ActiveScene->OnUpdateRuntime(ts);
 		break;
 	}
+	//模拟的状态（Editor+物理）
 	case SceneState::Simulate:
 	{
+		if (m_ViewportFocused)
 		m_EditorCamera.OnUpdate(ts);
 
 		m_ActiveScene->OnUpdateSimulation(ts, m_EditorCamera);
@@ -164,37 +186,40 @@ void EditorLayer::OnUpdate(Timestep ts)
 	}
 	}
 
+	//获取鼠标在窗口的位置
 	auto [mx, my] = ImGui::GetMousePos();
 	mx -= m_ViewportBounds[0].x;
 	my -= m_ViewportBounds[0].y;
 	glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+	//flip(1),y轴进行反转
 	my = viewportSize.y - my;
 	int mouseX = (int)mx;
 	int mouseY = (int)my;
 
 	if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 	{
+		//读取像素颜色
 		int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
 	//	HZ_CORE_WARN("Pixel data = {0}", pixelData);
+		//更具读取到的ID进行实体的创建
 		m_HoveredEntity = pixelData <= -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		
 	}
 
-	//render with entity =-1;
+	//可视化渲染（类似UI(Post)后处理）
 	OnOverlayRender();
 
 	m_Framebuffer->Unbind();
-
-
-
 }
 
+//使用Imgui正式绘制
 void EditorLayer::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
 
 	// Note: Switch this to true to enable dockspace
 //Copy
+	//创建一个铺满整个屏幕、不可移动、没有边框的“隐形大窗口”，作为所有其他小窗口（如场景视图、属性面板）的容器
 	static bool dockspaceOpen = true;
 	static bool opt_fullscreen_persistant = true;
 	bool opt_fullscreen = opt_fullscreen_persistant;
@@ -262,59 +287,72 @@ void EditorLayer::OnImGuiRender()
 	m_ContentBrowserPanel.OnImguiRenderer();
 
 //调试信息
-	ImGui::Begin("Statics");
-	std::string name = "None";
-	if (m_HoveredEntity)
-		name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-	ImGui::Text("Hovered Entity: %s", name.c_str());
-	auto states = Hazel::Renderer2D::GetStats();
-	ImGui::Text("Renderer2D stats: ");
-	ImGui::Text("DrawCalls: %d", states.DrawCalls);
-	ImGui::Text("QuadCount: %d", states.QuadCount);
-	ImGui::Text("QuadVertex: %d", states.GetTotalVertexCount());
-	ImGui::Text("QuadIndex: %d", states.GetTotalIndexCount());
-	ImGui::End();
+	{
+		ImGui::Begin("Statics");
+		std::string name = "None";
+		if (m_HoveredEntity)
+			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hovered Entity: %s", name.c_str());
+		auto states = Hazel::Renderer2D::GetStats();
+		ImGui::Text("Renderer2D stats: ");
+		ImGui::Text("DrawCalls: %d", states.DrawCalls);
+		ImGui::Text("QuadCount: %d", states.QuadCount);
+		ImGui::Text("QuadVertex: %d", states.GetTotalVertexCount());
+		ImGui::Text("QuadIndex: %d", states.GetTotalIndexCount());
+		ImGui::End();
+	}
 
 //物理边界
-	ImGui::Begin("Setting");
-	ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
-	ImGui::End();
-
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
-
+	{
+		ImGui::Begin("Setting");
+		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
+		ImGui::End();
+	}
 //渲染主要视图
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
 	ImGui::Begin("ViewPort");
+	//该ui控件的一个偏移
 	auto viewportOffset = ImGui::GetCursorPos(); // Includes tab bar
-	//Resize viewport
-	//这段代码我需要重新看一遍
+	//当前视口是否被点击和悬停
 	m_ViewportFocused = ImGui::IsWindowFocused();
 	 m_ViewportHovered = ImGui::IsWindowHovered();
 	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 	//Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
-	//如果界面大小更改，全部重新resize一下
+	//查看当前可用的窗口剩余空间
 	ImVec2 SpaceAvil = ImGui::GetContentRegionAvail();
+	//作为实际的size
 	m_ViewportSize = { SpaceAvil.x, SpaceAvil.y };
-	//重新ReSize，并且松开鼠标左键的话
+	//如果和已有的Frambuffer 差距过大，并且松开鼠标的前提下，进行全部的resize
 	if (glm::distance(m_FramebufferSize, glm::vec2(SpaceAvil.x, SpaceAvil.y)) > 1.0f && !Hazel::Input::IsMouseButtonPressed(0)) {
+		//帧缓冲的（Textre重新创建，glViewport会在绑定的时候每一帧都重新绘制）
 		m_FramebufferSize = { SpaceAvil.x, SpaceAvil.y };
 		m_Framebuffer->Resize(SpaceAvil.x, SpaceAvil.y);
+		//Camera重新设置
 		m_CameralController.OnResize(SpaceAvil.x, SpaceAvil.y);
+		//Editor
 		m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+		//Play(游戏的Camera重新设置)
 		m_ActiveScene->OnViewportResize((uint32_t)SpaceAvil.x, (uint32_t)SpaceAvil.y);
 	}
+	//获取TextureID
 	uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
+	//y轴flip
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 	//GetBounds
+	//当前窗口的大小
 	auto windowSize = ImGui::GetWindowSize();
+	//当前窗口左上角的实际的位置
 	ImVec2 minBound = ImGui::GetWindowPos();
+	//左上角
 	minBound.x += viewportOffset.x;
 	minBound.y += viewportOffset.y;
+	//右下角
 	ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
 	m_ViewportBounds[0] = { minBound.x, minBound.y };
 	m_ViewportBounds[1] = { maxBound.x, maxBound.y };
 
-	//都是在这个imgui的viewport窗口里面的数据
+	//支持场景的拖拽和序列化
 	if (ImGui::BeginDragDropTarget())
 	{
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -326,21 +364,22 @@ void EditorLayer::OnImGuiRender()
 	}
 
 // Gizmos   
+	//获取当前选中的实体
 	Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 	if (selectedEntity && m_GizmoType != -1)
 	{
+		//设置投影模式
 		ImGuizmo::SetOrthographic(false);
+		//设置当前绘制图层
 		ImGuizmo::SetDrawlist();
 
+		//当前窗口的大小
 		float windowWidth = (float)ImGui::GetWindowWidth();
 		float windowHeight = (float)ImGui::GetWindowHeight();
+		//设置画布
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 		//在runtime绘制是没有道理的
-		// Runtime Camera
-		/*auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-		const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-		const glm::mat4& cameraProjection = camera.GetProjection();
-		glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());*/
+
 		// Editor camera
 		const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
 		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
@@ -359,6 +398,7 @@ void EditorLayer::OnImGuiRender()
 
 		float snapValues[3] = { snapValue, snapValue, snapValue };
 
+		//ImGuizmo进行绘制和变换（计算，绘制和修改）
 		ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
 			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
 			nullptr, snap ? snapValues : nullptr);
@@ -488,23 +528,27 @@ void EditorLayer::OnSceneSimulate()
 
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 }
-//顶部工具栏构建
+//顶部图标构建
 void EditorLayer::UI_Toolbar()
 {
+	//元素之间以及窗口和其他之间的padding
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+	//普通状态下背景为黑色（矩型）
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+	//读取当前主题色，但修改透明度。
 	auto& colors = ImGui::GetStyle().Colors;
 	const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
 	const auto& buttonActive = colors[ImGuiCol_ButtonActive];
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
-
+	//禁用滚动条和普通的装饰的效果
 	ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+	
 	//changed
-
 	bool toolbarEnabled = (bool)m_ActiveScene;
 
+	//判断当前的场景是否可用
 	ImVec4 tintColor = ImVec4(1, 1, 1, 1);
 	if (!toolbarEnabled)
 		tintColor.w = 0.5f;
@@ -514,20 +558,26 @@ void EditorLayer::UI_Toolbar()
 
 	//绘制第一个图标（编辑和模拟）
 	{
+		//引用纹理
 		Ref<Texture2D> icon = (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate) ? m_IconPlay : m_IconStop;
+		//设置点位
 		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
 		if (ImGui::ImageButton((ImTextureID)icon->GetRenderID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
 		{
+			//如果在Edit或是Simulate的情况下点击（场景运行）
 			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Simulate)
 				OnScenePlay();
+			//如果在paly的情况下点击（直接进行停止）
 			else if (m_SceneState == SceneState::Play)
 				OnSceneStop();
 		}
 	}
-	//编辑第二个图标（编辑和运行）
+	//编辑第二个图标（编辑和运行），在同一行下绘制
 	ImGui::SameLine();
 	{
+		//根据状态选择图标绘制
 		Ref<Texture2D> icon = (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play) ? m_IconSimulate : m_IconStop;		//ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+		//查询点击状态
 		if (ImGui::ImageButton((ImTextureID)icon->GetRenderID(), ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), tintColor) && toolbarEnabled)
 		{
 			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Play)
@@ -536,6 +586,7 @@ void EditorLayer::UI_Toolbar()
 				OnSceneStop();
 		}
 	}
+	//弹出之前的这些设置（因为ImGui的改变是全局的）
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor(3);
 	ImGui::End();
@@ -543,6 +594,7 @@ void EditorLayer::UI_Toolbar()
 
 void EditorLayer::NewScene()
 {
+	//创建新的场景
 	m_ActiveScene = CreateRef<Scene>();
 	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 	m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -569,8 +621,9 @@ void EditorLayer::OpenScene(const std::filesystem::path& path)
 		HZ_WARN("Could not load {0} - not a scene file", path.filename().string());
 		return;
 	}
-
+	//创建新场景
 	Ref<Scene> newScene = CreateRef<Scene>();
+	//进行序列化数据读取
 	SceneSerializer serializer(newScene);
 	if (serializer.Deserialize(path.string()))
 	{
@@ -579,10 +632,12 @@ void EditorLayer::OpenScene(const std::filesystem::path& path)
 		m_SceneHierarchyPanel.SetContext(m_EditorScene);
 		//这里是指针，
 		m_ActiveScene = m_EditorScene;
+		//保存地址（能够实时保存回去）
 		m_EditorScenePath = path;
 	}
 }
 
+//保存场景（如果场景path非空的话）
 void EditorLayer::SaveScene()
 {
 	if (!m_EditorScenePath.empty())
@@ -591,6 +646,7 @@ void EditorLayer::SaveScene()
 		SaveSceneAs();
 }
 
+//打开面板，创建新文件进行保存
 void EditorLayer::SaveSceneAs()
 {
 	std::string filepath = FileDialogs::SaveFile("Hazel Scene (*.hazel)\0*.hazel\0");
@@ -601,6 +657,7 @@ void EditorLayer::SaveSceneAs()
 	}
 }
 
+//实现数据序列化
 void EditorLayer::SerializeScene(Ref<Scene> scene, const std::filesystem::path& path)
 {
 	SceneSerializer serializer(scene);
@@ -619,7 +676,7 @@ void EditorLayer::OnDuplicateEntity()
 
 void EditorLayer::OnOverlayRender()
 {
-	//renderer the rect
+	//设置相机状态（对齐绘制）
 	if (m_SceneState == SceneState::Play)
 	{
 		Entity camera = m_ActiveScene->GetPrimaryCameraEntity();
@@ -634,25 +691,32 @@ void EditorLayer::OnOverlayRender()
 
 	if (m_ShowPhysicsColliders)
 	{
-		// Box Colliders
+		// 获取Box物理组件对应的实体ID
 		{
+			//拥有这两个组件的实体
 			auto group = m_ActiveScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+
 			for (auto entity : group)
 			{
+				//实际的Component的获取
 				auto [tc, bc2d] = group.get<TransformComponent, BoxCollider2DComponent>(entity);
 
+				//向近出偏移（防止深度的问题）
 				glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
+				//进行x,y,z的缩放
 				glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
 
+				//经典srt方式
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
 					* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 					* glm::scale(glm::mat4(1.0f), scale);
 
+				//绘制没有EntityId属性的显示框
 				Renderer2D::DrawRect(transform, glm::vec4(1, 0.5, 0, 1));
 			}
 		}
 
-		// Circle Colliders
+		// 获取Circle物理组件对应的实体ID
 		{
 			auto group = m_ActiveScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
 			for (auto entity : group)
@@ -673,7 +737,7 @@ void EditorLayer::OnOverlayRender()
 	Renderer2D::EndScene();
 }
 
-
+//事件处理
 void EditorLayer::OnEvent(Event& event)
 {
 	if (m_ViewportHovered) {

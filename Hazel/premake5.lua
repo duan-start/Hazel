@@ -35,7 +35,6 @@ project "Hazel"
 	{
 		"src",
 		"vendor/spdlog/include",
-		"vendor/assimp/include",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
@@ -45,7 +44,8 @@ project "Hazel"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.VulkanSDK}"
+		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.assimp}"
 	}
 
 	-- 编译的顺序（添加引用）
@@ -57,7 +57,7 @@ project "Hazel"
 		"Glad",
 		"ImGui",
 		"yaml-cpp",
-		"vendor/assimp/X64/assimp-vc143-mtd.lib",
+		"%{Library.Assimp}",
 		"opengl32.lib"
 	}
 -- 针对特定文件下，不使用预编译头文件

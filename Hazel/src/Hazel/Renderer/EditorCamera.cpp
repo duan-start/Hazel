@@ -18,6 +18,7 @@ namespace Hazel {
 		: m_FOV(fov), m_AspectRatio(aspectRatio), m_NearClip(nearClip), m_FarClip(farClip), GameCamera(glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip))
 	{
 		UpdateView();
+		UpdateProjection();
 	}
 
 	void EditorCamera::UpdateProjection()
@@ -63,7 +64,7 @@ namespace Hazel {
 
 	void EditorCamera::OnUpdate(Timestep ts)
 	{
-		if (Input::IsKeyPressed(HZ_KEY_LEFT_ALT))
+		if (Input::IsKeyPressed(HZ_KEY_LEFT_SHIFT))
 		{
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
 			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
@@ -76,6 +77,28 @@ namespace Hazel {
 			else if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_RIGHT))
 				MouseRotate(delta); 
 		}
+		if (Input::IsKeyPressed(HZ_KEY_W))
+			m_FocalPoint += GetForwardDirection() * m_CameraTranslationSpeed;
+		if (Input::IsKeyPressed(HZ_KEY_S))
+			m_FocalPoint -= GetForwardDirection() * m_CameraTranslationSpeed;
+		if (Input::IsKeyPressed(HZ_KEY_A))
+			m_FocalPoint += GetRightDirection() * m_CameraTranslationSpeed;
+		if (Input::IsKeyPressed(HZ_KEY_D))
+			m_FocalPoint -= GetRightDirection() * m_CameraTranslationSpeed;
+		if (Input::IsKeyPressed(HZ_KEY_Q)) // Éý¸ß
+			m_FocalPoint += GetUpDirection() * m_CameraTranslationSpeed;
+		if (Input::IsKeyPressed(HZ_KEY_E)) // ½µµÍ
+			m_FocalPoint -= GetUpDirection() * m_CameraTranslationSpeed;
+
+		//if (m_rotation) {
+		//
+		//	if (Hazel::Input::IsKeyPressed(HZ_KEY_E)) {
+		//		m_Rotation += m_CameraRotationSpeed * ts;
+		//	}
+		//	else if (Hazel::Input::IsKeyPressed(HZ_KEY_Q)) {
+		//		m_Rotation -= m_CameraRotationSpeed * ts;
+		//	}
+		//}
 
 		UpdateView();
 	}
@@ -84,6 +107,7 @@ namespace Hazel {
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseScrolledEvent>(HZ_BIND_EVENT_FN(EditorCamera::OnMouseScroll));
+
 	}
 
 	bool EditorCamera::OnMouseScroll(MouseScrolledEvent& e)
@@ -135,7 +159,7 @@ namespace Hazel {
 
 	glm::vec3 EditorCamera::CalculatePosition() const
 	{
-		return m_FocalPoint - GetForwardDirection() * m_Distance;
+		return  m_FocalPoint - GetForwardDirection() * m_Distance;
 	}
 
 	glm::quat EditorCamera::GetOrientation() const

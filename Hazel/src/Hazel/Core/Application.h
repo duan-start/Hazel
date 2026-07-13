@@ -52,7 +52,7 @@ public:
 
 	//直接close
 	void Close();
-	//为了获得对应私有变量的数据，这个是全局唯一的数据资源
+	//为了获得对应私有变量的数据，这个是全局唯一的数据资源(这是标准获取方式)
 	inline static Application& Get() { return *s_Instance; }
 
 	//获得对应的窗口资源

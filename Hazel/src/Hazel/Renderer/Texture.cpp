@@ -3,7 +3,7 @@
 #include "Renderer.h"  
 
 #include "Platform/OpenGL/OpenGLTexture2D.h" 
-
+#include "Platform/OpenGL/OpenGLTextureCube.h"
 namespace Hazel {
 	Ref<Texture2D> Texture2D::Create(uint32_t width, uint32_t height)
 	{
@@ -51,5 +51,15 @@ namespace Hazel {
 	bool TextureLibrary::Exists(const std::string& name) const
 	{
 		return  m_Textures.find(name) != m_Textures.end();
+	}
+	Ref<TextureCube> TextureCube::Create(const std::string& path)
+	{
+		switch (RendererAPI::GetAPI()) {
+		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "UnKnow RendererAPI"); break;
+		case RendererAPI::API::OpenGL: return CreateRef<OpenGLTextureCube>(path); break;
+
+		}
+		HZ_CORE_ASSERT(false, "UnKnow RendererAPI");
+		return nullptr;
 	}
 }
