@@ -86,7 +86,7 @@ namespace Hazel {
 			//Shader
 			//shaderLib;
 			auto& Lib = ShaderLibrary::GetLib();
-			s_Data.PBRshader = Lib->Get("Pbr");
+			//s_Data.PBRshader = Lib->Get("Pbr");
 			s_Data.SkyShader = Lib->Get("SkyBox");
 
 			// 立方体的 8 个顶点
@@ -192,9 +192,9 @@ namespace Hazel {
 		}
 
 		// 3. 渲染当前这个 Mesh
-		s_Data.PBRshader->Bind();
-		s_Data.TextureSlots[0]->Bind();
-		DrawIndexed(targetMesh->GetVertexArray());
+		//s_Data.PBRshader->Bind();
+		//s_Data.TextureSlots[0]->Bind();
+		//DrawIndexed(targetMesh->GetVertexArray());
 
 	}
 

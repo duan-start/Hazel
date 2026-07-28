@@ -51,7 +51,7 @@ namespace Hazel {
 			Load("assets/shaders/Texture.glsl");
 			Load("assets/shaders/Circle.glsl");
 			Load("assets/shaders/Line.glsl");
-			Load("assets/shaders/Pbr.glsl");
+			//Load("assets/shaders/Pbr.glsl");
 			Load("assets/shaders/SkyBox.glsl");
 		}
 	private:

@@ -33,6 +33,7 @@ namespace Hazel {
 
 	//直接一个当三个用,获得事件的类型和名字
 	//#type 直接把type变为const char*->"type"
+	//函数宏，只有解析到（）的时候才会进行替换
 	#define EVENT_CLASS_TYPE(type) static EventType GetStaticType(){ return EventType::type;}\
 									virtual EventType GetEventType()const override{return GetStaticType();}\
 									virtual const char* GetName() const override{return #type;}

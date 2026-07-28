@@ -14,7 +14,7 @@ namespace Hazel {
 		static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount);
 	private:
 
-		inline static RendererAPI* s_RendererAPI=nullptr;
+		static RendererAPI* s_RendererAPI;
 	};
 
 }

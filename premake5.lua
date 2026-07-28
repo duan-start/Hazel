@@ -1,5 +1,5 @@
 -- 就是为了引入额外的功能插件，用来控制书写和排版的同一
-include "./vendor/bin/premake_customization/solution_items.lua"
+include "./vendor/premake/premake_customization/solution_items.lua"
 include "Dependencies.lua"
 --引入设置好的宏命名
 workspace "Hazel"
@@ -29,7 +29,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- 里面必须得有对应的premakefile ，这样才能同一组织到。sln里面
 group "Dependencies"
-	include "vendor/bin"
+	include "vendor/premake"
 	include "Hazel/vendor/Box2D"
 	include "Hazel/vendor/GLFW"
 	include "Hazel/vendor/Glad"
