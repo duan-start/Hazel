@@ -7,6 +7,7 @@ bin-int/
 *.user
 *.filters
 *.vcxproj
+*.sln
 
 Hazel/vendor/VulkanSDK
 Hazel-Editor/assets/cache
