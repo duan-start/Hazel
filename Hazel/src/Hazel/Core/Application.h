@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Hazel/Core/Core.h"
 #include "Window.h"
 
@@ -20,61 +20,63 @@
 
 #include "Hazel/Renderer/Camera.h"
 
+#include "Hazel/Scripting/ScriptEngine.h"
+
 namespace Hazel {
-	//mainº¯ÊıÀïÃæµÄargiºÍcountµÄ´«²Î
-	//Ìí¼Ó¸ü¶àµÄ×¢ÊÍ£¬·½±ã¸üºÃµÄÀí½â
+	//mainå‡½æ•°é‡Œé¢çš„argiå’Œcountçš„ä¼ å‚
+	//æ·»åŠ æ›´å¤šçš„æ³¨é‡Šï¼Œæ–¹ä¾¿æ›´å¥½çš„ç†è§£
 	struct ApplicationCommandLineArgs
 	{
-		//ÃüÁîĞĞÖ±½Ó´ò°üÄÚÈİ
+		//å‘½ä»¤è¡Œç›´æ¥æ‰“åŒ…å†…å®¹
 		int Count = 0;
 		char** Args = nullptr;
 
-		//Êı¾İµÄ·ÃÎÊ
+		//æ•°æ®çš„è®¿é—®
 		const char* operator[](int index) const
 		{
 			HZ_CORE_ASSERT(index < Count,"Index Out of Count");
 			return Args[index];
 		}
 	};
-	//ApplicationÊÇÒ»¸ö²ßÂÔÄ£Ê½£¬¿Í»§¶ËÖ±½Ó¼Ì³ĞÕâ¸öÀà£¬Í¬Ê±¶¨ÒåCreatApplicaton º¯Êı
+	//Applicationæ˜¯ä¸€ä¸ªç­–ç•¥æ¨¡å¼ï¼Œå®¢æˆ·ç«¯ç›´æ¥ç»§æ‰¿è¿™ä¸ªç±»ï¼ŒåŒæ—¶å®šä¹‰CreatApplicaton å‡½æ•°
 class HAZEL_API Application {
 public:	
 	Application(const std::string& name, ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 	virtual ~Application();
-	//ºËĞÄµÄÑ­»·Âß¼­
+	//æ ¸å¿ƒçš„å¾ªç¯é€»è¾‘
 	void Run();
-	//ÊÂ¼ş´¦Àí»úÖÆ£¬¶¯Ì¬»ñµÃÊÂ¼şµÄÊµ¼ÊÀàĞÍ£¬Í¨¹ıÄ£°åÂÖÑ¯À´ÉèÖÃ¶ÔÓ¦µÄ´¦Àí»úÖÆ£¨ÒÔ¼°Ïò²»Í¬µÄlayer´¦Àí£©
+	//äº‹ä»¶å¤„ç†æœºåˆ¶ï¼ŒåŠ¨æ€è·å¾—äº‹ä»¶çš„å®é™…ç±»å‹ï¼Œé€šè¿‡æ¨¡æ¿è½®è¯¢æ¥è®¾ç½®å¯¹åº”çš„å¤„ç†æœºåˆ¶ï¼ˆä»¥åŠå‘ä¸åŒçš„layerå¤„ç†ï¼‰
 	void OnEvent(Event& e);
 	
 	void PushLayer(Layer* layer);
-	//Ö±½Ópushµ½×îÉÏÃæ
+	//ç›´æ¥pushåˆ°æœ€ä¸Šé¢
 	void PushOverLayer(Layer* overlay);
 
-	//Ö±½Óclose
+	//ç›´æ¥close
 	void Close();
-	//ÎªÁË»ñµÃ¶ÔÓ¦Ë½ÓĞ±äÁ¿µÄÊı¾İ£¬Õâ¸öÊÇÈ«¾ÖÎ¨Ò»µÄÊı¾İ×ÊÔ´(ÕâÊÇ±ê×¼»ñÈ¡·½Ê½)
+	//ä¸ºäº†è·å¾—å¯¹åº”ç§æœ‰å˜é‡çš„æ•°æ®ï¼Œè¿™ä¸ªæ˜¯å…¨å±€å”¯ä¸€çš„æ•°æ®èµ„æº(è¿™æ˜¯æ ‡å‡†è·å–æ–¹å¼)
 	inline static Application& Get() { return *s_Instance; }
 
-	//»ñµÃ¶ÔÓ¦µÄ´°¿Ú×ÊÔ´
+	//è·å¾—å¯¹åº”çš„çª—å£èµ„æº
 	Window& GetWindow(){ return  *m_Window; }
-	//»îµÃ¶ÔÓ¦µÄimguilayer
+	//æ´»å¾—å¯¹åº”çš„imguilayer
 	ImGuiLayer* GetImGuiLayer() {	return m_ImGuiLayer;}
-	//»ñµÃ¼òµ¥µÄ²ÎÊı£¬¸ºÔğ²»Í¬µÄÈÎÎñÖ¸Áî
+	//è·å¾—ç®€å•çš„å‚æ•°ï¼Œè´Ÿè´£ä¸åŒçš„ä»»åŠ¡æŒ‡ä»¤
 	ApplicationCommandLineArgs GetCommandLineArgs()const { return m_CommandLineArgs;}
 private:
-	//Ã¿¸öapplication»òÕßlayer¶¼ĞèÒªÊÖ¶¯¶¨Òå×Ô¼ºµÄÊÂ¼ş´¦Àíº¯Êı
+	//æ¯ä¸ªapplicationæˆ–è€…layeréƒ½éœ€è¦æ‰‹åŠ¨å®šä¹‰è‡ªå·±çš„äº‹ä»¶å¤„ç†å‡½æ•°
 	bool OnWindowClose(WindowCloseEvent& e);
 	bool OnWindowResize(WindowResizeEvent& e);
 private:
-	//È«¾ÖµÄ×ÊÔ´£º
-	//´°¿Ú£¬imguilayer,layerstack(ÓÃÀ´´ælayers,)
-	//Õâ¸ö´°¿ÚÒ²ÊÇ·â×°¹ıºóµÄ
+	//å…¨å±€çš„èµ„æºï¼š
+	//çª—å£ï¼Œimguilayer,layerstack(ç”¨æ¥å­˜layers,)
+	//è¿™ä¸ªçª—å£ä¹Ÿæ˜¯å°è£…è¿‡åçš„
 	std::unique_ptr<Window> m_Window;
 
 
 
 	bool m_Running = true;
-	//layerµÄÈİÆ÷
+	//layerçš„å®¹å™¨
 	LayerStack m_LayerStack;
 	ImGuiLayer* m_ImGuiLayer;
 
@@ -84,9 +86,9 @@ private:
 	//wait a minute
 	float m_LastFrameTime = 0.f;
 private:
-	//µ¥ÀıÉè¼Æ
+	//å•ä¾‹è®¾è®¡
 	static Application* s_Instance;
 };
-//º¯ÊıÉùÃ÷£¬ÑÓ³Ù¶¨Òå
+//å‡½æ•°å£°æ˜ï¼Œå»¶è¿Ÿå®šä¹‰
 Application* CreateApplication(ApplicationCommandLineArgs args);
 }

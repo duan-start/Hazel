@@ -45,6 +45,7 @@ project "Hazel"
 		"%{IncludeDir.Box2D}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.VulkanSDK}",
+		"%{IncludeDir.mono}",
 		"%{IncludeDir.assimp}"
 	}
 
@@ -58,7 +59,12 @@ project "Hazel"
 		"ImGui",
 		"yaml-cpp",
 		"%{Library.Assimp}",
-		"opengl32.lib"
+		"opengl32",
+		"%{Library.Mono}",
+		"%{Library.WinSock}",
+		"%{Library.WinMM}",
+		"%{Library.WinVersion}",
+		"%{Library.BCrypt}"
 	}
 -- 针对特定文件下，不使用预编译头文件
 	filter "files:vendor/ImGuizmo/**.cpp"

@@ -1,4 +1,4 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 
 #include "Application.h"
 #include "Hazel/Events/ApplicationEvent.h"
@@ -9,10 +9,10 @@
 
 namespace Hazel {
 
-	//º¯ÊıÖ¸ÕëÇ©Ãû¸ü¸Ä£¬Ê¹ÓÃthisÊÇÏÔÊ¾Ìæ»»µÄ²ÎÊı1¡£x(this,a)->x(a);(¶ÔÍâ²¿±©Â¶µÄ½Ó¿Ú)
+	//å‡½æ•°æŒ‡é’ˆç­¾åæ›´æ”¹ï¼Œä½¿ç”¨thisæ˜¯æ˜¾ç¤ºæ›¿æ¢çš„å‚æ•°1ã€‚x(this,a)->x(a);(å¯¹å¤–éƒ¨æš´éœ²çš„æ¥å£)
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 	
-	//static Êı¾İÈç¹û²»inlineµÄ»°ĞèÒªÔÚÍâ²¿¶¨Òå
+	//static æ•°æ®å¦‚æœä¸inlineçš„è¯éœ€è¦åœ¨å¤–éƒ¨å®šä¹‰
 	Application* Application::s_Instance = nullptr;
 
 
@@ -20,47 +20,49 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		HZ_CORE_ASSERT(!s_Instance, "Application has been existed ");
-		//ÀàÄÚ¹¹Ôìº¯Êı½øĞĞ³õÊ¼»¯£¬¶àÌ¬Ö¸Õë£¬¸¸ÀàÖ¸ÕëÖ¸Ïò×ÓÀà¶ÔÏó£¨Õâ¸öÊÇ¸ø×ÓÀà¼¯³ÉÊµÏÖ¶àÌ¬µÄ£©
+		//ç±»å†…æ„é€ å‡½æ•°è¿›è¡Œåˆå§‹åŒ–ï¼Œå¤šæ€æŒ‡é’ˆï¼Œçˆ¶ç±»æŒ‡é’ˆæŒ‡å‘å­ç±»å¯¹è±¡ï¼ˆè¿™ä¸ªæ˜¯ç»™å­ç±»é›†æˆå®ç°å¤šæ€çš„ï¼‰
 		s_Instance = this;
 
 		//Important
-		//Init Window,ÉèÖÃdataÀïÃæµÄ»Øµ÷º¯Êı£¬ÊµÏÖÊÂ¼şµÄ´«µİ´¦Àí
+		//Init Window,è®¾ç½®dataé‡Œé¢çš„å›è°ƒå‡½æ•°ï¼Œå®ç°äº‹ä»¶çš„ä¼ é€’å¤„ç†
 		m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 
-		//Init ImguiLayer(ImguiÊÇÒ»¸ö×´Ì¬»ú)
-		//ËùÓĞµÄImguiRender¶¼ÊÇ»ùÓÚµÚÒ»¸öImguiµÄ×´Ì¬
+		//Init ImguiLayer(Imguiæ˜¯ä¸€ä¸ªçŠ¶æ€æœº)
+		//æ‰€æœ‰çš„ImguiRenderéƒ½æ˜¯åŸºäºç¬¬ä¸€ä¸ªImguiçš„çŠ¶æ€
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverLayer(m_ImGuiLayer);
 
 		//Init Render
 		Renderer::Init();
-
+		
+		ScriptEngine::Init();
 	}
 
 	Application:: ~Application() {
 		HZ_PROFILE_FUNCTION();
 
-		//²»ÓÃĞ´£¬Õâ¸öÊµ¼ÊÉÏÊµÔÚlaystackÊÖ¶¯É¾³ı£¬ÔÚÄÇ¸öµØ·½¹ÜÀíÉúÃüÖÜÆÚ
+		//ä¸ç”¨å†™ï¼Œè¿™ä¸ªå®é™…ä¸Šå®åœ¨laystackæ‰‹åŠ¨åˆ é™¤ï¼Œåœ¨é‚£ä¸ªåœ°æ–¹ç®¡ç†ç”Ÿå‘½å‘¨æœŸ
 		//delete m_ImGuiLayer;  
+		ScriptEngine::Shutdown();
 	}
 
-	//Application´¦ÀíÊÂ¼şµÄÊÖ¶Î£¬Í¨¹ı×èÈûÊ½µÄ·½·¨Öğ¸ö´¦Àí£¨Ã¿¸öÊÂ¼ş¶¼È¥ÂÖÑ¯1.²»Í¬ÊÂ¼şÀàĞÍ2.²»Í¬²ãÕ»£©
+	//Applicationå¤„ç†äº‹ä»¶çš„æ‰‹æ®µï¼Œé€šè¿‡é˜»å¡å¼çš„æ–¹æ³•é€ä¸ªå¤„ç†ï¼ˆæ¯ä¸ªäº‹ä»¶éƒ½å»è½®è¯¢1.ä¸åŒäº‹ä»¶ç±»å‹2.ä¸åŒå±‚æ ˆï¼‰
 	void Application::OnEvent(Event& e) {
 		HZ_PROFILE_FUNCTION();
-		//ÉèÖÃ´¦ÀíÊÂ¼şµÄÀà£¨±£´æÕâ¸öÊÂ¼ş£©
+		//è®¾ç½®å¤„ç†äº‹ä»¶çš„ç±»ï¼ˆä¿å­˜è¿™ä¸ªäº‹ä»¶ï¼‰
 		EventDispatcher dispatcher(e);
-		//ÉèÖÃ´¦Àí¶ÔÓ¦ÊÂ¼şµÄÂß¼­
-		//ÎªÁË±£Ö¤º¯ÊıÖ¸ÕëµÄÇ©ÃûÏàÍ¬£¬ÕâÀïÓÃbindÊµÏÖÁËº¯ÊıµÄadapt£¬±£Ö¤º¯ÊıÄÜ¹»³É¹¦°ó¶¨µ½¶ÔÓ¦Ö¸Õë
+		//è®¾ç½®å¤„ç†å¯¹åº”äº‹ä»¶çš„é€»è¾‘
+		//ä¸ºäº†ä¿è¯å‡½æ•°æŒ‡é’ˆçš„ç­¾åç›¸åŒï¼Œè¿™é‡Œç”¨bindå®ç°äº†å‡½æ•°çš„adaptï¼Œä¿è¯å‡½æ•°èƒ½å¤ŸæˆåŠŸç»‘å®šåˆ°å¯¹åº”æŒ‡é’ˆ
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
 
 		
-		//´ÓÎ²¶Ëµ½Ç°Ãæ£¬ÖğLayer ÊµÏÖ´«µİÊÂ¼ş½øĞĞ´¦Àí
+		//ä»å°¾ç«¯åˆ°å‰é¢ï¼Œé€Layer å®ç°ä¼ é€’äº‹ä»¶è¿›è¡Œå¤„ç†
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it) {
 			(*it)->OnEvent(e);
 		//	HZ_CORE_TRACE("event: {} ", e.Handled);
-			//Èç¹û´¦Àí³É¹¦£¬Ö±½ÓÍË³ö
+			//å¦‚æœå¤„ç†æˆåŠŸï¼Œç›´æ¥é€€å‡º
 			if (e.Handled) break;  
 		}
 	}
@@ -105,7 +107,7 @@ namespace Hazel {
 	void Application::Close() {
 		m_Running = false;
 	}
-	//ºËĞÄ¸üĞÂÂß¼­
+	//æ ¸å¿ƒæ›´æ–°é€»è¾‘
 	void Application::Run() {
 
 		HZ_PROFILE_FUNCTION();
@@ -117,19 +119,19 @@ namespace Hazel {
 
 			float time = glfwGetTime();
 
-			//ÓÃÉÏÒ»Ö¡µÄÊ±¼äÈ¥tickÎïÀí
-			//»á´æÔÚÒ»µãÎÊÌâ
+			//ç”¨ä¸Šä¸€å¸§çš„æ—¶é—´å»tickç‰©ç†
+			//ä¼šå­˜åœ¨ä¸€ç‚¹é—®é¢˜
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			//Âß¼­£¬¶¯»­£¬äÖÈ¾µÄÀëÆÁ¸üĞÂ
+			//é€»è¾‘ï¼ŒåŠ¨ç”»ï¼Œæ¸²æŸ“çš„ç¦»å±æ›´æ–°
 			if (!m_Minimized) {
 			HZ_PROFILE_SCOPE("LayerStack Update");
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate(timestep);
 			}
 
-			//ImGuiµÄ¸üĞÂ£¬×´Ì¬»ú£¨»æÖÆµ½ÆÁÄ»µÄ×´Ì¬¸üĞÂ£¬2DUI£©
+			//ImGuiçš„æ›´æ–°ï¼ŒçŠ¶æ€æœºï¼ˆç»˜åˆ¶åˆ°å±å¹•çš„çŠ¶æ€æ›´æ–°ï¼Œ2DUIï¼‰
 			m_ImGuiLayer->Begin();
 			{
 			HZ_PROFILE_SCOPE("LayerStack OnImGuiRender");
@@ -140,7 +142,7 @@ namespace Hazel {
 			}
 			m_ImGuiLayer->End();
 
-			//ÊÂ¼ş²¶»ñºÍ´°¿Ú»­Ãæ¸üĞÂ
+			//äº‹ä»¶æ•è·å’Œçª—å£ç”»é¢æ›´æ–°
 			m_Window->OnUpdate();
 
 		}
