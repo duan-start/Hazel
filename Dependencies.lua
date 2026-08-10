@@ -26,12 +26,15 @@ IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 --Initialized Lidrary,指定原始的lib和编译到本地项目的debug版本
 LibraryDir = {}
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
-LibraryDir["assimp"] = "%{wks.location}/Hazel/vendor/assimp"
+LibraryDir["assimp"] = "%{wks.location}/Hazel/vendor/assimp/lib/%{cfg.buildcfg}"
+LibraryDir["zlib"] = "%{wks.location}/Hazel/vendor/assimp/lib/zlib/%{cfg.buildcfg}"
 LibraryDir["mono"] = "%{wks.location}/Hazel/vendor/mono/lib/%{cfg.buildcfg}"
 --利用上面已经定义好的去找到对应的库
 Library = {}
 Library["Mono"] = "%{LibraryDir.mono}/libmono-static-sgen.lib"
-Library["Assimp"]="%{LibraryDir.assimp}/Libs/assimp-vc143-mtd.lib"
+Library["Assimp"]="%{LibraryDir.assimp}/assimp-vc143-mtd.lib"
+Library["zlib"]="%{LibraryDir.zlib}/zlibstaticd.lib"
+
 Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
 Library["VulkanUtils"] = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"
 

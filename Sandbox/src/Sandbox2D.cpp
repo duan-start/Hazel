@@ -103,8 +103,8 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 		HZ_PROFILE_SCOPE("Render Prep ");
 		m_Framebuffer->Bind();
 		///---------------------------------------------
-		Hazel::Renderer::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-		Hazel::Renderer::Clear();
+		Hazel::Renderer3D::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		Hazel::Renderer3D::Clear();
 	}
 
 	{

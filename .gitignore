@@ -3,12 +3,16 @@
 bin/
 bin-int/
 
+
 # Files
 *.user
 *.filters
 *.vcxproj
 *.sln
 
+#lib
+*.lib
+*.pdb
 Hazel/vendor/VulkanSDK
 Hazel-Editor/assets/cache
 scripts/__pycache__

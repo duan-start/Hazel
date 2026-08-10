@@ -1,13 +1,14 @@
-#pragma once
+ï»¿#pragma once
 #include <glm/glm.hpp>
 #include "Buffer.h"
 #include "VertexArray.h"
 namespace Hazel {
 
+	class Material;
 	class  Mesh
 	{
 	public:
-		//Í¬Ò»¸öshaderäÖÈ¾ÏÂµÄ×îĞ¡µ¥Ôª£¬Ò»°ãÖ±½Ó¾ÍÊÇÒ»¸öÄ£ĞÍ
+		//åŒä¸€ä¸ªshaderæ¸²æŸ“ä¸‹çš„æœ€å°å•å…ƒï¼Œä¸€èˆ¬ç›´æ¥å°±æ˜¯ä¸€ä¸ªæ¨¡å‹
 		struct Vertex
 		{
 			glm::vec3 Position;
@@ -39,6 +40,8 @@ namespace Hazel {
 		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
 
+
+		Ref<Material> m_Material;
 		std::string m_FilePath;
 
 

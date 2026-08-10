@@ -147,8 +147,8 @@ void EditorLayer::OnUpdate(Timestep ts)
 
 	//每次bind的时候不仅bind，还重新设置了viewport的大小
 	m_Framebuffer->Bind();
-	Renderer::SetClearColor(glm::vec4(0.0f, 0.f, 0.f, 1.0f));
-	Renderer::Clear();
+	Renderer3D::SetClearColor(glm::vec4(0.0f, 0.f, 0.f, 1.0f));
+	Renderer3D::Clear();
 
 	
 	 //Clear our entity ID attachment to -1 （因为默认是0的话是代表对应的entityID的）

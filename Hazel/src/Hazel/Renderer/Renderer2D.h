@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Hazel/Renderer/OrthographicCamera.h"
 #include "Hazel/Renderer/GameCamera.h"
 #include "Hazel/Renderer/EditorCamera.h"
@@ -12,20 +12,20 @@
 #include "Hazel/Scene/Components.h"
 
 namespace Hazel {
-	//Ìá½»äÖÈ¾ÃüÁî°´ÀíÒ²ÊÇÖ»ºÍrendererCommand½»»¥
-	//ÖØ¹¹ing
-	//È«²¿ÊÇstatic£¬²»ĞèÒªÊµÀı»¯
+	//æäº¤æ¸²æŸ“å‘½ä»¤æŒ‰ç†ä¹Ÿæ˜¯åªå’ŒrendererCommandäº¤äº’
+	//é‡æ„ing
+	//å…¨éƒ¨æ˜¯staticï¼Œä¸éœ€è¦å®ä¾‹åŒ–
 	class Renderer2D
 	{
 	public:
 		
 		static void Init();
 		static void Shutdown();
-		//ÔÚ»æÖÆ»­ÃæÖ®Ç°£¬ÏÈÈ·¶¨Õû¸ö³¡¾°µÄÏà»úµÄÎ»ÖÃ
+		//åœ¨ç»˜åˆ¶ç”»é¢ä¹‹å‰ï¼Œå…ˆç¡®å®šæ•´ä¸ªåœºæ™¯çš„ç›¸æœºçš„ä½ç½®
 		static void BeginScene(const OrthographicCamera& camera);
 		static void BeginScene(const EditorCamera& camera);
 		static void BeginScene(const GameCamera& camera, const glm::mat4& transform);
-		//endScene£¬ÊµÏÖDrawCallµ÷ÓÃ
+		//endSceneï¼Œå®ç°DrawCallè°ƒç”¨
 		static void EndScene();
 		
 	//CIrcle
@@ -42,7 +42,7 @@ namespace Hazel {
 		static float GetLineWidth();
 		static void SetLineWidth(float width);
 
-	//»ù´¡»æÖÆÊôĞÔ
+	//åŸºç¡€ç»˜åˆ¶å±æ€§
 	//static : color
 		static void DrawQuad(const glm::vec3& position,const glm::vec2& size,const glm::vec4& color);
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
@@ -61,7 +61,7 @@ namespace Hazel {
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 
 
-	//Ğı×ªÊôĞÔµÄÌí¼Ó
+	//æ—‹è½¬å±æ€§çš„æ·»åŠ 
 	//rotation: color
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color);
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color);
@@ -89,7 +89,7 @@ namespace Hazel {
 
 	private:
 		//hack function
-		//»æÖÆ
+		//ç»˜åˆ¶
 		static void Flush();
 		static void StartNewBactch();
 	};

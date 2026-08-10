@@ -1,4 +1,4 @@
-#include "GameLayer.h"
+﻿#include "GameLayer.h"
 #include <imgui.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -49,8 +49,8 @@ void GameLayer::OnUpdate(Hazel::Timestep ts)
 	}
 
 	// Render
-	Hazel::Renderer::SetClearColor({ 0.0f, 0.0f, 0.1f, 1 });
-	Hazel::Renderer::Clear();
+	Hazel::Renderer3D::SetClearColor({ 0.0f, 0.0f, 0.1f, 1 });
+	Hazel::Renderer3D::Clear();
 
 	Hazel::Renderer2D::BeginScene(*m_Camera);
 	m_Level.OnRender(*m_Camera);

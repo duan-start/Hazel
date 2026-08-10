@@ -1,8 +1,8 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 #include "Scene.h"
 #include "Components.h"
 #include "ScriptableEntity.h"
-#include "Hazel/Renderer/Renderer.h"
+#include "Hazel/Renderer/Renderer3D.h"
 #include "Hazel/Renderer/Renderer2D.h"
 
 #include <glm/glm.hpp>
@@ -42,34 +42,34 @@ namespace Hazel {
 
 		}
 
-		//ÖØĞÂ´´½¨×¢²á±í£¬´´½¨ÊµÌå£¬²¢½«Ô­ÊµÌåµÄcomponent¸´ÖÆµ½ĞÂµÄÊµÌåÀïÃæ
+		//é‡æ–°åˆ›å»ºæ³¨å†Œè¡¨ï¼Œåˆ›å»ºå®ä½“ï¼Œå¹¶å°†åŸå®ä½“çš„componentå¤åˆ¶åˆ°æ–°çš„å®ä½“é‡Œé¢
 		template<typename Component>
 		static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
 		{
-			//Component¾ÍÊÇÈÎÒâtype
-			//ÕÒµ½ÓµÓĞ¶ÔÓ¦×é¼şµÄÊµÌå
-			//È»ºóÒÀ´Î¿½±´
+			//Componentå°±æ˜¯ä»»æ„type
+			//æ‰¾åˆ°æ‹¥æœ‰å¯¹åº”ç»„ä»¶çš„å®ä½“
+			//ç„¶åä¾æ¬¡æ‹·è´
 			auto view = src.view<Component>();
 			
 			for (auto e : view)
 			{
-				//¸ù¾İuuidµÃµ½srcµÄÊµ¼ÊµÄentityid
-				//È»ºóÖ±½Ó¸´ÖÆµ½ĞÂ½¨µÄÊµÌåÖĞ
-				//ÒâÎ¶×ÅÕâÁ½¸öµÄÊµÌåµÄIDÊÇÒ»ÑùµÄ
-				//ËùÒÔ²»ÄÜÖ»ÊÇÍ¬Ê±³öÏÖ£¨äÖÈ¾£© Ò²È·Êµ²»»á
+				//æ ¹æ®uuidå¾—åˆ°srcçš„å®é™…çš„entityid
+				//ç„¶åç›´æ¥å¤åˆ¶åˆ°æ–°å»ºçš„å®ä½“ä¸­
+				//æ„å‘³ç€è¿™ä¸¤ä¸ªçš„å®ä½“çš„IDæ˜¯ä¸€æ ·çš„
+				//æ‰€ä»¥ä¸èƒ½åªæ˜¯åŒæ—¶å‡ºç°ï¼ˆæ¸²æŸ“ï¼‰ ä¹Ÿç¡®å®ä¸ä¼š
 				UUID uuid = src.get<IDComponent>(e).ID;
 				//HZ_CORE_ASSERT(enttMap.find(uuid) != enttMap.end());
-				//ÕÒµ½Ä¿±ê×¢²á±íÀïÃæ¶ÔÓ¦µÄÊµÌå
+				//æ‰¾åˆ°ç›®æ ‡æ³¨å†Œè¡¨é‡Œé¢å¯¹åº”çš„å®ä½“
 				entt::entity dstEnttID = enttMap.at(uuid);
-				//È¥srcÀïÃæÕÒµ½¶ÔÓ¦µÄÊµÌåµÄ×é¼ş
+				//å»srcé‡Œé¢æ‰¾åˆ°å¯¹åº”çš„å®ä½“çš„ç»„ä»¶
 				auto& component = src.get<Component>(e);
-				//½«ÕÒµ½µÄ×é¼ş¹ÒÔØµ½Ä¿±êµÄÊµÌåÉÏ
+				//å°†æ‰¾åˆ°çš„ç»„ä»¶æŒ‚è½½åˆ°ç›®æ ‡çš„å®ä½“ä¸Š
 				dst.emplace_or_replace<Component>(dstEnttID, component);
 			}
 		}
 
-		//µ¥¸öÊµÌå×é¼şµÄ¸´ÖÆ
-		//ÔÚÍ¬Ò»¸ö³¡¾°ÖĞäÖÈ¾³öÀ´£¬ËùÒÔdstĞèÒªµ¥¶À´´½¨
+		//å•ä¸ªå®ä½“ç»„ä»¶çš„å¤åˆ¶
+		//åœ¨åŒä¸€ä¸ªåœºæ™¯ä¸­æ¸²æŸ“å‡ºæ¥ï¼Œæ‰€ä»¥dstéœ€è¦å•ç‹¬åˆ›å»º
 		template<typename Component>
 		static void CopyComponentIfExists(Entity dst, Entity src)
 		{
@@ -108,27 +108,27 @@ namespace Hazel {
 
 	Scene::~Scene()
 	{
-		//É¾³ıÎïÀíÊÀ½çµÄÖ¸Õë
+		//åˆ é™¤ç‰©ç†ä¸–ç•Œçš„æŒ‡é’ˆ
 		delete m_PhysicsWorld;
 	}
 
 	Ref<Scene> Scene::Copy(Ref<Scene> other)
 	{
-		//´´½¨Ö¸Õë¶ÔÏó
+		//åˆ›å»ºæŒ‡é’ˆå¯¹è±¡
 		Ref<Scene> newScene = CreateRef<Scene>();
 
-		//CameraÉèÖÃaspect Ration
+		//Cameraè®¾ç½®aspect Ration
 		newScene->m_ViewportWidth = other->m_ViewportWidth;
 		newScene->m_ViewportHeight = other->m_ViewportHeight;
 
-		//»ñÈ¡×¢²á±í
+		//è·å–æ³¨å†Œè¡¨
 		auto& srcSceneRegistry = other->m_Registry;
 		auto& dstSceneRegistry = newScene->m_Registry;
-		//ÉèÖÃ×ÊÔ´±í
+		//è®¾ç½®èµ„æºè¡¨
 		std::unordered_map<UUID, entt::entity> enttMap;
 
-		// ÀûÓÃUUID´´½¨ÏàÍ¬µÄ¶ÔÏó£¨ÓÉÓÚ²¢²»¿çSceneÍ¨ĞÅ£¬ËùÒÔÎÒÃÇÊÇÔÊĞíUUIDÖØ¸´µÄ£¨SceneÎ¨Ò»£©£¬¶øÇÒÕâÑù×î¸ßĞ§£¬ÄÜ¹»¾«×¼ÕÒµ½¶ÔÓ¦µÄÊµÌå£©
-		//ËÑ¼¯ËùÓĞ¶ÔÏó
+		// åˆ©ç”¨UUIDåˆ›å»ºç›¸åŒçš„å¯¹è±¡ï¼ˆç”±äºå¹¶ä¸è·¨Sceneé€šä¿¡ï¼Œæ‰€ä»¥æˆ‘ä»¬æ˜¯å…è®¸UUIDé‡å¤çš„ï¼ˆSceneå”¯ä¸€ï¼‰ï¼Œè€Œä¸”è¿™æ ·æœ€é«˜æ•ˆï¼Œèƒ½å¤Ÿç²¾å‡†æ‰¾åˆ°å¯¹åº”çš„å®ä½“ï¼‰
+		//æœé›†æ‰€æœ‰å¯¹è±¡
 		auto idView = srcSceneRegistry.view<IDComponent>();
 		for (auto e : idView)
 		{
@@ -138,9 +138,9 @@ namespace Hazel {
 			enttMap[uuid] = (entt::entity)newEntity;
 		}
 
-		// ×¢²á±íÀïÃæËùÓĞ£¨µÄ×é¼ş£©µÄ¸´ÖÆ£¨ÒÀ¾İ×é¼şÈ¥ÕÒÊµÌå£¬È»ºó¸ù¾İÏàÍ¬µÄUUID¾«×¼¸´ÖÆµ½¶ÔÓ¦µÄÊµÌåÉÏ£©
-		//³¡¾°¸´ÖÆÓĞÁ½ÖÖË¼Ïë£¬Ò»ÖÖÊÇ±éÀúentity½øĞĞ¶à¸öcomponmet¸´ÖÆ£¨ºÃÀí½âµ«µÍĞ§£©
-		//¶şÊÇ±éÀúComponent½øĞĞ½øĞĞ¶à¸öEntityµÄÒ»¸öComponment£¨cacheÓÑºÃ£¬»ùÓÚUUID½øĞĞentityÆ¥Åä)
+		// æ³¨å†Œè¡¨é‡Œé¢æ‰€æœ‰ï¼ˆçš„ç»„ä»¶ï¼‰çš„å¤åˆ¶ï¼ˆä¾æ®ç»„ä»¶å»æ‰¾å®ä½“ï¼Œç„¶åæ ¹æ®ç›¸åŒçš„UUIDç²¾å‡†å¤åˆ¶åˆ°å¯¹åº”çš„å®ä½“ä¸Šï¼‰
+		//åœºæ™¯å¤åˆ¶æœ‰ä¸¤ç§æ€æƒ³ï¼Œä¸€ç§æ˜¯éå†entityè¿›è¡Œå¤šä¸ªcomponmetå¤åˆ¶ï¼ˆå¥½ç†è§£ä½†ä½æ•ˆï¼‰
+		//äºŒæ˜¯éå†Componentè¿›è¡Œè¿›è¡Œå¤šä¸ªEntityçš„ä¸€ä¸ªComponmentï¼ˆcacheå‹å¥½ï¼ŒåŸºäºUUIDè¿›è¡ŒentityåŒ¹é…)
 		Utils::CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		Utils::CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		Utils::CopyComponent<CircleRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
@@ -152,14 +152,14 @@ namespace Hazel {
 		return newScene;
 	}
 
-	//ÊµÌå¸´ÖÆ£¨×é¼ş¸´ÖÆ£©
+	//å®ä½“å¤åˆ¶ï¼ˆç»„ä»¶å¤åˆ¶ï¼‰
 	void Scene::DuplicateEntity(Entity entity)
 	{
-		//´´½¨Ò»¸öĞÂÊµÌå£¨ÓÉÓÚÊÇÍ¬Ò»³¡¾°ÏÂ£¬ËùÒÔUUIDÒªÖØĞÂÉú³É£©
+		//åˆ›å»ºä¸€ä¸ªæ–°å®ä½“ï¼ˆç”±äºæ˜¯åŒä¸€åœºæ™¯ä¸‹ï¼Œæ‰€ä»¥UUIDè¦é‡æ–°ç”Ÿæˆï¼‰
 		std::string name = entity.GetName();
 		Entity newEntity = CreateEntity(name);
 
-		//ÊµÌåÖ®¼äµÄ×é¼ş¸´ÖÆ
+		//å®ä½“ä¹‹é—´çš„ç»„ä»¶å¤åˆ¶
 		Utils::CopyComponentIfExists<TransformComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<CircleRendererComponent>(newEntity, entity);
@@ -169,17 +169,17 @@ namespace Hazel {
 		Utils::CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<CircleCollider2DComponent>(newEntity, entity);
 	}
-	// ´´½¨ĞÂÊµÌå
+	// åˆ›å»ºæ–°å®ä½“
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		return CreateEntityWithUUID(UUID(), name);
 	}
-	//Ö¸¶¨UUID½øĞĞÊµÌå´´½¨
+	//æŒ‡å®šUUIDè¿›è¡Œå®ä½“åˆ›å»º
 	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
 	{
-		//´´½¨ÊµÌå
+		//åˆ›å»ºå®ä½“
 		Entity entity(m_Registry.create(), this);
-		//Ìí¼Ó»ù´¡×é¼ş
+		//æ·»åŠ åŸºç¡€ç»„ä»¶
 		entity.AddComponent<TransformComponent>();
 		entity.AddComponent<IDComponent>(uuid);
 		auto& tag = entity.AddComponent<TagComponent>();
@@ -188,55 +188,55 @@ namespace Hazel {
 		return entity;
 	}
 
-	//ÕâÀïÖ»ÊÇÆäÖĞÒ»¸ö£¬ÓÎÏ·ÀïÃæ²»½öÓĞÎïÀí»¹ÓĞÒôĞ§µÈµÈ£¨¶øÇÒÕâÊÇ¿ªÊ¼ÉèÖÃ£¬²¢²»ÊÇtick£©
+	//è¿™é‡Œåªæ˜¯å…¶ä¸­ä¸€ä¸ªï¼Œæ¸¸æˆé‡Œé¢ä¸ä»…æœ‰ç‰©ç†è¿˜æœ‰éŸ³æ•ˆç­‰ç­‰ï¼ˆè€Œä¸”è¿™æ˜¯å¼€å§‹è®¾ç½®ï¼Œå¹¶ä¸æ˜¯tickï¼‰
 	void Scene::OnRuntimeStart()
 	{
-		//ÎïÀíÄ£Äâ
+		//ç‰©ç†æ¨¡æ‹Ÿ
 		OnSimulationStart();
 	}
 
 	void Scene::OnRuntimeStop()
 	{
-		//ÎïÀí½áÊø
+		//ç‰©ç†ç»“æŸ
 		OnSimulationStop();
 	}
 
-	//ÎïÀíStart
+	//ç‰©ç†Start
 	void Scene::OnSimulationStart()
 	{
 
 		OnPhysics2DStart();
 	}
 
-	//ÎïÀí½áÊø
+	//ç‰©ç†ç»“æŸ
 	void Scene::OnSimulationStop()
 	{
 		OnPhysics2DStop();
 	}
 
-	//ÎïÀíTick
+	//ç‰©ç†Tick
 	void Scene::OnUpdateSimulation(Timestep ts,EditorCamera& camera)
 	{
 		// Physics update
 		
-		//Ã¿Ö¡ËÙ¶ÈºÍÎ»ÖÃµü´úµÄ´ÎÊı
+		//æ¯å¸§é€Ÿåº¦å’Œä½ç½®è¿­ä»£çš„æ¬¡æ•°
 		const int32_t velocityIterations = 6;
 		const int32_t positionIterations = 2;
 		m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
 		// Retrieve transform from Box2D
-		//2D¸ÕÌå
+		//2Dåˆšä½“
 		auto view = m_Registry.view<Rigidbody2DComponent>();
 		for (auto e : view)
 		{
 			Entity entity = { e, this };
-			//»ñµÃ³õÊ¼µÄÎ»ÖÃ£¬ÎïÌåµÄĞÅÏ¢
+			//è·å¾—åˆå§‹çš„ä½ç½®ï¼Œç‰©ä½“çš„ä¿¡æ¯
 			auto& transform = entity.GetComponent<TransformComponent>();
 			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-			//°Ñ Rigidbody2DComponent ÀïµÄÔËĞĞÊ±Ö¸Õë£¨Í¨ÓÃÖ¸Õëvoid*£©×ª»»³É Box2D µÄ¸ÕÌåÖ¸Õë£¨Õâ¸öÒÑ¾­ÔÚattachÀïÃæ½øĞĞÉèÖÃÁË£©
+			//æŠŠ Rigidbody2DComponent é‡Œçš„è¿è¡Œæ—¶æŒ‡é’ˆï¼ˆé€šç”¨æŒ‡é’ˆvoid*ï¼‰è½¬æ¢æˆ Box2D çš„åˆšä½“æŒ‡é’ˆï¼ˆè¿™ä¸ªå·²ç»åœ¨attaché‡Œé¢è¿›è¡Œè®¾ç½®äº†ï¼‰
 			b2Body* body = (b2Body*)rb2d.RuntimeBody;
-			//»ñÈ¡ÔËĞĞ½á¹û£¨ÎïÌåÔÚÎïÀíÒıÇæµÄÎ»ÖÃ£©
+			//è·å–è¿è¡Œç»“æœï¼ˆç‰©ä½“åœ¨ç‰©ç†å¼•æ“çš„ä½ç½®ï¼‰
 			const auto& position = body->GetPosition();
 			transform.Translation.x = position.x;
 			transform.Translation.y = position.y;
@@ -249,46 +249,46 @@ namespace Hazel {
 	}
 
 
-	//¸ù¾İÓÎÏ·Ö¸¶¨µÄÉãÏñ»ú(ÓÎÏ·µÄrunTime)½øĞĞtick(ÓÎÏ·»­ÃæµÄTick)
+	//æ ¹æ®æ¸¸æˆæŒ‡å®šçš„æ‘„åƒæœº(æ¸¸æˆçš„runTime)è¿›è¡Œtick(æ¸¸æˆç”»é¢çš„Tick)
 	void Scene::OnUpdateRuntime(Timestep ts)
 	{
-		//ÎªÃ¿Ò»¸öÓĞÕâ¸ö×é¼şµÄÊµÌå½øĞĞlamda£¨¼´°´½Å±¾µÄ¸üĞÂ£©
+		//ä¸ºæ¯ä¸€ä¸ªæœ‰è¿™ä¸ªç»„ä»¶çš„å®ä½“è¿›è¡Œlamdaï¼ˆå³æŒ‰è„šæœ¬çš„æ›´æ–°ï¼‰
 		//stript update
-		//¶ÔÓÚÃ¿Ò»¸ö°üº¬½Å±¾µÄÊµÌå£¬°´ÕÕ½Å±¾Âß¼­½øĞĞtick          (ÊµÌå£¬  ½Å±¾×é¼ş)
+		//å¯¹äºæ¯ä¸€ä¸ªåŒ…å«è„šæœ¬çš„å®ä½“ï¼ŒæŒ‰ç…§è„šæœ¬é€»è¾‘è¿›è¡Œtick          (å®ä½“ï¼Œ  è„šæœ¬ç»„ä»¶)
 		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
 			{
 				if (!nsc.Instance)
 				{
-					//´´½¨½Å±¾ÊµÀı
+					//åˆ›å»ºè„šæœ¬å®ä¾‹
 					nsc.Instance=nsc.InstantiateScript();
-					//ÉèÖÃ½Å±¾ÊµÀıµÄÊµÌå
+					//è®¾ç½®è„šæœ¬å®ä¾‹çš„å®ä½“
 					nsc.Instance->m_Entity = Entity{ entity, this };
 					//nsc.Instance->OnCreate();
 				}
-				//°´½Å±¾µÄÂß¼­¸üĞÂÊµÌå
+				//æŒ‰è„šæœ¬çš„é€»è¾‘æ›´æ–°å®ä½“
 					nsc.Instance->OnUpdate(ts);
 			});
 
 		//physical tick
-		//Ã¿Ö¡ËÙ¶ÈºÍÎ»ÖÃµü´úµÄ´ÎÊı
+		//æ¯å¸§é€Ÿåº¦å’Œä½ç½®è¿­ä»£çš„æ¬¡æ•°
 		{
 			const int32_t velocityIterations = 6;
 			const int32_t positionIterations = 2;
 			m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
 
 			// Retrieve transform from Box2D
-			//2D¸ÕÌå
+			//2Dåˆšä½“
 			auto view = m_Registry.view<Rigidbody2DComponent>();
 			for (auto e : view)
 			{
 				Entity entity = { e, this };
-				//»ñµÃ³õÊ¼µÄÎ»ÖÃ£¬ÎïÌåµÄĞÅÏ¢
+				//è·å¾—åˆå§‹çš„ä½ç½®ï¼Œç‰©ä½“çš„ä¿¡æ¯
 				auto& transform = entity.GetComponent<TransformComponent>();
 				auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-				//°Ñ Rigidbody2DComponent ÀïµÄÔËĞĞÊ±Ö¸Õë£¨Í¨ÓÃÖ¸Õëvoid*£©×ª»»³É Box2D µÄ¸ÕÌåÖ¸Õë
+				//æŠŠ Rigidbody2DComponent é‡Œçš„è¿è¡Œæ—¶æŒ‡é’ˆï¼ˆé€šç”¨æŒ‡é’ˆvoid*ï¼‰è½¬æ¢æˆ Box2D çš„åˆšä½“æŒ‡é’ˆ
 				b2Body* body = (b2Body*)rb2d.RuntimeBody;
-				//»ñÈ¡ÔËĞĞ½á¹û£¨ÎïÌåÔÚÎïÀíÒıÇæµÄÎ»ÖÃ£©
+				//è·å–è¿è¡Œç»“æœï¼ˆç‰©ä½“åœ¨ç‰©ç†å¼•æ“çš„ä½ç½®ï¼‰
 				const auto& position = body->GetPosition();
 				transform.Translation.x = position.x;
 				transform.Translation.y = position.y;
@@ -304,7 +304,7 @@ namespace Hazel {
 			auto group = m_Registry.group<>(entt::get<TransformComponent, CameraComponent>);
 			//getMainCamera
 			for (auto entity : group){
-				//·µ»ØµÄÊÇÒ»¸öÁÙÊ±¶ÔÏóµÄÔª×é
+				//è¿”å›çš„æ˜¯ä¸€ä¸ªä¸´æ—¶å¯¹è±¡çš„å…ƒç»„
 				auto [transform, camera] = m_Registry.get<TransformComponent, CameraComponent>(entity);
 				if (camera.Primary) {
 					cameraTransform= transform.GetTransform();
@@ -313,7 +313,7 @@ namespace Hazel {
 				}
 			}
 			//Renderer With mainCamera
-			//¿´¿´ÄÜ²»ÄÜËõÆğÀ´
+			//çœ‹çœ‹èƒ½ä¸èƒ½ç¼©èµ·æ¥
 			//--------------------------------------------------------------
 			if (mainCamera)
 			{
@@ -331,7 +331,7 @@ namespace Hazel {
 
 				// Draw circles
 				{
-					//Í¬Àí
+					//åŒç†
 					auto group = m_Registry.group<>(entt::get<TransformComponent, CircleRendererComponent>);
 					for (auto entity : group)
 					{
@@ -341,24 +341,24 @@ namespace Hazel {
 					}
 				}
 
-				Renderer::EndScene();
+				Renderer3D::EndScene();
 			}
 		}
 
 	}
-	//¸ù¾İ±à¼­Æ÷Camera½øĞĞtick(±à¼­Æ÷»­ÃæµÄtick)
+	//æ ¹æ®ç¼–è¾‘å™¨Cameraè¿›è¡Œtick(ç¼–è¾‘å™¨ç”»é¢çš„tick)
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
 		RenderScene(camera);
 	}
 
-	//ÉèÖÃ¿í¸ß±È
+	//è®¾ç½®å®½é«˜æ¯”
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
 
-		// Resize our non-FixedAspectRatio cameras£¨Í³Ò»ĞŞ¸Ä£©
+		// Resize our non-FixedAspectRatio camerasï¼ˆç»Ÿä¸€ä¿®æ”¹ï¼‰
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
 		{
@@ -369,33 +369,33 @@ namespace Hazel {
 
 	}
 
-	//É¾³ıÊµÌå
+	//åˆ é™¤å®ä½“
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);
 	}
 
-	//»ñÈ¡Ö÷ÒªµÄÏà»úµÄÊµÌå
+	//è·å–ä¸»è¦çš„ç›¸æœºçš„å®ä½“
 	Entity Scene::GetPrimaryCameraEntity()
 	{
-		//Ö»¶Áview£¬
+		//åªè¯»viewï¼Œ
 		auto view = m_Registry.view<CameraComponent>();
 		for (auto entity : view)
 		{
 			const auto& camera = view.get<CameraComponent>(entity);
 			if (camera.Primary)
-				//Èç¹ûÊÇÍ¬ÑùµÄentityIDµÄ»°£¬Êµ¼ÊÉÏÔÚÒ»¸ö³¡¾°ÖĞ£¨×¢²á±íÖĞ£©£¬´ú±íµÄÊÇÍ¬Ò»¸ö
+				//å¦‚æœæ˜¯åŒæ ·çš„entityIDçš„è¯ï¼Œå®é™…ä¸Šåœ¨ä¸€ä¸ªåœºæ™¯ä¸­ï¼ˆæ³¨å†Œè¡¨ä¸­ï¼‰ï¼Œä»£è¡¨çš„æ˜¯åŒä¸€ä¸ª
 				return Entity{ entity, this };
 		}
 		return {};
 	}
 
-	//ÎïÀíÊÀ½çÄ£ÄâµÄ¿ªÊ¼ÉèÖÃ
+	//ç‰©ç†ä¸–ç•Œæ¨¡æ‹Ÿçš„å¼€å§‹è®¾ç½®
 	void Scene::OnPhysics2DStart()
 	{
-		//ÉèÖÃĞÂÊÀ½ç£¨ÖØÁ¦£©
+		//è®¾ç½®æ–°ä¸–ç•Œï¼ˆé‡åŠ›ï¼‰
 		m_PhysicsWorld = new b2World({ 0.0f, -9.8f });
-		//ÕÒµ½¸ÕÌå×é¼ş
+		//æ‰¾åˆ°åˆšä½“ç»„ä»¶
 		auto view = m_Registry.view<Rigidbody2DComponent>();
 		for (auto e : view)
 		{
@@ -403,38 +403,38 @@ namespace Hazel {
 			auto& transform = entity.GetComponent<TransformComponent>();
 			auto& rb2d = entity.GetComponent<Rigidbody2DComponent>();
 
-			//¸ÕÌå¶¨ÒåÇåµ¥£¨¾ÍÊÇcreatInfo£©
+			//åˆšä½“å®šä¹‰æ¸…å•ï¼ˆå°±æ˜¯creatInfoï¼‰
 			b2BodyDef bodyDef;
 			bodyDef.type = Utils::Rigidbody2DTypeToBox2DBody(rb2d.Type);
 			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
 			bodyDef.angle = transform.Rotation.z;
 
-			//Ö¸ÏòÕæÊµÎïÌåµÄÖ¸Õë£¨Í¨¹ıÕâ¸öÕâ¸öÊÀ½ç½øĞĞ¹ÜÀíºÍ¿ØÖÆ£©
+			//æŒ‡å‘çœŸå®ç‰©ä½“çš„æŒ‡é’ˆï¼ˆé€šè¿‡è¿™ä¸ªè¿™ä¸ªä¸–ç•Œè¿›è¡Œç®¡ç†å’Œæ§åˆ¶ï¼‰
 			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
 			body->SetFixedRotation(rb2d.FixedRotation);
-			//¿ªÊ¼Ö¸Ïò
+			//å¼€å§‹æŒ‡å‘
 			rb2d.RuntimeBody = body;
 
 
-			//ÉèÖÃÅö×²ºĞ
+			//è®¾ç½®ç¢°æ’ç›’
 			if (entity.HasComponent<BoxCollider2DComponent>())
 			{
 				auto& bc2d = entity.GetComponent<BoxCollider2DComponent>();
 
-				//ĞÎ×´
+				//å½¢çŠ¶
 				b2PolygonShape boxShape;
-				//Åö×²ºĞµÄ´óĞ¡
+				//ç¢°æ’ç›’çš„å¤§å°
 				//boxShape.SetAsBox(bc2d.Size.x * transform.Scale.x, bc2d.Size.y * transform.Scale.y);
-				// ¼ÆËã°ë¿í¡¢°ë¸ß
+				// è®¡ç®—åŠå®½ã€åŠé«˜
 				float halfWidth = bc2d.Size.x * transform.Scale.x;
 				float halfHeight = bc2d.Size.y * transform.Scale.y;
 
-				// Æ«ÒÆÁ¿£¨×¢Òâ£ºBox2D Ê¹ÓÃ b2Vec2£©
+				// åç§»é‡ï¼ˆæ³¨æ„ï¼šBox2D ä½¿ç”¨ b2Vec2ï¼‰
 				b2Vec2 boxCenter(bc2d.Offset.x, bc2d.Offset.y);
 
-				// ´´½¨´øÆ«ÒÆµÄÅö×²ºĞ
+				// åˆ›å»ºå¸¦åç§»çš„ç¢°æ’ç›’
 				boxShape.SetAsBox(halfWidth, halfHeight, boxCenter, 0.0f);
-				//²ÄÖÊÊôĞÔ
+				//æè´¨å±æ€§
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &boxShape;
 				fixtureDef.density = bc2d.Density;
@@ -448,12 +448,12 @@ namespace Hazel {
 			{
 				auto& cc2d = entity.GetComponent<CircleCollider2DComponent>();
 
-				//ĞÎ×´
+				//å½¢çŠ¶
 				b2CircleShape circleShape;
 				circleShape.m_p.Set(cc2d.Offset.x, cc2d.Offset.y);
 				circleShape.m_radius = cc2d.Radius * transform.Scale.x;
 
-				//²ÄÖÊÊôĞÔ
+				//æè´¨å±æ€§
 				b2FixtureDef fixtureDef;
 				fixtureDef.shape = &circleShape;
 				fixtureDef.density = cc2d.Density;
@@ -465,31 +465,31 @@ namespace Hazel {
 		}
 	}
 
-	//ÎïÀíÊÀ½ç½áÊøµÄÉ¾³ı
+	//ç‰©ç†ä¸–ç•Œç»“æŸçš„åˆ é™¤
 	void Scene::OnPhysics2DStop()
 	{
 		delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;
 	}
 
-	//Editor½øĞĞRendererTickµÄÊµ¼ÊÄÚÈİ
+	//Editorè¿›è¡ŒRendererTickçš„å®é™…å†…å®¹
 	void Scene::RenderScene(EditorCamera& camera)
 	{
 
 		//Renderer3D
-		Renderer::BeginScene(camera);
+		Renderer3D::BeginScene(camera);
 		
 
-		if (m_Environment.SkyMap)
-			Renderer::RenderSkyMap(m_Environment.SkyMap);
-		else HZ_CORE_INFO("NO SkyMap");
-	//	Renderer::RenderMesh("assets/Meshes/backpack.obj");
-		Renderer::EndScene();
-		//ÓĞÒ»¸öÍ¨ÓÃµÄEditorCamera
-		//¸ù¾İentityµÄ×´Ì¬Ö±½Ó»æÖÆ
+		//if (m_Environment.SkyMap)
+		//	Renderer3D::RenderSkyMap(m_Environment.SkyMap);
+		//else HZ_CORE_INFO("NO SkyMap");
+		Renderer3D::RenderMesh("assets/Meshes/backpack.obj");
+		Renderer3D::EndScene();
+		//æœ‰ä¸€ä¸ªé€šç”¨çš„EditorCamera
+		//æ ¹æ®entityçš„çŠ¶æ€ç›´æ¥ç»˜åˆ¶
 		Renderer2D::BeginScene(camera);
 		{
-			//×é¼ş²»ÄÜ±»¶à¸ögroupÍ¬Ê±ÓµÓĞ
+			//ç»„ä»¶ä¸èƒ½è¢«å¤šä¸ªgroupåŒæ—¶æ‹¥æœ‰
 			//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			
 			//DrawQuad
@@ -518,7 +518,7 @@ namespace Hazel {
 		Renderer2D::EndScene();
 	}
 
-	//Todo:ÉèÖÃ»Øµ÷Í¨Öª£¨Now These are garbage£©
+	//Todo:è®¾ç½®å›è°ƒé€šçŸ¥ï¼ˆNow These are garbageï¼‰
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{

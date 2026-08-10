@@ -1,14 +1,14 @@
-#include "hzpch.h"
+﻿#include "hzpch.h"
 #include "UniformBuffer.h"
 
-#include "Hazel/Renderer/Renderer.h"
+#include "Hazel/Renderer/Renderer3D.h"
 #include "Platform/OpenGL/OpenGLUniformBuffer.h"
 
 namespace Hazel {
 
     Ref<UniformBuffer> UniformBuffer::Create(uint32_t size, uint32_t binding)
     {
-        switch (Renderer::GetAPI()) {
+        switch (Renderer3D::GetAPI()) {
         case RendererAPI::API::None: HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
         case RendererAPI::API::OpenGL:return CreateRef<OpenGLUniformBuffer>(size,binding);
 

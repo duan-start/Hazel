@@ -1,12 +1,12 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 #include "Shader.h"
-#include "Renderer.h"
+#include "Renderer3D.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 
 namespace Hazel {
 	Ref<Shader> Shader::Create(const std::string& name,const std::string& vertexsrc, const std::string& fragmentsrc) {
-		switch (Renderer::GetAPI()) {
+		switch (Renderer3D::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
 		case RendererAPI::API::OpenGL: return  std::make_shared<OpenGLShader>(name,vertexsrc, fragmentsrc);
 		}
@@ -14,7 +14,7 @@ namespace Hazel {
 	};
 
 	Ref<Shader> Shader::Create(const std::string& filepath) {
-		switch (Renderer::GetAPI()) {
+		switch (Renderer3D::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(filepath);
 		}
@@ -30,7 +30,7 @@ namespace Hazel {
 	void ShaderLibrary::Add(const Ref<Shader>& shader)
 	{
 		auto& name = shader->GetName();
-		//Èç¹û²éÕÒ·¢ÏÖm_shaderÀïÃæÓĞshader
+		//å¦‚æœæŸ¥æ‰¾å‘ç°m_shaderé‡Œé¢æœ‰shader
 		HZ_CORE_ASSERT(m_Shaders.find(name) == m_Shaders.end(), "Shader has been already exists");
 
 		m_Shaders[name] = shader;
@@ -47,7 +47,7 @@ namespace Hazel {
 		return m_Shaders[name];
 	}
 
-	//¶ÔÓÚµÄÍ¬ÑùµÄ¹¦ÄÜ£¬ÎÒÃÇÓ¦¸ÃÌá¸ßµ¥Ò»½Ó¿ÚµÄ¸´ÓÃĞÔ
+	//å¯¹äºçš„åŒæ ·çš„åŠŸèƒ½ï¼Œæˆ‘ä»¬åº”è¯¥æé«˜å•ä¸€æ¥å£çš„å¤ç”¨æ€§
 	void ShaderLibrary::Load(const std::string& name, const std::string& vertex,const std::string& fragment)
 	{
 		HZ_CORE_ASSERT(!Exists(name), "Shader has been already exists");

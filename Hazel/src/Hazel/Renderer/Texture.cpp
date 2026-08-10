@@ -1,6 +1,6 @@
-#include "hzpch.h"  
+﻿#include "hzpch.h"  
 #include "Texture.h"  
-#include "Renderer.h"  
+#include "Renderer3D.h"  
 
 #include "Platform/OpenGL/OpenGLTexture2D.h" 
 #include "Platform/OpenGL/OpenGLTextureCube.h"

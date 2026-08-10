@@ -4,7 +4,7 @@
 #include "Hazel/Events/ApplicationEvent.h"
 #include"Log.h"
 
-#include "Hazel/Renderer/Renderer.h"
+#include "Hazel/Renderer/Renderer3D.h"
 #include <GLFW/glfw3.h>
 
 namespace Hazel {
@@ -34,9 +34,9 @@ namespace Hazel {
 		PushOverLayer(m_ImGuiLayer);
 
 		//Init Render
-		Renderer::Init();
+		Renderer3D::Init();
 		
-		ScriptEngine::Init();
+		//ScriptEngine::Init();
 	}
 
 	Application:: ~Application() {
@@ -100,7 +100,7 @@ namespace Hazel {
 			return false;
 		}
 
-		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		Renderer3D::OnWindowResize(e.GetWidth(), e.GetHeight());
 		m_Minimized = false;
 		return false;
 	}

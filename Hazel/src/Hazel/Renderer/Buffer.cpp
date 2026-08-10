@@ -1,26 +1,26 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 #include "Buffer.h"
-#include "Renderer.h"
+#include "Renderer3D.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
 namespace Hazel {
 	VertexBuffer::~VertexBuffer()
 	{
 	}
-	//´´½¨²¢´«ÊäÊı¾İ
+	//åˆ›å»ºå¹¶ä¼ è¾“æ•°æ®
 	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t size)
 	{
-		switch (Renderer::GetAPI()) {
+		switch (Renderer3D::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI");return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVertexBuffer>(vertices, size);
 		}
 		HZ_CORE_ASSERT(false, "Unknown RenderAPI"); return nullptr;
 	}
 
-	//ËäÈ»´´½¨ÁË£¬µ«ÊÇ²¢Ã»ÓĞ´«ÊäÊı¾İ£¬ÊäÈëµÄÊÇÒ»¸ö¿ÕÖ¸Õë
+	//è™½ç„¶åˆ›å»ºäº†ï¼Œä½†æ˜¯å¹¶æ²¡æœ‰ä¼ è¾“æ•°æ®ï¼Œè¾“å…¥çš„æ˜¯ä¸€ä¸ªç©ºæŒ‡é’ˆ
 	Ref<VertexBuffer> VertexBuffer::Create(uint32_t size)
 	{
-		switch (Renderer::GetAPI()) {
+		switch (Renderer3D::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVertexBuffer>(size);
 		}
@@ -37,7 +37,7 @@ namespace Hazel {
 
 	Ref<IndexBuffer> IndexBuffer::Create(uint32_t* indices, uint32_t count)
 	{
-		switch (Renderer::GetAPI()) {
+		switch (Renderer3D::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLIndexBuffer> (indices, count);
 		}
@@ -46,7 +46,7 @@ namespace Hazel {
 
 	Ref<IndexBuffer> IndexBuffer::Create(uint32_t count)
 	{
-		switch (Renderer::GetAPI()) {
+		switch (Renderer3D::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
 		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLIndexBuffer>(count);
 		}

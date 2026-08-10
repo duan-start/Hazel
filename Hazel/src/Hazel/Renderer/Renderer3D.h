@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "RendererAPI.h"
 #include "GameCamera.h"
 #include "EditorCamera.h"
@@ -11,9 +11,9 @@
 
 namespace Hazel {
 	//Renderer3D
-	//Ìá½»äÖÈ¾ÃüÁîÖ»ÊÇºÍrendererCommand½»»¥
-	//ÖØ¹¹ing
-	class Renderer {
+	//æäº¤æ¸²æŸ“å‘½ä»¤åªæ˜¯å’ŒrendererCommandäº¤äº’
+	//é‡æ„ing
+	class Renderer3D {
 	public:
 		typedef void(*RenderCommandFn)(void*);
 
@@ -31,7 +31,7 @@ namespace Hazel {
 		}
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
-		inline static Renderer& GetRenderer() { return *s_Instance; }
+		inline static Renderer3D& GetRenderer() { return *s_Instance; }
 		void WaitAndRender();
 
 		//CommonRender
@@ -50,34 +50,34 @@ namespace Hazel {
 		static void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) ;
 
 	private:
-		//static µÄÊı¾İÖ®Ö»ÄÜÀàÍâ¶¨Òå
+		//static çš„æ•°æ®ä¹‹åªèƒ½ç±»å¤–å®šä¹‰
 		//static RendererAPI::API m_RendererAPI;
-		//²»ÂÛ»æÖÆÊ²Ã´¶«Î÷£¬¶¼ÊÇ±ØĞë´«¸øshaderµÄÖµ
+		//ä¸è®ºç»˜åˆ¶ä»€ä¹ˆä¸œè¥¿ï¼Œéƒ½æ˜¯å¿…é¡»ä¼ ç»™shaderçš„å€¼
 		struct SceneData{
 			glm::mat4 ViewProjection;
 			float CurrentTime;
 			float SCR_Width;
 			float SCR_Height;
 		};
-		//ÕâÀïÖ»ÊÇÉùÃ÷,ºÍÈ«¾ÖµÄstaticÊÇÒ»ÑùµÄ£¬Ö»ÊÇÓĞÁËÒ»¸öÊ¹ÓÃµÄ×÷ÓÃÓò
+		//è¿™é‡Œåªæ˜¯å£°æ˜,å’Œå…¨å±€çš„staticæ˜¯ä¸€æ ·çš„ï¼Œåªæ˜¯æœ‰äº†ä¸€ä¸ªä½¿ç”¨çš„ä½œç”¨åŸŸ
 		static SceneData* s_SceneData;
-		//Ã»ÓĞÃ÷È·µ¥Àı£¬µ«ÊÇÈ·ÊµÖ»ÒÀÀµÕâÒ»¸ö
-		static Renderer* s_Instance;
+		//æ²¡æœ‰æ˜ç¡®å•ä¾‹ï¼Œä½†æ˜¯ç¡®å®åªä¾èµ–è¿™ä¸€ä¸ª
+		static Renderer3D* s_Instance;
 		RenderCommandQueue m_CommandQueue;
 	};
 
 
 
-//ÕâÒ»¶ÎºêÕæ²»ÊÇÈËĞ´µÄ£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿£¿
-//Æ´½Ó
+//è¿™ä¸€æ®µå®çœŸä¸æ˜¯äººå†™çš„ï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿï¼Ÿ
+//æ‹¼æ¥
 #define HZ_RENDER_PASTE2(a,b)  a##b
 //cat
 #define HZ_RENDER_PASTE(a, b) HZ_RENDER_PASTE2(a, b)
-	//__LINE__±íÊ¾µ±Ç°(µ÷ÓÃ·½)µÄĞĞÊı£¬ÊµÏÖÎ¨Ò»±êÊ¶£¨Ã¿Ì«Ã÷°×ÎªÊ²Ã´Òª¸ã¶à²ã·â×°£©
+	//__LINE__è¡¨ç¤ºå½“å‰(è°ƒç”¨æ–¹)çš„è¡Œæ•°ï¼Œå®ç°å”¯ä¸€æ ‡è¯†ï¼ˆæ¯å¤ªæ˜ç™½ä¸ºä»€ä¹ˆè¦æå¤šå±‚å°è£…ï¼‰
 #define HZ_RENDER_UNIQUE(x) HZ_RENDER_PASTE(x, __LINE__)
 
-	//»»ĞĞ·û \
-//¸ù¾İcode ´´½¨Ò»¸öÎ¨Ò»µÄ½á¹¹Ìå£¬°üº¬¶ÔÓ¦µÄäÖÈ¾´úÂë£¨£©
+	//æ¢è¡Œç¬¦ \
+//æ ¹æ®code åˆ›å»ºä¸€ä¸ªå”¯ä¸€çš„ç»“æ„ä½“ï¼ŒåŒ…å«å¯¹åº”çš„æ¸²æŸ“ä»£ç ï¼ˆï¼‰
 #define HZ_RENDER(code) \
     struct HZ_RENDER_UNIQUE(HZRenderCommand) \
     {\
@@ -90,7 +90,7 @@ namespace Hazel {
 		auto mem = ::Hazel::Renderer::Submit(HZ_RENDER_UNIQUE(HZRenderCommand)::Execute, sizeof(HZ_RENDER_UNIQUE(HZRenderCommand)));\
 		new (mem) HZ_RENDER_UNIQUE(HZRenderCommand)();\
 	}\
-//new (mem) HZ_RENDER_UNIQUE(HZRenderCommand)();\ ÔÚÖ¸Õë·ÖÅäµÄÄÚ´æÉÏ½øĞĞ´´½¨Àà
+//new (mem) HZ_RENDER_UNIQUE(HZRenderCommand)();\ åœ¨æŒ‡é’ˆåˆ†é…çš„å†…å­˜ä¸Šè¿›è¡Œåˆ›å»ºç±»
 
 #define HZ_RENDER_1(arg0, code) \
 	do {\

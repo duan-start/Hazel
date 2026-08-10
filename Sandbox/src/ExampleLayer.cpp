@@ -1,4 +1,4 @@
-#include "ExampleLayer.h"
+ï»¿#include "ExampleLayer.h"
 
 
 ExampleLayer::ExampleLayer()
@@ -11,9 +11,9 @@ ExampleLayer::ExampleLayer()
 	m_VertexArray = Hazel::VertexArray::Create();
 
 	float vertices[5 * 4] = {
-		//ÆÁÄ»×ø±ê     //ÎÆÀí×ø±ê
-	 -0.5f,-0.5f,0.f,	0.f,0.f,//×óÏÂ
-	 -0.5f,0.5f,0.f,	0.f,1.f,//×óÉÏ
+		//å±å¹•åæ ‡     //çº¹ç†åæ ‡
+	 -0.5f,-0.5f,0.f,	0.f,0.f,//å·¦ä¸‹
+	 -0.5f,0.5f,0.f,	0.f,1.f,//å·¦ä¸Š
 	 0.5f,-0.5f,0.f,	1.f,0.f,//you xia
 	 0.5f,0.5f,0.f,		1.f,1.f//you shang
 	};
@@ -21,21 +21,21 @@ ExampleLayer::ExampleLayer()
 	m_VertexBuffer = (Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 
-	{//°Ñ²»ÒªµÄ¶«Î÷È«²¿¶¼Ïú»Ù,
-	//buffderlayout Êµ¼ÊÉÏ¾ÍÊÇÒ»¸öclass ,ÀïÃæ·â×°ÁËÒ»¸ö³õÊ¼º¯Êı½øĞĞ¶ÔÓ¦bufferÀïÃæÃ¿¸öBufferElementsµÄ¼ÆËã£¬µÃµ½¶ÔÓ¦µÄÆ«ÒÆÁ¿£¬ÕûÌåµÄÆ«ÒÆÁ¿Ö®ÀàµÄÊı¾İ
-	// vector<BufferElements>µÄÊı¾İ²ÅÊÇÕâ¸öclass´«µİ¸øºóÃæµÄ¹Ø¼üĞÅÏ¢
+	{//æŠŠä¸è¦çš„ä¸œè¥¿å…¨éƒ¨éƒ½é”€æ¯,
+	//buffderlayout å®é™…ä¸Šå°±æ˜¯ä¸€ä¸ªclass ,é‡Œé¢å°è£…äº†ä¸€ä¸ªåˆå§‹å‡½æ•°è¿›è¡Œå¯¹åº”bufferé‡Œé¢æ¯ä¸ªBufferElementsçš„è®¡ç®—ï¼Œå¾—åˆ°å¯¹åº”çš„åç§»é‡ï¼Œæ•´ä½“çš„åç§»é‡ä¹‹ç±»çš„æ•°æ®
+	// vector<BufferElements>çš„æ•°æ®æ‰æ˜¯è¿™ä¸ªclassä¼ é€’ç»™åé¢çš„å…³é”®ä¿¡æ¯
 		Hazel::BufferLayout layout = {
-			//"addv"ÊÇconst std::string& ÀàĞÍ»òÊÇstd::string Ò²ĞĞ£¬µ«¾ÍÊÇÇ§Íò±ğstd::string&
+			//"addv"æ˜¯const std::string& ç±»å‹æˆ–æ˜¯std::string ä¹Ÿè¡Œï¼Œä½†å°±æ˜¯åƒä¸‡åˆ«std::string&
 			{ Hazel::ShaderDataType::Float3, "a_Pos"},
 			{Hazel::ShaderDataType::Float2,"a_Tex"}
 		};
-		//ÉèÖÃ»º³å²¼¾Ö£¬Êµ¼ÊÉÏÕâÀï¾ÍÊÇ´«ÊäÉÏÃæ¼ÆËãºÃµÄ¸÷ÖÖĞÅÏ¢
+		//è®¾ç½®ç¼“å†²å¸ƒå±€ï¼Œå®é™…ä¸Šè¿™é‡Œå°±æ˜¯ä¼ è¾“ä¸Šé¢è®¡ç®—å¥½çš„å„ç§ä¿¡æ¯
 		m_VertexBuffer->SetLayout(layout);
 	}
 
-	//ÉèÖÃÊôĞÔ£¬Õâ±ßÓĞ³éÏó³öÁËÒ»²ã£¬ÕâÀïÔÚÉèÖÃvaoµÄÊôĞÔ£¬
-	// Êµ¼ÊÉÏÒ»¸övao¿ÉÒÔ°ó¶¨¶àÖÖ×´Ì¬µÄvbo£¨Ò²¾ÍÊÇÎÒÃÇµÄa_PosºÍa_Tex£©£¬Í¨¹ıÅäÖÃ¶¥µãÊôĞÔÖ¸ÕëºÍenable¶ÔÓ¦µÄ¶¥µãÊôĞÔÖ¸Õë¡£
-	//µ«ÊÇÊµ¼ÊÉÏÎÒÃÇ³ıÁË¿ÉÒÔĞ´³ÉÒ»¸öÊı×é£¬»¹¿ÉÒÔµ¥¶À²ğ³ÉÁ½¸öÊı×é£¬vaoÊÇÔÊĞí·Ö±ğ°ó¶¨µÄ
+	//è®¾ç½®å±æ€§ï¼Œè¿™è¾¹æœ‰æŠ½è±¡å‡ºäº†ä¸€å±‚ï¼Œè¿™é‡Œåœ¨è®¾ç½®vaoçš„å±æ€§ï¼Œ
+	// å®é™…ä¸Šä¸€ä¸ªvaoå¯ä»¥ç»‘å®šå¤šç§çŠ¶æ€çš„vboï¼ˆä¹Ÿå°±æ˜¯æˆ‘ä»¬çš„a_Poså’Œa_Texï¼‰ï¼Œé€šè¿‡é…ç½®é¡¶ç‚¹å±æ€§æŒ‡é’ˆå’Œenableå¯¹åº”çš„é¡¶ç‚¹å±æ€§æŒ‡é’ˆã€‚
+	//ä½†æ˜¯å®é™…ä¸Šæˆ‘ä»¬é™¤äº†å¯ä»¥å†™æˆä¸€ä¸ªæ•°ç»„ï¼Œè¿˜å¯ä»¥å•ç‹¬æ‹†æˆä¸¤ä¸ªæ•°ç»„ï¼Œvaoæ˜¯å…è®¸åˆ†åˆ«ç»‘å®šçš„
 	m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
 	//indexbuffer
@@ -47,47 +47,47 @@ ExampleLayer::ExampleLayer()
 
 
 
-	////°ó¶¨µÚ¶ş¸ö×´Ì¬
+	////ç»‘å®šç¬¬äºŒä¸ªçŠ¶æ€
 	//m_SquareVA = (Hazel::VertexArray::Create());
 	//float bluevertices[3 * 4] = {
-	// -.5f,-.5f,-.5f,//×óÏÂ
-	//-.5f,.5f,-.5f,//×óÉÏ
+	// -.5f,-.5f,-.5f,//å·¦ä¸‹
+	//-.5f,.5f,-.5f,//å·¦ä¸Š
 	//.5f,-.5f,-.5f,//you xia
 	//.5f,.5f,-.5f//you shang
 	//};
 
-	////ËäÈ»ÕâÀïÊÇ´´½¨ÖÇÄÜÖ¸Õë£¬µ«ÊÇÒ²ÊÇ´´½¨Àà£¬Ò²ÊÇÊµÀı»¯£¬×¢Òâ¹¹Ôìº¯Êı,²»ÊÇ£¬Ã»¸ã¶®Õâ¸ömake_sharedµÄÓÃ·¨
+	////è™½ç„¶è¿™é‡Œæ˜¯åˆ›å»ºæ™ºèƒ½æŒ‡é’ˆï¼Œä½†æ˜¯ä¹Ÿæ˜¯åˆ›å»ºç±»ï¼Œä¹Ÿæ˜¯å®ä¾‹åŒ–ï¼Œæ³¨æ„æ„é€ å‡½æ•°,ä¸æ˜¯ï¼Œæ²¡ææ‡‚è¿™ä¸ªmake_sharedçš„ç”¨æ³•
 	//Hazel::Ref<Hazel::VertexBuffer> squareVB;
 	//squareVB = (Hazel::VertexBuffer::Creat(bluevertices, sizeof(bluevertices)));
 
-	//{//°Ñ²»ÒªµÄ¶«Î÷È«²¿¶¼Ïú»Ù
+	//{//æŠŠä¸è¦çš„ä¸œè¥¿å…¨éƒ¨éƒ½é”€æ¯
 	//	Hazel::BufferLayout layout = {
-	//		//"addv"ÊÇconst std::string& ÀàĞÍ»òÊÇstd::string Ò²ĞĞ£¬µ«¾ÍÊÇÇ§Íò±ğstd::string&
+	//		//"addv"æ˜¯const std::string& ç±»å‹æˆ–æ˜¯std::string ä¹Ÿè¡Œï¼Œä½†å°±æ˜¯åƒä¸‡åˆ«std::string&
 	//		{Hazel::ShaderDataType::Float3, "a_Pos"},
 	//	};
-	//	//ÉèÖÃ»º³å²¼¾Ö
+	//	//è®¾ç½®ç¼“å†²å¸ƒå±€
 	//	squareVB->SetLayout(layout);
 	//}
 
-	////ÉèÖÃÊôĞÔ
+	////è®¾ç½®å±æ€§
 	//m_SquareVA->AddVertexBuffer(squareVB);
 	//m_SquareVA->SetIndexBuffer(m_IndexBuffer);
 
 //
 //
-//	//Õı³£ÓÃÀ´²âÊÔµÄ
+//	//æ­£å¸¸ç”¨æ¥æµ‹è¯•çš„
 //	std::string m_BlueVertexSrc = R"(
 //		#version 330 core
 //		
-//		// ÊäÈë¶¥µãÊı¾İ
-//		layout(location = 0) in vec3 aPos;      // ¶¥µãÎ»ÖÃ
+//		// è¾“å…¥é¡¶ç‚¹æ•°æ®
+//		layout(location = 0) in vec3 aPos;      // é¡¶ç‚¹ä½ç½®
 //		uniform vec2 iResolution;
 //		uniform mat4 u_ViewProjection;
 //		uniform mat4 u_Transform;
 //
-//		// ¶¥µã×ÅÉ«Æ÷Ö÷º¯Êı
+//		// é¡¶ç‚¹ç€è‰²å™¨ä¸»å‡½æ•°
 //		void main() {
-//		    // ÉèÖÃ¶¥µãÎ»ÖÃ
+//		    // è®¾ç½®é¡¶ç‚¹ä½ç½®
 //		    gl_Position = u_ViewProjection * u_Transform * vec4(aPos, 1.0);
 //		}
 //)";
@@ -100,13 +100,13 @@ ExampleLayer::ExampleLayer()
 //			FragColor=vec4(Color,0.f);	
 //			}
 //)";
-	//Ö±½Ó¸ø¿Í»§¶ËÊ¹ÓÃ
+	//ç›´æ¥ç»™å®¢æˆ·ç«¯ä½¿ç”¨
 	//m_Shader.reset(Hazel::Shader::Create("assets/shaders/Youtube.glsl"));
 	//m_BlueShader.reset(Hazel::Shader::Create("BlueShader",m_BlueVertexSrc, m_BuleFragmentSrc));
 
 	//m_TexShader.reset(Hazel::Shader::Create("assets/shaders/Texture.glsl"));
 
-	//¼ÓÔØµ½Ä¬ÈÏµÄlib½øĞĞÊ¹ÓÃ
+	//åŠ è½½åˆ°é»˜è®¤çš„libè¿›è¡Œä½¿ç”¨
 	m_ShaderLib.Load("assets/shaders/Youtube.glsl");
 	/*m_ShaderLib.Load("BlueShader", m_BlueVertexSrc, m_BuleFragmentSrc);*/
 	//m_ShaderLib.Load("assets/shaders/Texture.glsl");
@@ -116,7 +116,7 @@ ExampleLayer::ExampleLayer()
 
 	//auto& m_TexShader = m_ShaderLib.Get("Texture");
 	//m_TexShader->Bind();
-	//Ïà¶ÔÓÚstatic »á¸ü°²È«£¨Êµ¼Ê¾ÍÊÇÏŞÖÆ¸ü¶à£¬ËùÒÔ¸ü°²È«£©
+	//ç›¸å¯¹äºstatic ä¼šæ›´å®‰å…¨ï¼ˆå®é™…å°±æ˜¯é™åˆ¶æ›´å¤šï¼Œæ‰€ä»¥æ›´å®‰å…¨ï¼‰
 	//m_TexShader->SetUniformInt("u_texture", 0);
 	//m_TexShader->UnBind();
 }
@@ -125,11 +125,11 @@ void ExampleLayer::OnUpdate(Hazel::Timestep ts)  {
 
 	m_CameralController.OnUpdate(ts);
 	///---------------------------------------------
-	Hazel::Renderer::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
-	Hazel::Renderer::Clear();
+	Hazel::Renderer3D::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
+	Hazel::Renderer3D::Clear();
 
 	//HZ_TRACE("{}", m_Rotation);
-	//ÕâÀïÎÒÓÖhackÁË£¬Õâ¸ö¿í¸ß´«¸øshader½øĞĞ³õÊ¼»°µÄ·½·¨ÎÒÖ»Ïëµ½ñîºÏm_window
+	//è¿™é‡Œæˆ‘åˆhackäº†ï¼Œè¿™ä¸ªå®½é«˜ä¼ ç»™shaderè¿›è¡Œåˆå§‹è¯çš„æ–¹æ³•æˆ‘åªæƒ³åˆ°è€¦åˆm_window
 	Hazel::Renderer2D::BeginScene(m_CameralController.GetCamera());
 
 	//hack
@@ -138,26 +138,26 @@ void ExampleLayer::OnUpdate(Hazel::Timestep ts)  {
 	youTube->SetUniformFloat4("color", m_SquareColor);
 	youTube->UnBind();
 
-	//¿ÉÄÜÊÇÍ¬Ê±¿ªÆôÁË×°ÃÅµÄrender2d£¬µ¼ÖÂÕâ±ßĞÔÄÜÏÂ½µµÄÈ·Êµ´ó
+	//å¯èƒ½æ˜¯åŒæ—¶å¼€å¯äº†è£…é—¨çš„render2dï¼Œå¯¼è‡´è¿™è¾¹æ€§èƒ½ä¸‹é™çš„ç¡®å®å¤§
 	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 	for (int y = 0; y < 10; y++) {
 		for (int x = 0; x < 10; x++) {
 			glm::vec3 Pos(x * 0.11, y * 0.11, 0);
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), Pos) * scale;
-			Hazel::Renderer::Submit(youTube, m_VertexArray, transform);
+			Hazel::Renderer3D::Submit(youTube, m_VertexArray, transform);
 		}
 	}
 
-	//ÕâÀïÒ²ÊÇ×öµÄÒ»¸ö¿ìËÙµÄhack,°ó¶¨Á½´Îshader,Êµ¼ÊÉÏÊÇ¿ÉÒÔÖ¸°ó¶¨Ò»´ÎµÄ£¬ÒòÎªÃ¿¸ötexture¿ÉÒÔ°ó¶¨µ½²»Í¬µÄ²ÉÑùÆ÷ÉÏ¡£
+	//è¿™é‡Œä¹Ÿæ˜¯åšçš„ä¸€ä¸ªå¿«é€Ÿçš„hack,ç»‘å®šä¸¤æ¬¡shader,å®é™…ä¸Šæ˜¯å¯ä»¥æŒ‡ç»‘å®šä¸€æ¬¡çš„ï¼Œå› ä¸ºæ¯ä¸ªtextureå¯ä»¥ç»‘å®šåˆ°ä¸åŒçš„é‡‡æ ·å™¨ä¸Šã€‚
 	//m_TextureHu->Bind();
 	//Hazel::Renderer::Submit(m_ShaderLib.Get("Texture"), m_VertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f)));
-	//ËäÈ»zbufferµÄ»æÖÆÊÇ¿ÉÒÔ²»°´ÕÕË³ĞòÀ´µÄ£¬ËùÒÔÈç¹ûÊÇ·ÇÍ¸Ã÷µÄ£¬»æÖÆË³ĞòÊÇÃ»ÓĞ¹ØÏµµÄ¡£
-	//µ«ÊÇÈç¹ûÊÇÍ¸Ã÷µÄ»°£¬¾Í±ØĞë´ÓºóÍùÇ°»æÖÆ£¬£¨ÒòÎª»æÖÆµÄÊ±ºòÒªµş¼Ó±³¾°µÄÑÕÉ«£©
+	//è™½ç„¶zbufferçš„ç»˜åˆ¶æ˜¯å¯ä»¥ä¸æŒ‰ç…§é¡ºåºæ¥çš„ï¼Œæ‰€ä»¥å¦‚æœæ˜¯éé€æ˜çš„ï¼Œç»˜åˆ¶é¡ºåºæ˜¯æ²¡æœ‰å…³ç³»çš„ã€‚
+	//ä½†æ˜¯å¦‚æœæ˜¯é€æ˜çš„è¯ï¼Œå°±å¿…é¡»ä»åå¾€å‰ç»˜åˆ¶ï¼Œï¼ˆå› ä¸ºç»˜åˆ¶çš„æ—¶å€™è¦å åŠ èƒŒæ™¯çš„é¢œè‰²ï¼‰
 	//m_Texture->Bind();
 	//Hazel::Renderer::Submit(m_TexShader, m_VertexArray);
 
 
-	Hazel::Renderer::EndScene();
+	Hazel::Renderer3D::EndScene();
 }
 
 void ExampleLayer::OnImGuiRender()  {

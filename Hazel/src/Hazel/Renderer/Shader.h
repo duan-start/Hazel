@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Hazel/Core/Core.h"
 
 #include <string>
@@ -6,13 +6,13 @@
 
 
 namespace Hazel {
-	//¸Ğ¾õ²»ÊÇÌ«¶Ô£¡vulkanµÄshaderµÄuniform£¨push_const£©
+	//æ„Ÿè§‰ä¸æ˜¯å¤ªå¯¹ï¼vulkançš„shaderçš„uniformï¼ˆpush_constï¼‰
 	class Shader
 	{
 	public:
 		Shader() {};
-		virtual void Bind() const = 0;  // ´¿Ğéº¯Êı£¬ÉùÃ÷Îªconst
-		virtual void UnBind() const = 0;  // ´¿Ğéº¯Êı£¬ÉùÃ÷Îªconst
+		virtual void Bind() const = 0;  // çº¯è™šå‡½æ•°ï¼Œå£°æ˜ä¸ºconst
+		virtual void UnBind() const = 0;  // çº¯è™šå‡½æ•°ï¼Œå£°æ˜ä¸ºconst
 		virtual const std::string& GetName()const = 0;
 
 		virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const = 0;
@@ -20,7 +20,7 @@ namespace Hazel {
 		virtual void SetUniformFloat3(const std::string& name,const glm::vec3& value)const=0 ;
 		virtual void SetUniformFloat(const std::string& name, float value) const = 0;
 
-		//ÓÃÀ´ÉèÖÃ²ÉÑùÆ÷µÄ¿¨²Û
+		//ç”¨æ¥è®¾ç½®é‡‡æ ·å™¨çš„å¡æ§½
 		virtual void SetUniformInt(const std::string& name, int value)const = 0;
 		virtual void SetUniformIntArray(const std::string& name,int* value, uint32_t count) = 0;
 
@@ -31,8 +31,8 @@ namespace Hazel {
 
 	};
 
-//´´½¨Ò»¸öShaderLibrary £¬ÓÃÀ´±£´æÒıÇæÔ­Ê¼µÄ»ù±¾µÄshader µÄĞ§¹û£¬·½±ãÊ¹ÓÃ¡£
-// ÕâÀïÃæÒÔºó¿ÉÒÔÀ©Õ¹·ÅÒ»Ğ©ĞÂµÄÍ¼ĞÎÑ§µÄäÖÈ¾µÄÒ»Ğ©·½·¨
+//åˆ›å»ºä¸€ä¸ªShaderLibrary ï¼Œç”¨æ¥ä¿å­˜å¼•æ“åŸå§‹çš„åŸºæœ¬çš„shader çš„æ•ˆæœï¼Œæ–¹ä¾¿ä½¿ç”¨ã€‚
+// è¿™é‡Œé¢ä»¥åå¯ä»¥æ‰©å±•æ”¾ä¸€äº›æ–°çš„å›¾å½¢å­¦çš„æ¸²æŸ“çš„ä¸€äº›æ–¹æ³•
 	class ShaderLibrary {
 	public:
 		inline static void Init() { ShaderLib = CreateRef<ShaderLibrary>(); }
@@ -46,17 +46,25 @@ namespace Hazel {
 
 		bool Exists(const std::string& name) const;
 
+		//need to add more shader
 		ShaderLibrary() {	
-			//2DShaderInit
+			//2D 
 			Load("assets/shaders/Texture.glsl");
 			Load("assets/shaders/Circle.glsl");
 			Load("assets/shaders/Line.glsl");
-			//Load("assets/shaders/Pbr.glsl");
+			//sky
 			Load("assets/shaders/SkyBox.glsl");
+			//æ— å…‰çš„
+			Load("assets/shaders/Lift.glsl");
+			//blinn
+			//pbr
+
+
+			//è‡ªå®šä¹‰çš„shader
 		}
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
-		inline static Ref<ShaderLibrary> ShaderLib = nullptr;
+		inline static Ref<ShaderLibrary> ShaderLib =nullptr ;
 	};
 }
 

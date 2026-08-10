@@ -59,6 +59,7 @@ project "Hazel"
 		"ImGui",
 		"yaml-cpp",
 		"%{Library.Assimp}",
+		"%{Library.zlib}",
 		"opengl32",
 		"%{Library.Mono}",
 		"%{Library.WinSock}",

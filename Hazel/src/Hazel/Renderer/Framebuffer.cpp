@@ -1,14 +1,14 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 
 #include "Framebuffer.h"
-#include "Renderer.h"
+#include "Renderer3D.h"
 #include "Platform/OpenGL/OpenGLFramebuffer.h"
 namespace Hazel {
 
-//¼òµ¥¹¤³§+¹¹½¨Æ÷£¨¼òµ¥Ä£Ê½£©
+//ç®€å•å·¥å‚+æ„å»ºå™¨ï¼ˆç®€å•æ¨¡å¼ï¼‰
 	Ref<Framebuffer> Hazel::Framebuffer::Create(const FramebufferSpecification& speci)
 	{
-		switch (Renderer::GetAPI()) {
+		switch (Renderer3D::GetAPI()) {
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "Do not support this RenderAPI"); return nullptr;
 		case RendererAPI::API::OpenGL: return  std::make_shared<OpenGLFramebuffer>(speci);
 		}

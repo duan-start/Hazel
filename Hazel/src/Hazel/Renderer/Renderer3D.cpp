@@ -1,5 +1,5 @@
-#include "hzpch.h"
-#include "Renderer.h"
+ï»¿#include "hzpch.h"
+#include "Renderer3D.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Platform/OpenGL/OpenGLShader.h"
@@ -9,32 +9,32 @@
 
 namespace Hazel {
 
-	//ÔÚcpu¶Ë¿ÉÒÔ´´½¨µÄÊı¾İ¼°ÆäãĞÖµ£¬ÓÃÀ´batch Renderering Ò»´ÎĞÔÉÏ´«¸øËùÓĞµÄgpuµÄÊı¾İ
+	//åœ¨cpuç«¯å¯ä»¥åˆ›å»ºçš„æ•°æ®åŠå…¶é˜ˆå€¼ï¼Œç”¨æ¥batch Renderering ä¸€æ¬¡æ€§ä¸Šä¼ ç»™æ‰€æœ‰çš„gpuçš„æ•°æ®
 	struct Renderer3DStorge {
-		//static const(Ò»´ÎĞÔ×î´óãĞÖµ)
+		//static const(ä¸€æ¬¡æ€§æœ€å¤§é˜ˆå€¼)
 		static const uint32_t MaxMeshes = 4;
-		//ÎÆÀí°ó¶¨µÄ¿¨²ÛµÄÊıÁ¿
+		//çº¹ç†ç»‘å®šçš„å¡æ§½çš„æ•°é‡
 		static const uint32_t MaxTextureSlots = 32;
 
-		//Shader£¨ºóÃæ¿ÉÒÔºÍ¾ßÌåµÄtextureId¼¯³ÉÎªMaterial£©
+		//Shaderï¼ˆåé¢å¯ä»¥å’Œå…·ä½“çš„textureIdé›†æˆä¸ºMaterialï¼‰
 		Ref<Shader> PBRshader;
 		Ref<Shader> SkyShader;
 
 		//skyMap
 		Ref<VertexArray> SkyVertexArray;
 		Ref<VertexBuffer> SkyVertexBuffer;
-		Ref<IndexBuffer> SkyIndexBuffer; // ½¨Òé¼ÓÉÏ£¬·ÀÖ¹ÒıÓÃ¶ªÊ§
+		Ref<IndexBuffer> SkyIndexBuffer; // å»ºè®®åŠ ä¸Šï¼Œé˜²æ­¢å¼•ç”¨ä¸¢å¤±
 		//Mesh
 		std::vector<Ref<Mesh>> Meshes;
 
-		//ÎÆÀí£¨Í¨ÓÃ£©
+		//çº¹ç†ï¼ˆé€šç”¨ï¼‰
 		Ref<Texture2D> WhiteTexture;
-		//´æ´¢Êµ¼ÊÎÆÀíµÄË÷Òı£¨ÓĞµãĞ¡ÇÉºÏ°É£©
+		//å­˜å‚¨å®é™…çº¹ç†çš„ç´¢å¼•ï¼ˆæœ‰ç‚¹å°å·§åˆå§ï¼‰
 		std::array<Ref<Texture>, MaxTextureSlots> TextureSlots;
-		//Ä¬ÈÏ³õÊ¼Index=2£¬µÚ0¸öÎªÄ¬ÈÏ°×É«ÎÆÀí,µÚÒ»¸öÎªÄ¬ÈÏcubemap,ºóÃæ¾ÍÊÇmeshµÄÕı³£ÎÆÀí
+		//é»˜è®¤åˆå§‹Index=2ï¼Œç¬¬0ä¸ªä¸ºé»˜è®¤ç™½è‰²çº¹ç†,ç¬¬ä¸€ä¸ªä¸ºé»˜è®¤cubemap,åé¢å°±æ˜¯meshçš„æ­£å¸¸çº¹ç†
 		uint32_t TextureSlotIndex = 2;
 
-		//´«µ½shaderÉÏÃæµÄUniformbbufferÀïÃæµÄÊı¾İ
+		//ä¼ åˆ°shaderä¸Šé¢çš„Uniformbbufferé‡Œé¢çš„æ•°æ®
 		struct CameraData
 		{
 			glm::mat4 ViewProjection;
@@ -47,27 +47,27 @@ namespace Hazel {
 		};
 		StaticData StaticBuffer;
 
-		//uniformBufferµÄÊı¾İ(»¹Î´ÉÏ´«)
+		//uniformBufferçš„æ•°æ®(è¿˜æœªä¸Šä¼ )
 		Ref<UniformBuffer> CameraUniformBuffer;
 
 		Ref<UniformBuffer> StaticUniformBuffer;
 	};
 
-	//È«¾ÖÎ¨Ò»µÄ
+	//å…¨å±€å”¯ä¸€çš„
 	static Renderer3DStorge s_Data;
 
-	//Renderer---RenderCommadºÍRenderer2D¡£
-	//Í¨ÓÃÃüÁîºÍ»æÖÆÃüÁî·Ö¿ª
-	Renderer* Renderer::s_Instance = new Renderer();
+	//Renderer---RenderCommadå’ŒRenderer2Dã€‚
+	//é€šç”¨å‘½ä»¤å’Œç»˜åˆ¶å‘½ä»¤åˆ†å¼€
+	Renderer3D* Renderer3D::s_Instance = new Renderer3D();
 
-	Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData();
-	//Õâ¸öRenderer»ù±¾ÉÏ¾ÍÖ»ÓÃÁË ÕâÒ»¸öº¯Êı
-	void Renderer::Init()
+	Renderer3D::SceneData* Renderer3D::s_SceneData = new Renderer3D::SceneData();
+	//è¿™ä¸ªRendereråŸºæœ¬ä¸Šå°±åªç”¨äº† è¿™ä¸€ä¸ªå‡½æ•°
+	void Renderer3D::Init()
 	{
 		HZ_PROFILE_FUNCTION();
-		//µ÷ÓÃopenglµÄÆÕ±éÉèÖÃ£¬¿ªÆôÉî¶È²âÊÔÖ®ÀàµÄ 
+		//è°ƒç”¨openglçš„æ™®éè®¾ç½®ï¼Œå¼€å¯æ·±åº¦æµ‹è¯•ä¹‹ç±»çš„ 
 		RendererCommand::Init();
-		//HZ_RENDER({ RendererCommand::Init();; });£¨in the futuer//CommandQueue£©
+		//HZ_RENDER({ RendererCommand::Init();; });ï¼ˆin the futuer//CommandQueueï¼‰
 		ShaderLibrary::Init();
 	
 		//Renderer3D::Init
@@ -77,19 +77,19 @@ namespace Hazel {
 			s_Data.StaticUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DStorge::CameraData), 1);
 			//ShaderInit
 			//Texture
-		//ÉèÖÃÄ¬ÈÏÎÆÀí
+		//è®¾ç½®é»˜è®¤çº¹ç†
 			s_Data.WhiteTexture = Texture2D::Create(1, 1);
 			uint32_t whiteTextureData = 0xffffffff;
 			s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-			//¹Ì¶¨0ºÅ²Û¶ÔÓ¦µÄÎÆÀí
+			//å›ºå®š0å·æ§½å¯¹åº”çš„çº¹ç†
 			s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 			//Shader
 			//shaderLib;
 			auto& Lib = ShaderLibrary::GetLib();
-			//s_Data.PBRshader = Lib->Get("Pbr");
+			s_Data.PBRshader = Lib->Get("Lift");
 			s_Data.SkyShader = Lib->Get("SkyBox");
 
-			// Á¢·½ÌåµÄ 8 ¸ö¶¥µã
+			// ç«‹æ–¹ä½“çš„ 8 ä¸ªé¡¶ç‚¹
 			std::array<float, 8 * 3> skyboxVertices = {
 				-1.0f,  1.0f, -1.0f,  // 0
 				-1.0f, -1.0f, -1.0f,  // 1
@@ -102,25 +102,25 @@ namespace Hazel {
 			};
 
 			std::array<uint32_t, 36> skyboxIndices = {
-				// ÓÒÃæ
+				// å³é¢
 				1, 2, 6, 6, 5, 1,
-				// ×óÃæ
+				// å·¦é¢
 				0, 4, 7, 7, 3, 0,
-				// ÉÏÃæ
+				// ä¸Šé¢
 				4, 5, 6, 6, 7, 4,
-				// ÏÂÃæ
+				// ä¸‹é¢
 				0, 3, 2, 2, 1, 0,
-				// ±³Ãæ
+				// èƒŒé¢
 				0, 1, 5, 5, 4, 0,
-				// ÕıÃæ
+				// æ­£é¢
 				3, 7, 6, 6, 2, 3
 			};
 
 			// skybox VAO
 			s_Data.SkyVertexArray = (Hazel::VertexArray::Create());
-			//´´½¨vbo(Ô¤Áô×î´óÄÚ´æ)£¬ËÄ±ßĞÎµÄ
+			//åˆ›å»ºvbo(é¢„ç•™æœ€å¤§å†…å­˜)ï¼Œå››è¾¹å½¢çš„
 			s_Data.SkyVertexBuffer = Hazel::VertexBuffer::Create(skyboxVertices.data(), sizeof(float) * skyboxVertices.size());
-			//ÉèÖÃ¶¥µãÊôĞÔ
+			//è®¾ç½®é¡¶ç‚¹å±æ€§
 			{
 				Hazel::BufferLayout layout = {
 					//SkyVertex Set
@@ -128,44 +128,44 @@ namespace Hazel {
 					//{ ShaderDataType::Float3, "a_Tex" },
 
 				};
-				//vboÉèÖÃºÃ¿Õ¼äºÍÊôĞÔ
+				//vboè®¾ç½®å¥½ç©ºé—´å’Œå±æ€§
 				s_Data.SkyVertexBuffer->SetLayout(layout);
 			}
 
-			//ÉèÖÃÒıÓÃ£¨ÒÔ¼°¶¥µãÊôĞÔ£©
+			//è®¾ç½®å¼•ç”¨ï¼ˆä»¥åŠé¡¶ç‚¹å±æ€§ï¼‰
 			s_Data.SkyVertexArray->AddVertexBuffer(s_Data.SkyVertexBuffer);
 
-			// 4. ´´½¨ IBO (ÕâÊÇÄãÒªÇóÌí¼ÓµÄ²¿·Ö)
+			// 4. åˆ›å»º IBO (è¿™æ˜¯ä½ è¦æ±‚æ·»åŠ çš„éƒ¨åˆ†)
 			 s_Data.SkyIndexBuffer = Hazel::IndexBuffer::Create(skyboxIndices.data(), skyboxIndices.size());
 
-			// 5. ½« IBO °ó¶¨µ½ VAO
+			// 5. å°† IBO ç»‘å®šåˆ° VAO
 			s_Data.SkyVertexArray->SetIndexBuffer(s_Data.SkyIndexBuffer);
 
 		//Test:: To Remove
 		//s_Data.TextureSlots[2] = Texture2D::Create("assets/Meshes/diffuse.jpg");
 		}
 
-		//×¨ÓÃµÄ2däÖÈ¾Æ÷µÄÉèÖÃºÍÊı¾İ³õÊ¼»¯£¬vao,vboÖ®ÀàµÄ
+		//ä¸“ç”¨çš„2dæ¸²æŸ“å™¨çš„è®¾ç½®å’Œæ•°æ®åˆå§‹åŒ–ï¼Œvao,vboä¹‹ç±»çš„
 		Renderer2D::Init();
 			//HZ_RENDER({ Renderer2D::Init(); })
 
 	}
-	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+	void Renderer3D::OnWindowResize(uint32_t width, uint32_t height)
 	{
 		//HZ_RENDER_2(width,height,{ s_RendererAPI->SetViewport(0,0,width,height); })
 		RendererCommand::OnWindowResize(width,height);
 	}
-	void Renderer::Clear()
+	void Renderer3D::Clear()
 	{
 		RendererCommand::Clear();
 		//HZ_RENDER({ s_RendererAPI->Clear(); })
 	
 	}
-	void Renderer::SetClearColor(const glm::vec4& color)
+	void Renderer3D::SetClearColor(const glm::vec4& color)
 	{
 		RendererCommand::SetClearColor(color);
 	}
-	void Renderer::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	void Renderer3D::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
 
 		RendererCommand::DrawIndexed(vertexArray, indexCount);
@@ -173,11 +173,11 @@ namespace Hazel {
 	}
 
 	//HardCode
-	void Renderer::RenderMesh(const std::string& filePath)
+	void Renderer3D::RenderMesh(const std::string& filePath)
 	{
 		Ref<Mesh> targetMesh = nullptr;
 
-		// 1. ²éÕÒÊÇ·ñÒÑ¼ÓÔØ¹ı¸Ã Mesh
+		// 1. æŸ¥æ‰¾æ˜¯å¦å·²åŠ è½½è¿‡è¯¥ Mesh
 		for (auto& mesh : s_Data.Meshes) {
 			if (filePath == mesh->GetFilePath()) {
 				targetMesh = mesh;
@@ -185,56 +185,56 @@ namespace Hazel {
 			}
 		}
 
-		// 2. Èç¹ûÃ»ÕÒµ½£¬ĞÂ´´½¨Ò»¸ö²¢·ÅÈëÈİÆ÷
+		// 2. å¦‚æœæ²¡æ‰¾åˆ°ï¼Œæ–°åˆ›å»ºä¸€ä¸ªå¹¶æ”¾å…¥å®¹å™¨
 		if (!targetMesh) {
-			targetMesh = CreateRef<Mesh>(filePath); // Ê¹ÓÃ Hazel µÄ CreateRef
+			targetMesh = CreateRef<Mesh>(filePath); // ä½¿ç”¨ Hazel çš„ CreateRef
 			s_Data.Meshes.push_back(targetMesh);
 		}
 
-		// 3. äÖÈ¾µ±Ç°Õâ¸ö Mesh
-		//s_Data.PBRshader->Bind();
-		//s_Data.TextureSlots[0]->Bind();
-		//DrawIndexed(targetMesh->GetVertexArray());
+		// 3. æ¸²æŸ“å½“å‰è¿™ä¸ª Mesh
+		s_Data.PBRshader->Bind();
+		s_Data.TextureSlots[0]->Bind();
+		DrawIndexed(targetMesh->GetVertexArray());
 
 	}
 
-	void Renderer::RenderSkyMap(const Ref<Texture> skyMap)
-	{		//Èç¹ûÊÇÏàÍ¬×ÊÔ´µÄ»°
+	void Renderer3D::RenderSkyMap(const Ref<Texture> skyMap)
+	{		//å¦‚æœæ˜¯ç›¸åŒèµ„æºçš„è¯
 		if (s_Data.TextureSlots[1].get() != skyMap.get()) {
 			s_Data.TextureSlots[1] = skyMap;
 		}
 		////to do::repaire
-		//glDisable(GL_BLEND);          // ±ØĞë¹Øµô£¬·ñÔòÑÕÉ«»á±» Blend Factor ³Ë³ÉÈ« 0
-		//glEnable(GL_DEPTH_TEST);      // ±ØĞë¿ªÆô£¬ÅäºÏ xyww ¼¼ÇÉ
-		//Ğ¡ÓÚµÈÓÚ²Å¸²¸Ç
-		glDepthFunc(GL_LEQUAL);       // È·±£Ô¶Æ½Ãæ¿É¼û
-		//glDepthMask(GL_FALSE);        // Ìì¿ÕºĞ²»Ğ´Éî¶È
+		//glDisable(GL_BLEND);          // å¿…é¡»å…³æ‰ï¼Œå¦åˆ™é¢œè‰²ä¼šè¢« Blend Factor ä¹˜æˆå…¨ 0
+		//glEnable(GL_DEPTH_TEST);      // å¿…é¡»å¼€å¯ï¼Œé…åˆ xyww æŠ€å·§
+		//å°äºç­‰äºæ‰è¦†ç›–
+		glDepthFunc(GL_LEQUAL);       // ç¡®ä¿è¿œå¹³é¢å¯è§
+		//glDepthMask(GL_FALSE);        // å¤©ç©ºç›’ä¸å†™æ·±åº¦
 		s_Data.SkyShader->Bind();
 		//
 		s_Data.TextureSlots[1]->Bind(1);
 		DrawIndexed(s_Data.SkyVertexArray);
 
-		//ÑÏ¸ñĞ¡ÓÚ²Å¸²¸Ç
+		//ä¸¥æ ¼å°äºæ‰è¦†ç›–
 		glDepthFunc(GL_LESS); // set depth function back to default
 
 	}
 
-	void Renderer::SetLineWidth(float width)
+	void Renderer3D::SetLineWidth(float width)
 	{
 		RendererCommand::SetLineWidth(width);
 	}
-	void Renderer::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	void Renderer3D::DrawLines(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
 		RendererCommand::DrawLines(vertexArray, indexCount);
 		
 	}
-	void Renderer::BeginScene(const GameCamera& camera, const glm::mat4& transform)
+	void Renderer3D::BeginScene(const GameCamera& camera, const glm::mat4& transform)
 	{
 		//HZ_RENDER_2(camera,transform,{Renderer2D::BeginScene(camera,transform);});
 		s_SceneData->ViewProjection = camera.GetProjection() * glm::inverse(transform);
 		//m_SceneData->CurrentTime = glfwGetTime();
 	}
-	void Renderer::BeginScene(const EditorCamera& camera)
+	void Renderer3D::BeginScene(const EditorCamera& camera)
 	{
 		//HZ_RENDER_1(camera,{Renderer2D::BeginScene(camera);});
 		s_Data.CameraBuffer.ViewProjection = camera.GetViewProjection();
@@ -244,13 +244,13 @@ namespace Hazel {
 
 	}
 
-	void Renderer::EndScene()
+	void Renderer3D::EndScene()
 	{
 		
 	
 	}
-	//Õâ¸ö»¹ÊÇĞèÒªµÄ
-	void Renderer::Submit(const Ref<Shader>& shader,const Ref<VertexArray>& vertexArray,const glm::mat4& transform)
+	//è¿™ä¸ªè¿˜æ˜¯éœ€è¦çš„
+	void Renderer3D::Submit(const Ref<Shader>& shader,const Ref<VertexArray>& vertexArray,const glm::mat4& transform)
 	{	
 		shader->Bind();
 		vertexArray->Bind();
@@ -261,11 +261,11 @@ namespace Hazel {
 		RendererCommand::DrawIndexed(vertexArray,0);
 		shader->UnBind();
 	}
-	void Renderer::WaitAndRender()
+	void Renderer3D::WaitAndRender()
 	{
-		//ÓĞµãÆæ¹Ö£¬ÒòÎªÊµ¼ÊÉÏÒ²ÊÇÒ»ÑùµÄ£¬Ö»ÊÇ¶ÁÆğÀ´ÒâÒå²»Ì«Ã÷È·¶øÒÑ  this---==s_Instance
+		//æœ‰ç‚¹å¥‡æ€ªï¼Œå› ä¸ºå®é™…ä¸Šä¹Ÿæ˜¯ä¸€æ ·çš„ï¼Œåªæ˜¯è¯»èµ·æ¥æ„ä¹‰ä¸å¤ªæ˜ç¡®è€Œå·²  this---==s_Instance
 		//m_CommandQueue.Execute();
-		//È«¾ÖÎ¨Ò»µÄäÖÈ¾¶ÓÁĞ
+		//å…¨å±€å”¯ä¸€çš„æ¸²æŸ“é˜Ÿåˆ—
 		s_Instance->m_CommandQueue.Execute();
 	}
 	//RendererAPI::API Renderer::m_RendererAPI = RendererAPI::API::OpenGL;

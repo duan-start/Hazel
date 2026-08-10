@@ -2,6 +2,7 @@
 #include "Hazel/Renderer/SceneCamera.h"
 #include "Hazel/Renderer/Mesh.h"
 #include "Hazel/Renderer/Texture.h"
+#include "Hazel/Renderer/Shader.h"
 #include "Hazel/Core/UUID.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -12,13 +13,30 @@
 
 //实体和他对应的组件
 namespace Hazel {
+
+	//导入外部的自定义渲染的组件
 	struct MeshRendererComponent {
 		Ref<Mesh> MeshRender;
 		//Material
 
+		//如果你需要什么，就明确说，不要靠自动生成
 		MeshRendererComponent() = default;
 		MeshRendererComponent(const MeshRendererComponent&) = default;
 	};
+
+	//需要设置一种默认的
+	//Material  = shader + texture + uniform
+	//这边
+	struct RendererComponent {
+		//如果你需要什么，就明确说，不要靠自动生成
+		RendererComponent() = default;
+		RendererComponent(const RendererComponent&) = default;
+
+	public:
+		Ref<Shader> shader;
+
+	};
+
 
 
 	struct CircleRendererComponent {

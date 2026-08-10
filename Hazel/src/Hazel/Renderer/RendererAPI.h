@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include <glm/glm.hpp>
 #include "VertexArray.h"
 
 namespace Hazel {
-	//�;�����Ⱦ�޹ص��ձ�����Ѵ�����Ķ���abstract
+	//和具体渲染无关的普遍命令，把大多数的东西abstract
 	class RendererAPI
 	{
 	public:
@@ -12,6 +12,7 @@ namespace Hazel {
 			OpenGL=1
 		};
 
+		//最大各向异性过滤值，用来斜纹理的
 		struct Capabilities {
 			float MaxAnisotropy=0;
 		};

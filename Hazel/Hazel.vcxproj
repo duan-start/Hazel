@@ -90,7 +90,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>vendor\assimp\Libs\assimp-vc143-mtd.lib;opengl32.lib;vendor\mono\lib\Debug\libmono-static-sgen.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\VulkanSDK\1.4.350.0\Lib\shaderc_sharedd.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-cored.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-glsld.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vendor\assimp\lib\Debug\assimp-vc143-mtd.lib;vendor\assimp\lib\zlib\Debug\zlibstaticd.lib;opengl32.lib;vendor\mono\lib\Debug\libmono-static-sgen.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\VulkanSDK\1.4.350.0\Lib\shaderc_sharedd.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-cored.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-glsld.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -115,7 +115,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>vendor\assimp\Libs\assimp-vc143-mtd.lib;opengl32.lib;vendor\mono\lib\Release\libmono-static-sgen.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\VulkanSDK\1.4.350.0\Lib\shaderc_shared.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-core.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vendor\assimp\lib\Release\assimp-vc143-mtd.lib;vendor\assimp\lib\zlib\Release\zlibstaticd.lib;opengl32.lib;vendor\mono\lib\Release\libmono-static-sgen.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\VulkanSDK\1.4.350.0\Lib\shaderc_shared.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-core.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -140,12 +140,14 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>vendor\assimp\Libs\assimp-vc143-mtd.lib;opengl32.lib;vendor\mono\lib\Dist\libmono-static-sgen.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\VulkanSDK\1.4.350.0\Lib\shaderc_shared.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-core.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vendor\assimp\lib\Dist\assimp-vc143-mtd.lib;vendor\assimp\lib\zlib\Dist\zlibstaticd.lib;opengl32.lib;vendor\mono\lib\Dist\libmono-static-sgen.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;D:\VulkanSDK\1.4.350.0\Lib\shaderc_shared.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-core.lib;D:\VulkanSDK\1.4.350.0\Lib\spirv-cross-glsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Debug\Instrumentor.h" />
     <ClInclude Include="src\Hazel.h" />
+    <ClInclude Include="src\Hazel\Asset\Model.h" />
+    <ClInclude Include="src\Hazel\Asset\ModelImporter.h" />
     <ClInclude Include="src\Hazel\Core\Application.h" />
     <ClInclude Include="src\Hazel\Core\Core.h" />
     <ClInclude Include="src\Hazel\Core\EntryPoint.h" />
@@ -171,13 +173,14 @@
     <ClInclude Include="src\Hazel\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Hazel\Renderer\GameCamera.h" />
     <ClInclude Include="src\Hazel\Renderer\GraphicsContext.h" />
+    <ClInclude Include="src\Hazel\Renderer\Material.h" />
     <ClInclude Include="src\Hazel\Renderer\Mesh.h" />
     <ClInclude Include="src\Hazel\Renderer\OrthographicCamera.h" />
     <ClInclude Include="src\Hazel\Renderer\OrthographicCameraController.h" />
     <ClInclude Include="src\Hazel\Renderer\PerspectivegraphicCamera.h" />
     <ClInclude Include="src\Hazel\Renderer\RenderCommandQueue.h" />
-    <ClInclude Include="src\Hazel\Renderer\Renderer.h" />
     <ClInclude Include="src\Hazel\Renderer\Renderer2D.h" />
+    <ClInclude Include="src\Hazel\Renderer\Renderer3D.h" />
     <ClInclude Include="src\Hazel\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Hazel\Renderer\RendererCommand.h" />
     <ClInclude Include="src\Hazel\Renderer\RendererScene.h" />
@@ -628,6 +631,8 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hazel\Asset\Model.cpp" />
+    <ClCompile Include="src\Hazel\Asset\ModelImporter.cpp" />
     <ClCompile Include="src\Hazel\Core\Application.cpp" />
     <ClCompile Include="src\Hazel\Core\Layer.cpp" />
     <ClCompile Include="src\Hazel\Core\LayerStack.cpp" />
@@ -641,13 +646,14 @@
     <ClCompile Include="src\Hazel\Renderer\EditorCamera.cpp" />
     <ClCompile Include="src\Hazel\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\Hazel\Renderer\GameCamera.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\Material.cpp" />
     <ClCompile Include="src\Hazel\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Hazel\Renderer\OrthographicCamera.cpp" />
     <ClCompile Include="src\Hazel\Renderer\OrthographicCameraController.cpp" />
     <ClCompile Include="src\Hazel\Renderer\PerspectivegraphicCamera.cpp" />
     <ClCompile Include="src\Hazel\Renderer\RenderCommandQueue.cpp" />
-    <ClCompile Include="src\Hazel\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Hazel\Renderer\Renderer2D.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\Renderer3D.cpp" />
     <ClCompile Include="src\Hazel\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\Hazel\Renderer\RendererCommand.cpp" />
     <ClCompile Include="src\Hazel\Renderer\RendererScene.cpp" />
