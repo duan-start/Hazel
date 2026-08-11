@@ -1,4 +1,4 @@
-#include "SceneHierarchyPanel.h"
+ï»¿#include "SceneHierarchyPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -17,7 +17,7 @@
 #endif
 
 namespace Hazel {
-	//const Ä¬ÈÏstatic Á´½Ó
+	//const é»˜è®¤static é“¾æ¥
 	extern const std::filesystem::path g_AssetPath;
 
 	SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& context)
@@ -25,7 +25,7 @@ namespace Hazel {
 		SetContext(context);
 	}
 
-	//ÉèÖÃÑ¡ÖĞµÄ³¡¾°
+	//è®¾ç½®é€‰ä¸­çš„åœºæ™¯
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
 	{
 		m_Context = context;
@@ -38,27 +38,27 @@ namespace Hazel {
 
 		auto& registry = m_Context->m_Registry;
 
-		// ±éÀúËùÓĞÓĞÄ³×é¼şµÄÊµÌå£¬ÀıÈç TagComponent
+		// éå†æ‰€æœ‰æœ‰æŸç»„ä»¶çš„å®ä½“ï¼Œä¾‹å¦‚ TagComponent
 		for (auto entityID : registry.view<TagComponent>()) {
 			Entity entity{ entityID, m_Context.get() };
 			DrawEntityNode(entity);
 		}
 
-		// Èç¹ûµã»÷ÁË´°¿Ú¿Õ°×´¦£¬ÔòÈ¡ÏûÑ¡ÖĞ
+		// å¦‚æœç‚¹å‡»äº†çª—å£ç©ºç™½å¤„ï¼Œåˆ™å–æ¶ˆé€‰ä¸­
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			m_SelectiedEntity = {};
 
 		// Right-click on blank space
 		if (ImGui::BeginPopupContextWindow(0, 1))
 		{
-			//Èç¹ûµã»÷²Ëµ¥
+			//å¦‚æœç‚¹å‡»èœå•
 			if (ImGui::MenuItem("Create Empty Entity"))
 				m_Context->CreateEntity("Empty Entity");
 
 			ImGui::EndPopup();
 		}
 
-		//È¡¾öÓÚÉÏÒ»¸öäÖÈ¾µÄÊÇ·ñµã»÷£¬·ÅºóÃæ×ÜÊÇÓĞbug£¬ÎÒÖ±½Ó·Åµ½Ç°ÃæÀ´ÁË
+		//å–å†³äºä¸Šä¸€ä¸ªæ¸²æŸ“çš„æ˜¯å¦ç‚¹å‡»ï¼Œæ”¾åé¢æ€»æ˜¯æœ‰bugï¼Œæˆ‘ç›´æ¥æ”¾åˆ°å‰é¢æ¥äº†
 		if (m_SelectiedEntity) {
 			bool entityDeleted = false;
 			if (ImGui::BeginPopupContextWindow(0, 1))
@@ -78,7 +78,7 @@ namespace Hazel {
 
 		ImGui::End();
 
-		//½øĞĞÊôĞÔ»æÖÆ
+		//è¿›è¡Œå±æ€§ç»˜åˆ¶
 		ImGui::Begin("Properties");
 		if (m_SelectiedEntity)
 		{
@@ -93,7 +93,7 @@ namespace Hazel {
 		m_SelectiedEntity = entity;
 	}
 
-	//»æÖÆ½Úµã
+	//ç»˜åˆ¶èŠ‚ç‚¹
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -107,7 +107,7 @@ namespace Hazel {
 		}
 
 
-		//Èç¹ûÕ¹¿ªµÄ»°
+		//å¦‚æœå±•å¼€çš„è¯
 		if (opened)
 		{
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -119,7 +119,7 @@ namespace Hazel {
 
 	}
 
-	//»æÖÆ¿ØÖÆÃæ°å£¨Ö÷ÒªÊÇÍ³Ò»¸ñÊ½·ç¸ñ£©
+	//ç»˜åˆ¶æ§åˆ¶é¢æ¿ï¼ˆä¸»è¦æ˜¯ç»Ÿä¸€æ ¼å¼é£æ ¼ï¼‰
 	static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -186,7 +186,7 @@ namespace Hazel {
 		ImGui::PopID();
 	}
 
-	//»æÖÆ
+	//ç»˜åˆ¶
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
 	{
@@ -228,7 +228,7 @@ namespace Hazel {
 		}
 	}
 
-	//»æÖÆ×é¼ş
+	//ç»˜åˆ¶ç»„ä»¶
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
 	{
 		if (entity.HasComponent<TagComponent>())
@@ -302,6 +302,14 @@ namespace Hazel {
 				if (ImGui::MenuItem("Circle Collider 2D"))
 				{
 					m_SelectiedEntity.AddComponent<CircleCollider2DComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!m_SelectiedEntity.HasComponent<MeshRendererComponent>())
+			{
+				if (ImGui::MenuItem("MeshRenderer"))
+				{
+					m_SelectiedEntity.AddComponent<MeshRendererComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
@@ -389,7 +397,7 @@ namespace Hazel {
 				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
-					//½ÓÊÜ×Ê²úÍÏ×§£¨CONTENT_BROWSER_ITEMÊÇ°µºÅ£©
+					//æ¥å—èµ„äº§æ‹–æ‹½ï¼ˆCONTENT_BROWSER_ITEMæ˜¯æš—å·ï¼‰
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 					{
 						const wchar_t* path = (const wchar_t*)payload->Data;
@@ -407,6 +415,38 @@ namespace Hazel {
 				}
 					ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
 			});
+
+		DrawComponent<MeshRendererComponent>("Mesh Renderer", entity, [](auto& component)
+			{
+				
+				ImGui::Button("Mesh", ImVec2(100.0f, 0.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					//æ¥å—èµ„äº§æ‹–æ‹½ï¼ˆCONTENT_BROWSER_ITEMæ˜¯æš—å·ï¼‰
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path meshPath = std::filesystem::path(g_AssetPath) / path;
+						if (meshPath.extension() != ".obj" && meshPath.extension() != ".fbx" && meshPath.extension() != ".gltf" && meshPath.extension() != ".glb")
+						{
+							HZ_WARN("Unsupported mesh format: {0}", meshPath.extension().string());
+							ImGui::EndDragDropTarget();
+							return;
+						}
+						//è‚¯å®šæ˜¯éœ€è¦ä¸€ä¸ªç»Ÿä¸€çš„library å»åšç®¡ç†ï¼ŒrenderUUID
+						Ref<Mesh> mesh = Mesh::Create(meshPath.string());
+						if (mesh->IsLoaded())
+							component.mesh = mesh;
+						else
+							HZ_WARN("Could not load texture {0}", meshPath.filename().string());
+
+					}
+
+					ImGui::EndDragDropTarget();
+
+				}
+			});
+
 
 		DrawComponent<CircleRendererComponent>("Circle Renderer", entity, [](auto& component)
 			{

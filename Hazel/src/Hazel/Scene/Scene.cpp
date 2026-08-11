@@ -477,16 +477,31 @@ namespace Hazel {
 	{
 
 		//Renderer3D
+		//Render Mesh ,skyMap,之类的
 		Renderer3D::BeginScene(camera);
 		
 
 		//if (m_Environment.SkyMap)
 		//	Renderer3D::RenderSkyMap(m_Environment.SkyMap);
 		//else HZ_CORE_INFO("NO SkyMap");
-		Renderer3D::RenderMesh("assets/Meshes/backpack.obj");
+
+		auto group = m_Registry.group<>(entt::get<TransformComponent,MeshRendererComponent>);
+		for (auto entity : group)
+		{
+			auto [transform, meshComp] = group.get<TransformComponent, MeshRendererComponent>(entity);
+
+			//Renderer3D::DrawMesh(transform.GetTransform(), mesh, (int)entity);
+			if(meshComp.mesh)
+			Renderer3D::DrawMesh(transform.GetTransform(), meshComp.mesh, (int)entity);
+		}
+
+
 		Renderer3D::EndScene();
 		//有一个通用的EditorCamera
 		//根据entity的状态直接绘制
+
+
+		//Render 2D,滤镜,自定义shader之类的
 		Renderer2D::BeginScene(camera);
 		{
 			//组件不能被多个group同时拥有
@@ -537,6 +552,11 @@ namespace Hazel {
 		component.Camera.SetViewPortSize(m_ViewportWidth, m_ViewportHeight);
 		}
 
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MeshRendererComponent>(Entity entity, MeshRendererComponent& component)
+	{
 	}
 
 	template<>

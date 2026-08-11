@@ -16,7 +16,7 @@ namespace Hazel {
 
 	//导入外部的自定义渲染的组件
 	struct MeshRendererComponent {
-		Ref<Mesh> MeshRender;
+		Ref<Mesh> mesh;
 		//Material
 
 		//如果你需要什么，就明确说，不要靠自动生成

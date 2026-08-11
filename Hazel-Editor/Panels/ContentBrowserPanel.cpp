@@ -1,22 +1,22 @@
-#include "ContentBrowserPanel.h"
+ï»¿#include "ContentBrowserPanel.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
 namespace Hazel {
 	
-	//¹Ì¶¨µÄ£¬¶ø²»ÒÀÀµÓÚÍâ½ç
-	//const Ä¬ÈÏÊÇstaic,ĞèÒªÏÔÊ¾extern£¨¸øÍâ²¿Ê¹ÓÃ£©
+	//å›ºå®šçš„ï¼Œè€Œä¸ä¾èµ–äºå¤–ç•Œ
+	//const é»˜è®¤æ˜¯staic,éœ€è¦æ˜¾ç¤ºexternï¼ˆç»™å¤–éƒ¨ä½¿ç”¨ï¼‰
 	extern const std::filesystem::path g_AssetPath = "assets";
 
 	ContentBrowserPanel::ContentBrowserPanel():
 		m_CurrentDirectory(g_AssetPath)
 	{
-		//´´½¨Í¼±êÎÆÀí
+		//åˆ›å»ºå›¾æ ‡çº¹ç†
 		m_DirectoryIcon = Texture2D::Create("Resources/Icons/ContentBrowser/DirectoryIcon.png");
 		m_FileIcon = Texture2D::Create("Resources/Icons/ContentBrowser/FileIcon.png");
 	}
-	//imgui µÄÊ¹ÓÃºÍÓÃ·¨
+	//imgui çš„ä½¿ç”¨å’Œç”¨æ³•
 	void ContentBrowserPanel::OnImguiRenderer()
 	{
 		//Reset
@@ -24,7 +24,7 @@ namespace Hazel {
 		static float thumbnailSize = 128.0f;
 		float cellSize = thumbnailSize + padding;
 		//ImGuiStyle& style = ImGui::GetStyle();
-		//style.ItemSpacing.x = 0.0f; // È¥µôÁĞ¼äÄ¬ÈÏ¼ä¾à
+		//style.ItemSpacing.x = 0.0f; // å»æ‰åˆ—é—´é»˜è®¤é—´è·
 
 		float panelWidth = ImGui::GetContentRegionAvail().x;
 		int columnCount = (int)(panelWidth / cellSize);
@@ -42,57 +42,59 @@ namespace Hazel {
 			}
 		}
 
-		//Draw,±éÀú
+		//Draw,éå†
 
-		//ÔÚµ±Ç°Ä¿Â¼ÏÂµÄËùÓĞµÄÎÄ¼ş
+		//åœ¨å½“å‰ç›®å½•ä¸‹çš„æ‰€æœ‰çš„æ–‡ä»¶
 		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
 		{
 
-			//¼ÆËãÊµ¼ÊÂ·¾¶
+			//è®¡ç®—å®é™…è·¯å¾„
 			const auto& path = directoryEntry.path();
-			//ralativePath È¥µô¸üÄ¿Â¼ºÍÅÌ£¬Ò²¾ÍÊÇ¼ÆËãÏà¶ÔÄ¿Â¼
+			//ralativePath å»æ‰æ›´ç›®å½•å’Œç›˜ï¼Œä¹Ÿå°±æ˜¯è®¡ç®—ç›¸å¯¹ç›®å½•
 			auto relativePath = std::filesystem::relative(path, g_AssetPath);
-			//Ïà¶ÔÂ·¾¶µ±×öÕâ¸öImgui»æÖÆÍ¼±ê¶ÔÓ¦µÄID
+			//ç›¸å¯¹è·¯å¾„å½“åšè¿™ä¸ªImguiç»˜åˆ¶å›¾æ ‡å¯¹åº”çš„ID
 			std::string filenameString = relativePath.filename().string();
 			ImGui::PushID(filenameString.c_str());
 
-			//Í¼±ê»æÖÆ
-			//¶ÔÓÚÄ¿Â¼ºÍÎÄ¼ş²ÉÈ¡²»Í¬µÄ»æÖÆ·½Ê½
+			//å›¾æ ‡ç»˜åˆ¶
+			//å¯¹äºç›®å½•å’Œæ–‡ä»¶é‡‡å–ä¸åŒçš„ç»˜åˆ¶æ–¹å¼
 			Ref<Texture2D> icon = directoryEntry.is_directory() ? m_DirectoryIcon : m_FileIcon;
 			
-			//±³¾°ÑÕÉ«±äÍ¸Ã÷
+			//èƒŒæ™¯é¢œè‰²å˜é€æ˜
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::ImageButton((ImTextureID)icon->GetRenderID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 			ImGui::PopStyleColor();
 
-			//Core-,,payload ÊÇÂ·¾¶£¬È»ºó¡°¡±Õâ¸öÊÇÒ»¸öÆ¥ÅäµÄflag
-			//ÊµÏÖÍÏ×§
+			//Core-,,payload æ˜¯è·¯å¾„ï¼Œç„¶åâ€œâ€è¿™ä¸ªæ˜¯ä¸€ä¸ªåŒ¹é…çš„flag
+			//å®ç°æ‹–æ‹½
 			if (ImGui::BeginDragDropSource())
 			{
 				const wchar_t* itemPath = relativePath.c_str();
-				//ÉèÖÃÎÄ¼şÏà¶ÔÂ·¾¶
+				//è®¾ç½®æ–‡ä»¶ç›¸å¯¹è·¯å¾„
 				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
 				ImGui::EndDragDropSource();
 			}
 
-			//ĞüÍ£²¢µã»÷Á½´Î-->½øÈëÄ¿Â¼
+
+
+			//æ‚¬åœå¹¶ç‚¹å‡»ä¸¤æ¬¡-->è¿›å…¥ç›®å½•
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (directoryEntry.is_directory())
 					m_CurrentDirectory /= path.filename();
 			}
 
-			//×Ô¶¯»»ĞĞ
+			//è‡ªåŠ¨æ¢è¡Œ
 			ImGui::TextWrapped(filenameString.c_str());
 
-			//ÏÂÒ»¸ö¸ñ×Ó£¨»òÕßÊÇÓÒ±ßµÄ¸ñ×Ó£©
+			//ä¸‹ä¸€ä¸ªæ ¼å­ï¼ˆæˆ–è€…æ˜¯å³è¾¹çš„æ ¼å­ï¼‰
 			ImGui::NextColumn();
 			ImGui::PopID();
 		}
 
-		//»Øµ½µ¥ÁĞÄ£Ê½£¨ÕûÌå¿Ø¼ş²¼¾ÖµÄÉèÖÃ£©
+		//å›åˆ°å•åˆ—æ¨¡å¼ï¼ˆæ•´ä½“æ§ä»¶å¸ƒå±€çš„è®¾ç½®ï¼‰
 		ImGui::Columns(1);
-		//µ÷Õû
+		//è°ƒæ•´
 		ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 16, 512);
 		ImGui::SliderFloat("Padding", &padding, 0, 128);
 

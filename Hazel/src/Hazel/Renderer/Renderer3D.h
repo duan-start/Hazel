@@ -13,7 +13,9 @@ namespace Hazel {
 	//Renderer3D
 	//提交渲染命令只是和rendererCommand交互
 	//重构ing
+	class Mesh;
 	class Renderer3D {
+
 	public:
 		typedef void(*RenderCommandFn)(void*);
 
@@ -42,7 +44,7 @@ namespace Hazel {
 		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) ;
 
 		//Renderer
-		static void RenderMesh(const std::string& filePath);
+		static void DrawMesh(const glm::mat4& transform, const Ref<Mesh> mesh,int entityID);
 		static void RenderSkyMap(const Ref<Texture> skyMap);
 
 		//Lines

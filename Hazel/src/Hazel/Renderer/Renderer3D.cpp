@@ -172,30 +172,26 @@ namespace Hazel {
 
 	}
 
-	//HardCode
-	void Renderer3D::RenderMesh(const std::string& filePath)
-	{
-		Ref<Mesh> targetMesh = nullptr;
 
-		// 1. 查找是否已加载过该 Mesh
-		for (auto& mesh : s_Data.Meshes) {
-			if (filePath == mesh->GetFilePath()) {
-				targetMesh = mesh;
-				break;
-			}
-		}
+	void Renderer3D::DrawMesh(const glm::mat4& transform, const Ref<Mesh> mesh, int entityID)
+	{
+		//for (auto& m_mesh : s_Data.Meshes) {
+		//	if (filePath == m_mesh->GetFilePath()) {
+		//		targetMesh = m_mesh;
+		//		break;
+		//	}
+		//}
 
 		// 2. 如果没找到，新创建一个并放入容器
-		if (!targetMesh) {
-			targetMesh = CreateRef<Mesh>(filePath); // 使用 Hazel 的 CreateRef
-			s_Data.Meshes.push_back(targetMesh);
-		}
-
+		//if (!targetMesh) {
+		//	targetMesh = Mesh::Create(filePath);
+		//	s_Data.Meshes.push_back(targetMesh);
+		//}
+	
 		// 3. 渲染当前这个 Mesh
 		s_Data.PBRshader->Bind();
 		s_Data.TextureSlots[0]->Bind();
-		DrawIndexed(targetMesh->GetVertexArray());
-
+		DrawIndexed(mesh->GetVertexArray());
 	}
 
 	void Renderer3D::RenderSkyMap(const Ref<Texture> skyMap)

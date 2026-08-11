@@ -144,6 +144,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLMesh.h" />
     <ClInclude Include="src\Debug\Instrumentor.h" />
     <ClInclude Include="src\Hazel.h" />
     <ClInclude Include="src\Hazel\Asset\Model.h" />
@@ -631,6 +632,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLMesh.cpp" />
     <ClCompile Include="src\Hazel\Asset\Model.cpp" />
     <ClCompile Include="src\Hazel\Asset\ModelImporter.cpp" />
     <ClCompile Include="src\Hazel\Core\Application.cpp" />
