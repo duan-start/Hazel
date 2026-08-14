@@ -1,4 +1,4 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 #include "SceneSerializer.h"
 
 #include "Entity.h"
@@ -11,7 +11,7 @@
 
 
 namespace YAML {
-	//×Ô¶¨Òå±£´æºÍ¶ÁÈ¡µÄ·½Ê½
+	//è‡ªå®šä¹‰ä¿å­˜å’Œè¯»å–çš„æ–¹å¼
 	template<>
 	struct convert<glm::vec2>
 	{
@@ -20,7 +20,7 @@ namespace YAML {
 			Node node;
 			node.push_back(rhs.x);
 			node.push_back(rhs.y);
-			//±íÊ¾ºáÏò´æ´¢[]
+			//è¡¨ç¤ºæ¨ªå‘å­˜å‚¨[]
 			node.SetStyle(EmitterStyle::Flow);
 			return node;
 		}
@@ -93,8 +93,8 @@ namespace Hazel {
 
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
 	{
-		out << YAML::Flow;//Ğ´ÔÚÒ»ĞĞÀïÃæ
-		//Ğ¡À¨ºÅ£¬ÄÚ²¿»áÉú³É¾Ö²¿node²¢Ïú»Ù
+		out << YAML::Flow;//å†™åœ¨ä¸€è¡Œé‡Œé¢
+		//å°æ‹¬å·ï¼Œå†…éƒ¨ä¼šç”Ÿæˆå±€éƒ¨nodeå¹¶é”€æ¯
 		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
 		return out;
 	}
@@ -138,7 +138,7 @@ namespace Hazel {
 	}
 
 
-	//ĞòÁĞ»¯µ¥¶ÀÊµÌå£¨ifÅĞ¶ÏËùÓĞ°üÀ¨µÄ×é¼ş£©
+	//åºåˆ—åŒ–å•ç‹¬å®ä½“ï¼ˆifåˆ¤æ–­æ‰€æœ‰åŒ…æ‹¬çš„ç»„ä»¶ï¼‰
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap; // Entity
@@ -168,7 +168,7 @@ namespace Hazel {
 			out << YAML::EndMap; // TransformComponent
 		}
 
-		//Õâ¸ö±È½Ï¾«Ëè
+		//è¿™ä¸ªæ¯”è¾ƒç²¾é«“
 		if (entity.HasComponent<CameraComponent>())
 		{
 			out << YAML::Key << "CameraComponent";
@@ -264,33 +264,45 @@ namespace Hazel {
 
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}
+		if (entity.HasComponent<MeshRendererComponent>())
+		{
+			out << YAML::Key << "MeshRendererComponent";
+			out << YAML::BeginMap; // CircleCollider2DComponent
+
+			auto& meshComponent = entity.GetComponent<MeshRendererComponent>();
+			meshComponent.mesh ?
+				out << YAML::Key << "Mesh" << YAML::Value << meshComponent.mesh->GetFilePath() :
+				out << YAML::Key << "Mesh" << YAML::Value << "null";
+
+			out << YAML::EndMap; // CircleCollider2DComponent
+		}
 
 		out << YAML::EndMap; // Entity
 	}
 
 
-	//³õÊ¼»¯±£´æ³¡¾°ÒıÓÃ
+	//åˆå§‹åŒ–ä¿å­˜åœºæ™¯å¼•ç”¨
 	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
 		: m_Scene(scene)
 	{
 	}
 
-	//ĞòÁĞ»¯Êä³ö
+	//åºåˆ—åŒ–è¾“å‡º
 	bool SceneSerializer::Serialize(const std::string& filepath)
 	{
 
-		//Èç¹ûÄãÃ»ÓĞÌØÒâĞ´ out << YAML::Flow£¬yaml-cpp Ä¬ÈÏ»áÊ¹ÓÃÕâÖÖ·ç¸ñ¡£ÔÚÕâÖÖÄ£Ê½ÏÂ£º
-		//BeginMap / EndMap£º²»ÏÔÊ¾´óÀ¨ºÅ{}¡£ËüÊÇ¿¿»»ĞĞºÍËõ½øÀ´±íÊ¾²ã¼¶¹ØÏµµÄ¡£
-		//BeginSeq / EndSeq£º²»ÏÔÊ¾·½À¨ºÅ[]¡£ËüÓÃ ¶Ìºá¸Ü - À´±íÊ¾ÁĞ±íÖĞµÄÃ¿Ò»Ïî¡£
+		//å¦‚æœä½ æ²¡æœ‰ç‰¹æ„å†™ out << YAML::Flowï¼Œyaml-cpp é»˜è®¤ä¼šä½¿ç”¨è¿™ç§é£æ ¼ã€‚åœ¨è¿™ç§æ¨¡å¼ä¸‹ï¼š
+		//BeginMap / EndMapï¼šä¸æ˜¾ç¤ºå¤§æ‹¬å·{}ã€‚å®ƒæ˜¯é æ¢è¡Œå’Œç¼©è¿›æ¥è¡¨ç¤ºå±‚çº§å…³ç³»çš„ã€‚
+		//BeginSeq / EndSeqï¼šä¸æ˜¾ç¤ºæ–¹æ‹¬å·[]ã€‚å®ƒç”¨ çŸ­æ¨ªæ  - æ¥è¡¨ç¤ºåˆ—è¡¨ä¸­çš„æ¯ä¸€é¡¹ã€‚
 
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
+		out << YAML::Key << "Scene" << YAML::Value << "Start";
 
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		//	auto& registry = m_Context->m_Registry;
 
-		//// ÕÒÒ»¸öËùÓĞÊµÌå¶¼°üº¬µÄ×é¼ş£¨Component£©,È¥±éÀúÊµÌå£¨½øĞĞĞòÁĞ»¯£©
+		//// æ‰¾ä¸€ä¸ªæ‰€æœ‰å®ä½“éƒ½åŒ…å«çš„ç»„ä»¶ï¼ˆComponentï¼‰,å»éå†å®ä½“ï¼ˆè¿›è¡Œåºåˆ—åŒ–ï¼‰
 		auto& registry = m_Scene->m_Registry;
 		for (auto entityID : registry.view<IDComponent>()) {
 				Entity entity = { entityID, m_Scene.get() };
@@ -302,26 +314,26 @@ namespace Hazel {
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
-		//´´½¨ÎÄ¼ş²¢Ğ´Èëstr
+		//åˆ›å»ºæ–‡ä»¶å¹¶å†™å…¥str
 		std::ofstream fout(filepath);
 		fout << out.c_str();
 		return true;
 	}
 
-	//Î´Íê³É
+	//æœªå®Œæˆ
 	bool SceneSerializer::SerializeRuntime(const std::string& filepath)
 	{
 		return true;
 	}
 
 
-	//´Ó¶ÔÓ¦µÄÎÄ¼ş£¨string£©ÀïÃæĞòÁĞ»¯Êı¾İ£¬²¢¸ù¾İÀïÃæµÄÊı¾İ½øĞĞsceneµÄ³õÊ¼»¯
+	//ä»å¯¹åº”çš„æ–‡ä»¶ï¼ˆstringï¼‰é‡Œé¢åºåˆ—åŒ–æ•°æ®ï¼Œå¹¶æ ¹æ®é‡Œé¢çš„æ•°æ®è¿›è¡Œsceneçš„åˆå§‹åŒ–
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
 		YAML::Node data;
 		try
 		{
-			//¶ÁÈ¡string
+			//è¯»å–string
 			data = YAML::LoadFile(filepath);
 		}
 		catch (YAML::ParserException e)
@@ -329,19 +341,19 @@ namespace Hazel {
 			return false;
 		}
 
-		//ÕÒµ½key½Úµã
+		//æ‰¾åˆ°keyèŠ‚ç‚¹
 		if (!data["Scene"])
 			return false;
 
-		//ÕÒµ½¶ÔÓ¦µÄvalue(²¢½øĞĞÇ¿ÖÆÀàĞÍ×ª»»)
+		//æ‰¾åˆ°å¯¹åº”çš„value(å¹¶è¿›è¡Œå¼ºåˆ¶ç±»å‹è½¬æ¢)
 		std::string sceneName = data["Scene"].as<std::string>();
 		HZ_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 
-		//node(key+value)
+		//nodes(key+value)
 		auto entities = data["Entities"];
 		if (entities)
 		{
-			//ºÃ°ÉnodeÀïÃæ¾ÓÈ»Ò²ÄÜÇ¶Ì×µ±Ò»¸öÈİÆ÷£¨mapºÍseq£©
+			//å¥½å§nodeé‡Œé¢å±…ç„¶ä¹Ÿèƒ½åµŒå¥—å½“ä¸€ä¸ªå®¹å™¨ï¼ˆmapå’Œseqï¼‰
 			for (auto entity : entities)
 			{
 				uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
@@ -352,10 +364,10 @@ namespace Hazel {
 					name = tagComponent["Tag"].as<std::string>();
 
 				HZ_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
-				//´´½¨ÊµÌå
+				//åˆ›å»ºå®ä½“
 				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid,name);
 
-				//ÀûÓÃ´æ´¢µÄÊı¾İ½øĞĞ¶ÔÓ¦×é¼şµÄ³õÊ¼»¯ºÍÊµÌå×é¼ş¹ÒÔØ
+				//åˆ©ç”¨å­˜å‚¨çš„æ•°æ®è¿›è¡Œå¯¹åº”ç»„ä»¶çš„åˆå§‹åŒ–å’Œå®ä½“ç»„ä»¶æŒ‚è½½
 				auto transformComponent = entity["TransformComponent"];
 				if (transformComponent)
 				{
@@ -393,6 +405,13 @@ namespace Hazel {
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 					src.Texture = spriteRendererComponent["Texture"].as<std::string>()!="null" ? Texture2D::Create(spriteRendererComponent["Texture"].as<std::string>()) : nullptr;
+				}
+
+				auto meshRendererComponent = entity["MeshRendererComponent"];
+				if (meshRendererComponent)
+				{
+					auto& src = deserializedEntity.AddComponent<MeshRendererComponent>();
+					src.mesh = meshRendererComponent["Mesh"].as<std::string>() != "null" ? Mesh::Create(meshRendererComponent["Mesh"].as<std::string>()) : nullptr;
 				}
 
 				auto circleRendererComponent = entity["CircleRendererComponent"];

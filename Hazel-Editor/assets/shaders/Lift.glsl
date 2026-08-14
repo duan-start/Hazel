@@ -8,6 +8,11 @@ layout(location = 2) in vec3 Tan;
 layout(location = 3) in vec3 Bin;
 layout(location = 4) in vec2 aTex;
 
+layout(std140, binding = 1) uniform TransformData
+{
+	mat4 u_Model;
+};
+
 layout(std140, binding = 0) uniform Camera
 {
 	mat4 u_ViewProjection;
@@ -17,9 +22,8 @@ layout(location=0) out vec2 pTex;
 void main()
 {
 
-	// 暂时无视相机矩阵，直接把模型画在屏幕中心！
     // a_Pos 通常在 -1 到 1 之间，这会在屏幕正中央画一个大白块
-    gl_Position = u_ViewProjection*vec4(aPos, 1.0);
+    gl_Position = u_ViewProjection*u_Model*vec4(aPos, 1.0);
 	pTex=aTex;
 }
 

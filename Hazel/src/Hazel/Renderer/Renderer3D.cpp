@@ -50,6 +50,7 @@ namespace Hazel {
 		//uniformBuffer的数据(还未上传)
 		Ref<UniformBuffer> CameraUniformBuffer;
 
+
 		Ref<UniformBuffer> StaticUniformBuffer;
 	};
 
@@ -190,6 +191,7 @@ namespace Hazel {
 	
 		// 3. 渲染当前这个 Mesh
 		s_Data.PBRshader->Bind();
+		//s_Data.PBRshader->
 		s_Data.TextureSlots[0]->Bind();
 		DrawIndexed(mesh->GetVertexArray());
 	}
@@ -224,12 +226,12 @@ namespace Hazel {
 		RendererCommand::DrawLines(vertexArray, indexCount);
 		
 	}
-	void Renderer3D::BeginScene(const GameCamera& camera, const glm::mat4& transform)
-	{
-		//HZ_RENDER_2(camera,transform,{Renderer2D::BeginScene(camera,transform);});
-		s_SceneData->ViewProjection = camera.GetProjection() * glm::inverse(transform);
-		//m_SceneData->CurrentTime = glfwGetTime();
-	}
+	//void Renderer3D::BeginScene(const GameCamera& camera, const glm::mat4& transform)
+	//{
+		
+		//s_SceneData->ViewProjection = camera.GetProjection() * glm::inverse(transform);
+		////m_SceneData->CurrentTime = glfwGetTime();
+	//}
 	void Renderer3D::BeginScene(const EditorCamera& camera)
 	{
 		//HZ_RENDER_1(camera,{Renderer2D::BeginScene(camera);});
@@ -245,7 +247,7 @@ namespace Hazel {
 		
 	
 	}
-	//这个还是需要的
+	// ||暂时没用
 	void Renderer3D::Submit(const Ref<Shader>& shader,const Ref<VertexArray>& vertexArray,const glm::mat4& transform)
 	{	
 		shader->Bind();
