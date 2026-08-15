@@ -194,12 +194,12 @@ namespace Hazel {
 			out << YAML::EndMap; // CameraComponent
 		}
 
-		if (entity.HasComponent<SpriteRendererComponent>())
+		if (entity.HasComponent<QuadRendererComponent>())
 		{
 			out << YAML::Key << "SpriteRendererComponent";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			auto& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
+			auto& spriteRendererComponent = entity.GetComponent<QuadRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << spriteRendererComponent.Color;
 			spriteRendererComponent.Texture?
 				out << YAML::Key << "Texture" << YAML::Value << spriteRendererComponent.Texture->GetPath():
@@ -401,7 +401,7 @@ namespace Hazel {
 				auto spriteRendererComponent = entity["SpriteRendererComponent"];
 				if (spriteRendererComponent)
 				{
-					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
+					auto& src = deserializedEntity.AddComponent<QuadRendererComponent>();
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
 					src.Texture = spriteRendererComponent["Texture"].as<std::string>()!="null" ? Texture2D::Create(spriteRendererComponent["Texture"].as<std::string>()) : nullptr;

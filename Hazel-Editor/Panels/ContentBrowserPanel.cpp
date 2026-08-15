@@ -32,7 +32,7 @@ namespace Hazel {
 			columnCount = 1;
 
 		ImGui::Begin("Content Browser");
-		ImGui::Columns(columnCount-2, nullptr, false);
+
 
 		if (m_CurrentDirectory != std::filesystem::path(g_AssetPath))
 		{
@@ -41,7 +41,7 @@ namespace Hazel {
 				m_CurrentDirectory = m_CurrentDirectory.parent_path();
 			}
 		}
-
+		ImGui::Columns(columnCount - 2, nullptr, false);
 		//Draw,遍历
 
 		//在当前目录下的所有的文件

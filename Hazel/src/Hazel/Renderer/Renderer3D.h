@@ -44,7 +44,9 @@ namespace Hazel {
 		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) ;
 
 		//Renderer
-		static void DrawMesh(const glm::mat4& transform, const Ref<Mesh> mesh,int entityID);
+		//static void DrawMesh(const glm::mat4& transform, const const Ref<Mesh> mesh,int entityID,);
+
+		static void DrawMesh(const glm::mat4& transform, const struct MeshRendererComponent& mesh,int entityID);
 		static void RenderSkyMap(const Ref<Texture> skyMap);
 
 		//Lines

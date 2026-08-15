@@ -87,7 +87,7 @@ namespace Hazel {
 			//Shader
 			//shaderLib;
 			auto& Lib = ShaderLibrary::GetLib();
-			s_Data.PBRshader = Lib->Get("Lift");
+			s_Data.PBRshader = Lib->Get("Mesh");
 			s_Data.SkyShader = Lib->Get("SkyBox");
 
 			// 立方体的 8 个顶点
@@ -174,7 +174,7 @@ namespace Hazel {
 	}
 
 
-	void Renderer3D::DrawMesh(const glm::mat4& transform, const Ref<Mesh> mesh, int entityID)
+	void Renderer3D::DrawMesh(const glm::mat4& transform, const struct MeshRendererComponent& mesh, int entityID)
 	{
 		//for (auto& m_mesh : s_Data.Meshes) {
 		//	if (filePath == m_mesh->GetFilePath()) {
@@ -192,8 +192,11 @@ namespace Hazel {
 		// 3. 渲染当前这个 Mesh
 		s_Data.PBRshader->Bind();
 		//s_Data.PBRshader->
-		s_Data.TextureSlots[0]->Bind();
-		DrawIndexed(mesh->GetVertexArray());
+		if(mesh.Texture)
+		s_Data.TextureSlots[0] = mesh.Texture;
+		s_Data.TextureSlots[0]->Bind(4);
+
+		DrawIndexed(mesh.mesh->GetVertexArray());
 	}
 
 	void Renderer3D::RenderSkyMap(const Ref<Texture> skyMap)

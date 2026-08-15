@@ -17,6 +17,7 @@ namespace Hazel {
 	//导入外部的自定义渲染的组件
 	struct MeshRendererComponent {
 		Ref<Mesh> mesh;
+		Ref<Texture2D> Texture;
 		//Material
 
 		//如果你需要什么，就明确说，不要靠自动生成
@@ -27,15 +28,17 @@ namespace Hazel {
 	//需要设置一种默认的
 	//Material  = shader + texture + uniform
 	//这边
-	struct RendererComponent {
-		//如果你需要什么，就明确说，不要靠自动生成
-		RendererComponent() = default;
-		RendererComponent(const RendererComponent&) = default;
-
-	public:
-		Ref<Shader> shader;
-
-	};
+	//struct MaterialComponent {
+	//	//如果你需要什么，就明确说，不要靠自动生成
+	//	MaterialComponent() = default;
+	//	MaterialComponent(const  MaterialComponent&) = default;
+	//
+	//public:
+	//	Ref<Shader> shader;
+	//	// 方式 A：经典架构 - 持有共享指针（自动计费与引用）
+	//	std::unordered_map<std::string, Ref<Texture2D>> textures;
+	//
+	//};
 
 
 
@@ -107,16 +110,16 @@ namespace Hazel {
 		}
 	};
 
-	struct SpriteRendererComponent
+	struct QuadRendererComponent
 	{
 		glm::vec4 Color{ 1.0f, 0.0f, 1.0f, 1.0f };
 
 		Ref<Texture2D> Texture;
 		float TilingFactor = 1.0f;
 
-		SpriteRendererComponent() = default;
-		SpriteRendererComponent(const SpriteRendererComponent&) = default;
-		SpriteRendererComponent(const glm::vec4& color)
+		QuadRendererComponent() = default;
+		QuadRendererComponent(const QuadRendererComponent&) = default;
+		QuadRendererComponent(const glm::vec4& color)
 			: Color(color) {
 		}
 	};

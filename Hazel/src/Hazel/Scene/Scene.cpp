@@ -142,7 +142,7 @@ namespace Hazel {
 		//场景复制有两种思想，一种是遍历entity进行多个componmet复制（好理解但低效）
 		//二是遍历Component进行进行多个Entity的一个Componment（cache友好，基于UUID进行entity匹配)
 		Utils::CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		Utils::CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		Utils::CopyComponent<QuadRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		Utils::CopyComponent<CircleRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		Utils::CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
 		Utils::CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
@@ -161,7 +161,7 @@ namespace Hazel {
 
 		//实体之间的组件复制
 		Utils::CopyComponentIfExists<TransformComponent>(newEntity, entity);
-		Utils::CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
+		Utils::CopyComponentIfExists<QuadRendererComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<CircleRendererComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<CameraComponent>(newEntity, entity);
 		Utils::CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
@@ -320,10 +320,10 @@ namespace Hazel {
 				Renderer2D::BeginScene(mainCamera->GetProjection(), cameraTransform);
 
 				{
-					auto group = m_Registry.group<>(entt::get<TransformComponent, SpriteRendererComponent>);
+					auto group = m_Registry.group<>(entt::get<TransformComponent, QuadRendererComponent>);
 					for (auto entity : group)
 					{
-						auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+						auto [transform, sprite] = group.get<TransformComponent, QuadRendererComponent>(entity);
 
 						Renderer2D::DrawQuad(transform.GetTransform(), sprite);
 					}
@@ -492,7 +492,7 @@ namespace Hazel {
 
 			//Renderer3D::DrawMesh(transform.GetTransform(), mesh, (int)entity);
 			if(meshComp.mesh)
-			Renderer3D::DrawMesh(transform.GetTransform(), meshComp.mesh, (int)entity);
+			Renderer3D::DrawMesh(transform.GetTransform(), meshComp, (int)entity);
 		}
 
 
@@ -508,10 +508,10 @@ namespace Hazel {
 			//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			
 			//DrawQuad
-			auto group = m_Registry.group<>(entt::get<TransformComponent, SpriteRendererComponent>);
+			auto group = m_Registry.group<>(entt::get<TransformComponent, QuadRendererComponent>);
 			for (auto entity : group)
 			{
-				auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				auto [transform, sprite] = group.get<TransformComponent, QuadRendererComponent>(entity);
 
 				Renderer2D::DrawQuad(transform.GetTransform(), sprite, (int)entity);
 			}
@@ -560,7 +560,7 @@ namespace Hazel {
 	}
 
 	template<>
-	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
+	void Scene::OnComponentAdded<QuadRendererComponent>(Entity entity, QuadRendererComponent& component)
 	{
 	}
 

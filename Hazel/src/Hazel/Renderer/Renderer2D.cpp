@@ -675,7 +675,7 @@ namespace Hazel {
 #endif
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, QuadRendererComponent& src, int entityID)
 	{
 		if (src.Texture)
 			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);

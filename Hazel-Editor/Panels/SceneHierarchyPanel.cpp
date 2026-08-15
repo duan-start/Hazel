@@ -261,12 +261,12 @@ namespace Hazel {
 				ImGui::CloseCurrentPopup();
 			}
 
-			if (ImGui::MenuItem("Sprite Renderer"))
+			if (ImGui::MenuItem("Quad Renderer"))
 			{
-				if (!m_SelectiedEntity.HasComponent<SpriteRendererComponent>())
-					m_SelectiedEntity.AddComponent<SpriteRendererComponent>();
+				if (!m_SelectiedEntity.HasComponent<QuadRendererComponent>())
+					m_SelectiedEntity.AddComponent<QuadRendererComponent>();
 				else
-					HZ_CORE_WARN("This entity already has the Sprite Renderer Component!");
+					HZ_CORE_WARN("This entity already has the Quad Renderer Component!");
 				ImGui::CloseCurrentPopup();
 			}
 
@@ -307,7 +307,7 @@ namespace Hazel {
 			}
 			if (!m_SelectiedEntity.HasComponent<MeshRendererComponent>())
 			{
-				if (ImGui::MenuItem("MeshRenderer"))
+				if (ImGui::MenuItem("Mesh Renderer"))
 				{
 					m_SelectiedEntity.AddComponent<MeshRendererComponent>();
 					ImGui::CloseCurrentPopup();
@@ -389,7 +389,7 @@ namespace Hazel {
 				}
 			});
 
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
+		DrawComponent<QuadRendererComponent>("Sprite Renderer", entity, [](auto& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 
@@ -418,7 +418,7 @@ namespace Hazel {
 
 		DrawComponent<MeshRendererComponent>("Mesh Renderer", entity, [](auto& component)
 			{
-				
+
 				ImGui::Button("Mesh", ImVec2(100.0f, 0.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
@@ -445,6 +445,27 @@ namespace Hazel {
 					ImGui::EndDragDropTarget();
 
 				}
+				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					//接受资产拖拽（CONTENT_BROWSER_ITEM是暗号）
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+						Ref<Texture2D> texture = Texture2D::Create(texturePath.string());
+						if (texture->IsLoaded())
+							component.Texture = texture;
+						else
+							HZ_WARN("Could not load texture {0}", texturePath.filename().string());
+
+					}
+
+					ImGui::EndDragDropTarget();
+
+				}
+
+
 			});
 
 

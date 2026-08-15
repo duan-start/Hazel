@@ -55,7 +55,7 @@ namespace Hazel {
 			//sky
 			Load("assets/shaders/SkyBox.glsl");
 			//无光的
-			Load("assets/shaders/Lift.glsl");
+			Load("assets/shaders/Mesh.glsl");
 			//blinn
 			//pbr
 
