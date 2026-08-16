@@ -40,8 +40,7 @@ namespace Hazel {
 		static void OnWindowResize(uint32_t width, uint32_t height);
 		static void Clear();
 		static void SetClearColor(const glm::vec4& color);
-		//trangles
-		static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0) ;
+
 
 		//Renderer
 		//static void DrawMesh(const glm::mat4& transform, const const Ref<Mesh> mesh,int entityID,);

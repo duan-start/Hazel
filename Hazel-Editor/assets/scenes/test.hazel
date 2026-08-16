@@ -32,10 +32,6 @@ Entities:
       Translation: [-1.36702728, 0.782879233, 0]
       Rotation: [-0.0377337411, 0.0736978799, 0.00114577368]
       Scale: [1, 0.999999762, 1]
-    SpriteRendererComponent:
-      Color: [1, 0.852941215, 0, 1]
-      Texture: "null"
-      TilingFactor: 1
     Rigidbody2DComponent:
       BodyType: Dynamic
       FixedRotation: false

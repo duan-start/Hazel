@@ -306,6 +306,21 @@ void EditorLayer::OnImGuiRender()
 	{
 		ImGui::Begin("Setting");
 		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
+
+		ImGui::Button("skyBox", ImVec2(100.0f, 0.0f));
+		if (ImGui::BeginDragDropTarget())
+		{
+			//接受资产拖拽（CONTENT_BROWSER_ITEM是暗号）
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				const wchar_t* path = (const wchar_t*)payload->Data;
+				std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+				Ref<TextureCube> texture = TextureCube::Create(texturePath.string());
+				HZ_WARN("Could not load texture {0}", texturePath.filename().string());
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		ImGui::End();
 	}
 //渲染主要视图

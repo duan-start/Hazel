@@ -445,7 +445,7 @@ namespace Hazel {
 					ImGui::EndDragDropTarget();
 
 				}
-				ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+				ImGui::Button("Diffuse", ImVec2(100.0f, 0.0f));
 				if (ImGui::BeginDragDropTarget())
 				{
 					//接受资产拖拽（CONTENT_BROWSER_ITEM是暗号）

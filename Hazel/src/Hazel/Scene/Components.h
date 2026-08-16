@@ -26,19 +26,19 @@ namespace Hazel {
 	};
 
 	//需要设置一种默认的
-	//Material  = shader + texture + uniform
+	//Material  = shader  + uniform
 	//这边
-	//struct MaterialComponent {
-	//	//如果你需要什么，就明确说，不要靠自动生成
-	//	MaterialComponent() = default;
-	//	MaterialComponent(const  MaterialComponent&) = default;
-	//
-	//public:
-	//	Ref<Shader> shader;
-	//	// 方式 A：经典架构 - 持有共享指针（自动计费与引用）
-	//	std::unordered_map<std::string, Ref<Texture2D>> textures;
-	//
-	//};
+	struct MaterialComponent {
+		//如果你需要什么，就明确说，不要靠自动生成
+		MaterialComponent() = default;
+		MaterialComponent(const  MaterialComponent&) = default;
+	
+	public:
+		Ref<Shader> shader;
+		// 方式 A：经典架构 - 持有共享指针（自动计费与引用）
+		std::unordered_map<std::string, Ref<Texture2D>> textures;
+	
+	};
 
 
 

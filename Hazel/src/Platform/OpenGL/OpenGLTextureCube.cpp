@@ -33,7 +33,7 @@ namespace Hazel {
 		unsigned int faceWidth = m_Width / 4;
 		//高有三张图
 		unsigned int faceHeight = m_Height / 3;
-		HZ_CORE_ASSERT(faceWidth == faceHeight, "Non-square faces!");
+		//HZ_CORE_ASSERT(faceWidth == faceHeight, "Non-square faces!");
 
 		std::array<unsigned char*, 6> faces;
 		for (size_t i = 0; i < faces.size(); i++)

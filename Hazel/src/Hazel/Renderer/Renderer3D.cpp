@@ -35,23 +35,32 @@ namespace Hazel {
 		uint32_t TextureSlotIndex = 2;
 
 		//传到shader上面的Uniformbbuffer里面的数据
+		//因为更新频率不一样，所以分成多个binding
 		struct CameraData
 		{
 			glm::mat4 ViewProjection;
 		};
 		CameraData CameraBuffer;
 
+		// 
+		struct TransformData {
+			glm::mat4 Model;
+			int EntitID;
+			//int padding[3];
+		};
+		TransformData transform;
 
 		struct StaticData {
 			glm::mat4 StaticViewProjection;
 		};
 		StaticData StaticBuffer;
 
+
 		//uniformBuffer的数据(还未上传)
 		Ref<UniformBuffer> CameraUniformBuffer;
-
-
+		Ref<UniformBuffer> ModelUniformBuffer;
 		Ref<UniformBuffer> StaticUniformBuffer;
+
 	};
 
 	//全局唯一的
@@ -75,10 +84,11 @@ namespace Hazel {
 		{
 			//Camera
 			s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DStorge::CameraData), 0);
-			s_Data.StaticUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DStorge::CameraData), 1);
-			//ShaderInit
+			s_Data.StaticUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DStorge::CameraData), 2);
+			//model
+			s_Data.ModelUniformBuffer = UniformBuffer::Create(sizeof(Renderer3DStorge::TransformData), 1);
 			//Texture
-		//设置默认纹理
+			//设置默认纹理
 			s_Data.WhiteTexture = Texture2D::Create(1, 1);
 			uint32_t whiteTextureData = 0xffffffff;
 			s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
@@ -165,42 +175,28 @@ namespace Hazel {
 	void Renderer3D::SetClearColor(const glm::vec4& color)
 	{
 		RendererCommand::SetClearColor(color);
-	}
-	void Renderer3D::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
-	{
-
-		RendererCommand::DrawIndexed(vertexArray, indexCount);
-
-	}
-
+	} 
 
 	void Renderer3D::DrawMesh(const glm::mat4& transform, const struct MeshRendererComponent& mesh, int entityID)
 	{
-		//for (auto& m_mesh : s_Data.Meshes) {
-		//	if (filePath == m_mesh->GetFilePath()) {
-		//		targetMesh = m_mesh;
-		//		break;
-		//	}
-		//}
 
-		// 2. 如果没找到，新创建一个并放入容器
-		//if (!targetMesh) {
-		//	targetMesh = Mesh::Create(filePath);
-		//	s_Data.Meshes.push_back(targetMesh);
-		//}
-	
+		// 1. 更新 Model 矩阵到 Uniform Buffer
+		s_Data.transform.Model = transform;
+		s_Data.transform.EntitID = entityID;
+		s_Data.ModelUniformBuffer->SetData(&s_Data.transform, sizeof(Renderer3DStorge::TransformData),0);
+
 		// 3. 渲染当前这个 Mesh
 		s_Data.PBRshader->Bind();
 		//s_Data.PBRshader->
 		if(mesh.Texture)
 		s_Data.TextureSlots[0] = mesh.Texture;
-		s_Data.TextureSlots[0]->Bind(4);
+		s_Data.TextureSlots[0]->Bind(0);
 
-		DrawIndexed(mesh.mesh->GetVertexArray());
+		RendererCommand::DrawIndexed(mesh.mesh->GetVertexArray(),0);
 	}
 
 	void Renderer3D::RenderSkyMap(const Ref<Texture> skyMap)
-	{		//如果是相同资源的话
+	{	//如果是相同资源的话
 		if (s_Data.TextureSlots[1].get() != skyMap.get()) {
 			s_Data.TextureSlots[1] = skyMap;
 		}
@@ -213,7 +209,7 @@ namespace Hazel {
 		s_Data.SkyShader->Bind();
 		//
 		s_Data.TextureSlots[1]->Bind(1);
-		DrawIndexed(s_Data.SkyVertexArray);
+	//	DrawIndexed(s_Data.SkyVertexArray);
 
 		//严格小于才覆盖
 		glDepthFunc(GL_LESS); // set depth function back to default
@@ -245,12 +241,17 @@ namespace Hazel {
 
 	}
 
+	//todo(batch 优化)
 	void Renderer3D::EndScene()
 	{
 		
 	
 	}
-	// ||暂时没用
+
+
+
+
+	// ||暂时没用, (很长时间内)
 	void Renderer3D::Submit(const Ref<Shader>& shader,const Ref<VertexArray>& vertexArray,const glm::mat4& transform)
 	{	
 		shader->Bind();

@@ -8,7 +8,7 @@ namespace Hazel {
 	class  Mesh
 	{
 	public:
-		//同一个shader渲染下的最小单元，一般直接就是一个模型
+		//同一个shader渲染下的最小单元，一般直接就是一个模型，没有可以省
 		struct Vertex
 		{
 			glm::vec3 Position;
@@ -33,7 +33,6 @@ namespace Hazel {
 		virtual const std::string& GetFilePath()const = 0;
 		virtual const std::shared_ptr<VertexArray>& GetVertexArray() const =0;
 		virtual bool IsLoaded() const = 0;
-
 
 
 	};
