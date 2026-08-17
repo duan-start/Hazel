@@ -195,26 +195,10 @@ namespace Hazel {
 		RendererCommand::DrawIndexed(mesh.mesh->GetVertexArray(),0);
 	}
 
-	void Renderer3D::RenderSkyMap(const Ref<Texture> skyMap)
-	{	//如果是相同资源的话
-		if (s_Data.TextureSlots[1].get() != skyMap.get()) {
-			s_Data.TextureSlots[1] = skyMap;
-		}
-		////to do::repaire
-		//glDisable(GL_BLEND);          // 必须关掉，否则颜色会被 Blend Factor 乘成全 0
-		//glEnable(GL_DEPTH_TEST);      // 必须开启，配合 xyww 技巧
-		//小于等于才覆盖
-		glDepthFunc(GL_LEQUAL);       // 确保远平面可见
-		//glDepthMask(GL_FALSE);        // 天空盒不写深度
-		s_Data.SkyShader->Bind();
-		//
-		s_Data.TextureSlots[1]->Bind(1);
-	//	DrawIndexed(s_Data.SkyVertexArray);
-
-		//严格小于才覆盖
-		glDepthFunc(GL_LESS); // set depth function back to default
-
-	}
+	//void Renderer3D::DrawSkyMap(const Ref<Material> sky)
+	//{	
+	
+	//}
 
 	void Renderer3D::SetLineWidth(float width)
 	{
@@ -254,21 +238,21 @@ namespace Hazel {
 	// ||暂时没用, (很长时间内)
 	void Renderer3D::Submit(const Ref<Shader>& shader,const Ref<VertexArray>& vertexArray,const glm::mat4& transform)
 	{	
-		shader->Bind();
-		vertexArray->Bind();
+		//shader->Bind();
+		//vertexArray->Bind();
 		
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", s_SceneData->ViewProjection);
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
+		//std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_ViewProjection", s_SceneData->ViewProjection);
+		//std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4("u_Transform", transform);
 
-		RendererCommand::DrawIndexed(vertexArray,0);
-		shader->UnBind();
+		//RendererCommand::DrawIndexed(vertexArray,0);
+		//shader->UnBind();
 	}
 	void Renderer3D::WaitAndRender()
 	{
 		//有点奇怪，因为实际上也是一样的，只是读起来意义不太明确而已  this---==s_Instance
 		//m_CommandQueue.Execute();
 		//全局唯一的渲染队列
-		s_Instance->m_CommandQueue.Execute();
+		//s_Instance->m_CommandQueue.Execute();
 	}
 	//RendererAPI::API Renderer::m_RendererAPI = RendererAPI::API::OpenGL;
 }

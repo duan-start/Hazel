@@ -46,7 +46,7 @@ namespace Hazel {
 		//static void DrawMesh(const glm::mat4& transform, const const Ref<Mesh> mesh,int entityID,);
 
 		static void DrawMesh(const glm::mat4& transform, const struct MeshRendererComponent& mesh,int entityID);
-		static void RenderSkyMap(const Ref<Texture> skyMap);
+		//static void DrawSkyMap(const Ref<Material> Sky);
 
 		//Lines
 		static void SetLineWidth(float width) ;

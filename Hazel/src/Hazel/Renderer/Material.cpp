@@ -23,8 +23,12 @@ namespace Hazel {
 	{
 	}
 
+	void Material::Bind() const
+	{
+		m_Shader->Bind();
+	}
 
-	void Material::BindTextures() const
+	void MaterialInstance::BindTextures() const
 	{
 		for (size_t i = 0; i < m_Textures.size(); i++)
 		{
@@ -32,13 +36,6 @@ namespace Hazel {
 			if (texture)
 				texture->Bind(i);
 		}
-	}
-
-	void Material::Bind() const
-	{
-		m_Shader->Bind();
-
-		BindTextures();
 	}
 
 

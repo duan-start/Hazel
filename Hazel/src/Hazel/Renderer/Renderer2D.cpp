@@ -247,10 +247,10 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		//Todu:Camera(u_ViewProjection)  //old
-		s_Data.QuadShader->Bind();
+		//s_Data.QuadShader->Bind();
 		//对标upload实际上
-		s_Data.QuadShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-		StartNewBactch();
+	//	s_Data.QuadShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		//StartNewBactch();
 
 	}
 

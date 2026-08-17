@@ -6,7 +6,6 @@
 
 
 namespace Hazel {
-	//感觉不是太对！vulkan的shader的uniform（push_const）
 	class Shader
 	{
 	public:
@@ -15,14 +14,15 @@ namespace Hazel {
 		virtual void UnBind() const = 0;  // 纯虚函数，声明为const
 		virtual const std::string& GetName()const = 0;
 
-		virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const = 0;
-		virtual void SetUniformMat4(const std::string& name,const glm::mat4& value)const = 0;
-		virtual void SetUniformFloat3(const std::string& name,const glm::vec3& value)const=0 ;
-		virtual void SetUniformFloat(const std::string& name, float value) const = 0;
-
-		//用来设置采样器的卡槽
-		virtual void SetUniformInt(const std::string& name, int value)const = 0;
-		virtual void SetUniformIntArray(const std::string& name,int* value, uint32_t count) = 0;
+		//对于vk shader,已经不支持直接设置uniform了
+			//所以这里是450一下的接口
+			//virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value)const = 0;
+			//virtual void SetUniformMat4(const std::string& name,const glm::mat4& value)const = 0;
+			//virtual void SetUniformFloat3(const std::string& name,const glm::vec3& value)const=0 ;
+			//virtual void SetUniformFloat(const std::string& name, float value) const = 0;
+			//用来设置采样器的卡槽
+			//virtual void SetUniformInt(const std::string& name, int value)const = 0;
+			//virtual void SetUniformIntArray(const std::string& name,int* value, uint32_t count) = 0;
 
 		virtual ~Shader() ;
 		static Ref<Shader> Create(const std::string& name,const std::string& vertexsrc, const std::string& fragmentsrc);

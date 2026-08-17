@@ -144,6 +144,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hazel\Renderer\SceneRenderer.h" />
     <ClInclude Include="src\Debug\Instrumentor.h" />
     <ClInclude Include="src\Hazel.h" />
     <ClInclude Include="src\Hazel\Asset\Model.h" />
@@ -183,7 +184,6 @@
     <ClInclude Include="src\Hazel\Renderer\Renderer3D.h" />
     <ClInclude Include="src\Hazel\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Hazel\Renderer\RendererCommand.h" />
-    <ClInclude Include="src\Hazel\Renderer\RendererScene.h" />
     <ClInclude Include="src\Hazel\Renderer\SceneCamera.h" />
     <ClInclude Include="src\Hazel\Renderer\Shader.h" />
     <ClInclude Include="src\Hazel\Renderer\SubTexture2D.h" />
@@ -632,6 +632,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hazel\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="src\Hazel\Asset\Model.cpp" />
     <ClCompile Include="src\Hazel\Asset\ModelImporter.cpp" />
     <ClCompile Include="src\Hazel\Core\Application.cpp" />
@@ -657,7 +658,6 @@
     <ClCompile Include="src\Hazel\Renderer\Renderer3D.cpp" />
     <ClCompile Include="src\Hazel\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\Hazel\Renderer\RendererCommand.cpp" />
-    <ClCompile Include="src\Hazel\Renderer\RendererScene.cpp" />
     <ClCompile Include="src\Hazel\Renderer\SceneCamera.cpp" />
     <ClCompile Include="src\Hazel\Renderer\Shader.cpp" />
     <ClCompile Include="src\Hazel\Renderer\SubTexture2D.cpp" />

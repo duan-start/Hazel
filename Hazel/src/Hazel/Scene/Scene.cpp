@@ -2,8 +2,9 @@
 #include "Scene.h"
 #include "Components.h"
 #include "ScriptableEntity.h"
-#include "Hazel/Renderer/Renderer3D.h"
-#include "Hazel/Renderer/Renderer2D.h"
+
+#include "Hazel/Renderer/SceneRenderer.h"
+
 
 #include <glm/glm.hpp>
 #include "Entity.h"
@@ -244,8 +245,9 @@ namespace Hazel {
 		}
 		
 		//Render tick
-		RenderScene(camera);
-
+		SceneRenderer::BeginScene(this, camera);
+		SceneRenderer::EndScene();
+		
 	}
 
 
@@ -317,31 +319,8 @@ namespace Hazel {
 			//--------------------------------------------------------------
 			if (mainCamera)
 			{
-				Renderer2D::BeginScene(mainCamera->GetProjection(), cameraTransform);
-
-				{
-					auto group = m_Registry.group<>(entt::get<TransformComponent, QuadRendererComponent>);
-					for (auto entity : group)
-					{
-						auto [transform, sprite] = group.get<TransformComponent, QuadRendererComponent>(entity);
-
-						Renderer2D::DrawQuad(transform.GetTransform(), sprite);
-					}
-				}
-
-				// Draw circles
-				{
-					//同理
-					auto group = m_Registry.group<>(entt::get<TransformComponent, CircleRendererComponent>);
-					for (auto entity : group)
-					{
-						auto [transform, circle] = group.get<TransformComponent, CircleRendererComponent>(entity);
-
-						Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
-					}
-				}
-
-				Renderer3D::EndScene();
+				SceneRenderer::BeginScene(this,mainCamera, cameraTransform);
+				SceneRenderer::EndScene();
 			}
 		}
 
@@ -349,7 +328,8 @@ namespace Hazel {
 	//根据编辑器Camera进行tick(编辑器画面的tick)
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
-		RenderScene(camera);
+		SceneRenderer::BeginScene(this, camera);
+		SceneRenderer::EndScene();
 	}
 
 	//设置宽高比
@@ -472,67 +452,6 @@ namespace Hazel {
 		m_PhysicsWorld = nullptr;
 	}
 
-	//Editor进行RendererTick的实际内容
-	void Scene::RenderScene(EditorCamera& camera)
-	{
-
-		//Renderer3D
-		//Render Mesh ,skyMap,之类的
-		Renderer3D::BeginScene(camera);
-		
-
-		//if (m_Environment.SkyMap)
-		//	Renderer3D::RenderSkyMap(m_Environment.SkyMap);
-		//else HZ_CORE_INFO("NO SkyMap");
-
-		auto group = m_Registry.group<>(entt::get<TransformComponent,MeshRendererComponent>);
-		for (auto entity : group)
-		{
-			auto [transform, meshComp] = group.get<TransformComponent, MeshRendererComponent>(entity);
-
-			//Renderer3D::DrawMesh(transform.GetTransform(), mesh, (int)entity);
-			if(meshComp.mesh)
-			Renderer3D::DrawMesh(transform.GetTransform(), meshComp, (int)entity);
-		}
-
-
-		Renderer3D::EndScene();
-		//有一个通用的EditorCamera
-		//根据entity的状态直接绘制
-
-
-		//Render 2D,滤镜,自定义shader之类的
-		Renderer2D::BeginScene(camera);
-		{
-			//组件不能被多个group同时拥有
-			//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-			
-			//DrawQuad
-			auto group = m_Registry.group<>(entt::get<TransformComponent, QuadRendererComponent>);
-			for (auto entity : group)
-			{
-				auto [transform, sprite] = group.get<TransformComponent, QuadRendererComponent>(entity);
-
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite, (int)entity);
-			}
-
-
-		}
-
-		// Draw circles
-		{
-			auto group = m_Registry.group<>(entt::get<TransformComponent, CircleRendererComponent>);
-			for (auto entity : group)
-			{
-				auto [transform, circle] = group.get<TransformComponent, CircleRendererComponent>(entity);
-
-				Renderer2D::DrawCircle(transform.GetTransform(), circle.Color, circle.Thickness, circle.Fade, (int)entity);
-			}
-		}
-
-		Renderer2D::EndScene();
-	}
-
 	//Todo:设置回调通知（Now These are garbage）
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
@@ -599,7 +518,7 @@ namespace Hazel {
 
 	Environment Environment::Load(const std::string& filepath)
 	{
-		auto skyMap = TextureCube::Create(filepath);
+		auto& skyMap = TextureCube::Create(filepath);
 		return { skyMap };
 	}
 }

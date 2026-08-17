@@ -14,10 +14,8 @@ namespace Hazel {
 
 	struct Environment
 	{
-		Ref<TextureCube> SkyMap;
-		//Ref<TextureCube> IrradianceMap;
-
 		static Environment Load(const std::string& filepath);
+		Ref<Texture> Sky;
 	};
 
 	struct Light
@@ -88,8 +86,6 @@ namespace Hazel {
 		void OnPhysics2DStart();
 		void OnPhysics2DStop();
 
-		//Render tick
-		void RenderScene(EditorCamera& camera);
 	private:
 		//ÊµÌå×¢²á±í
 		entt::registry m_Registry;
@@ -106,6 +102,7 @@ namespace Hazel {
 		friend class Entity;
 		friend class SceneHierarchyPanel;
 		friend class SceneSerializer;
+		friend class SceneRenderer;
 	};
 
 	

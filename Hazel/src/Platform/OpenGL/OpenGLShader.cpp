@@ -440,91 +440,92 @@ namespace Hazel {
 		glDeleteProgram(m_RenderID);
 	}
 
-	void OpenGLShader::SetUniformFloat4(const std::string& name, const glm::vec4& value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		UploadUniformVec4(name, value);
-	}
+	//void OpenGLShader::SetUniformFloat4(int binding, const glm::vec4& value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	UploadUniformVec4(name, value);
+	//}
+	//
+	//void OpenGLShader::SetUniformMat4(int binding,const glm::mat4& value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	UploadUniformMat4(name, value);
+	//}
+	//
+	//void OpenGLShader::SetUniformFloat3(int binding,const glm::vec3& value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	UploadUniformVec3(name, value);
+	//}
+	//void OpenGLShader::SetUniformFloat(int binding, float value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	UploadUniformFloat(name, value);
+	//}
+	//
+	//void OpenGLShader::SetUniformIntArray(const std::string& name, int* value, uint32_t count)
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	UploadUniformIntArray(name, value,count);
+	//}
 
-	void OpenGLShader::SetUniformMat4(const std::string& name,const glm::mat4& value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		UploadUniformMat4(name, value);
-	}
-
-	void OpenGLShader::SetUniformFloat3(const std::string& name,const glm::vec3& value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		UploadUniformVec3(name, value);
-	}
-	void OpenGLShader::SetUniformFloat(const std::string& name, float value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		UploadUniformFloat(name, value);
-	}
-
-	void OpenGLShader::SetUniformIntArray(const std::string& name, int* value, uint32_t count)
-	{
-		HZ_PROFILE_FUNCTION();
-		UploadUniformIntArray(name, value,count);
-	}
-
-	void OpenGLShader::SetUniformInt(const std::string& name, int value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		UploadUniformInt(name, value);
-	}
+	//void OpenGLShader::SetUniformInt(const std::string& name, int value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	UploadUniformInt(name, value);
+	//}
 
 	//---------------------------------------------------------
 	//---------------------------------------------------------
-	void OpenGLShader::UploadUniformBool(const std::string& name, const bool& value) const {
-		HZ_PROFILE_FUNCTION();
-		glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), (int)value);
-	}
-
-	void OpenGLShader::UploadUniformInt(const std::string& name, const int& value) const {
-		HZ_PROFILE_FUNCTION();
-		glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), value);
-	}
-
-	void OpenGLShader::UploadUniformFloat(const std::string& name, const float& value) const {
-		HZ_PROFILE_FUNCTION();
-		glUniform1f(glGetUniformLocation(m_RenderID, name.c_str()), value);
-	}
-
-	void OpenGLShader::UploadUniformIntArray(const std::string& name, const int* value, uint32_t count)
-	{
-		GLint location = glGetUniformLocation(m_RenderID, name.c_str());
-		glUniform1iv(location, count, value);
-	}
-
-	void OpenGLShader::UploadUniformVec2(const std::string& name, const glm::vec2& value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		glUniform2f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y);
-	}
-
-	void OpenGLShader::UploadUniformVec3(const std::string& name, const glm::vec3& value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		glUniform3f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y, value.z);
-	}
-	void OpenGLShader::UploadUniformVec4(const std::string& name,const glm::vec4& value) const 
-	{
-		HZ_PROFILE_FUNCTION();
-		glUniform4f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y, value.z,value.w);
-	}
-
-	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& value) const {
-		HZ_PROFILE_FUNCTION();
-		glUniformMatrix4fv(glGetUniformLocation(m_RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
-	}
-
-	void OpenGLShader::UploadUniformMat3(const std::string& name,const glm::mat3& value) const
-	{
-		HZ_PROFILE_FUNCTION();
-		glUniformMatrix3fv(glGetUniformLocation(m_RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
-	}
+	//void OpenGLShader::UploadUniformBool(const std::string& name, const bool& value) const {
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), (int)value);
+	//	glUniformMatrix4fv(X, 1, GL_FALSE, glm::value_ptr(mvp));
+	//}
+	//
+	//void OpenGLShader::UploadUniformInt(const std::string& name, const int& value) const {
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniform1i(glGetUniformLocation(m_RenderID, name.c_str()), value);
+	//}
+	//
+	//void OpenGLShader::UploadUniformFloat(const std::string& name, const float& value) const {
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniform1f(glGetUniformLocation(m_RenderID, name.c_str()), value);
+	//}
+	//
+	//void OpenGLShader::UploadUniformIntArray(const std::string& name, const int* value, uint32_t count)
+	//{
+	//	GLint location = glGetUniformLocation(m_RenderID, name.c_str());
+	//	glUniform1iv(location, count, value);
+	//}
+	//
+	//void OpenGLShader::UploadUniformVec2(const std::string& name, const glm::vec2& value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniform2f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y);
+	//}
+	//
+	//void OpenGLShader::UploadUniformVec3(const std::string& name, const glm::vec3& value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniform3f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y, value.z);
+	//}
+	//void OpenGLShader::UploadUniformVec4(const std::string& name,const glm::vec4& value) const 
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniform4f(glGetUniformLocation(m_RenderID, name.c_str()), value.x, value.y, value.z,value.w);
+	//}
+	//
+	//void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& value) const {
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniformMatrix4fv(glGetUniformLocation(m_RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+	//}
+	//
+	//void OpenGLShader::UploadUniformMat3(const std::string& name,const glm::mat3& value) const
+	//{
+	//	HZ_PROFILE_FUNCTION();
+	//	glUniformMatrix3fv(glGetUniformLocation(m_RenderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+	//}
 
 
 }
