@@ -119,6 +119,9 @@ namespace Hazel {
 
 	void OpenGLTextureCube::Bind(unsigned int slot) const
 	{
+
+		//glActiveTexture(GL_TEXTURE0 + slot);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
 		glBindTextureUnit(slot, m_RendererID);
 	}
 }

@@ -8,6 +8,7 @@
 
 #include "Hazel/Renderer/SubTexture2D.h"
 #include "Hazel/Renderer/Texture.h"
+#include "Hazel/Renderer/Material.h"
 
 #include "Hazel/Scene/Components.h"
 
@@ -41,6 +42,11 @@ namespace Hazel {
 // aatribute
 		static float GetLineWidth();
 		static void SetLineWidth(float width);
+
+
+		//绘制一个全屏的quad，主要是用来做后处理的(或者天空盒)
+		static void DrawFullscreenQuad(const Ref<MaterialInstance>& material);
+
 
 	//基础绘制属性
 	//static : color

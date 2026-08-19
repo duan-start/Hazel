@@ -46,18 +46,22 @@ namespace Hazel {
 	public:
 		//替换成新版的使用方式
 		//目前是先存储，等到用户真正要renderpass的时候再去设置uniform
-		void SetUniformFloat(int locatiion, float value);
-		void SetUniformFloat2(int locatiion, const glm::vec2& value);
-		void SetUniformFloat3(int locatiion, const glm::vec3& value);
-		void SetUniformFloat4(int locatiion, const glm::vec4& value);
-		void SetUniformMat3(int locatiion, const glm::mat3& value);
+		void SetUniformFloat(int locatiion, float value) {};
+		void SetUniformFloat2(int locatiion, const glm::vec2& value) {};
+		void SetUniformFloat3(int locatiion, const glm::vec3& value) {};
+		void SetUniformFloat4(int locatiion, const glm::vec4& value) {};
+		void SetUniformMat3(int locatiion, const glm::mat3& value) {};
 		void SetUniformMat4(int locatiion, const glm::mat4& value);
 
 
 		void AddTexture(const Ref<Texture>& texture) { m_Textures.push_back(texture); }
+
+	
 		void Bind() const { m_Material->Bind(); BindTextures(); }
-
-
+		void BindTexturesOnly(Ref<Texture> texture,int slot) const;
+		void UnBind() const { /*m_Material->UnBind();*/ }
+		//暂时给天空盒用
+		void ReplaceTexture(const Ref<Texture>& texture, int index);
 	public:
 		MaterialInstance(const Ref<Material>& material)
 			: m_Material(material) {

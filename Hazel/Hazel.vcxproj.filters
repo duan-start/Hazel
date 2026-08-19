@@ -1529,6 +1529,8 @@
     </ClInclude>
     <ClInclude Include="src\Hazel\Renderer\Material.h" />
     <ClInclude Include="src\Hazel\Renderer\SceneRenderer.h" />
+    <ClInclude Include="src\Hazel\Renderer\RendererPass.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRenderPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Asset\Model.cpp">
@@ -1683,5 +1685,7 @@
     </ClCompile>
     <ClCompile Include="src\Hazel\Renderer\Material.cpp" />
     <ClCompile Include="src\Hazel\Renderer\SceneRenderer.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\RendererPass.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRenderPass.cpp" />
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
 #include "Hazel/Renderer/UniformBuffer.h"
 #include "Shader.h"
 
+#include "glad/glad.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include <glm/gtc/type_ptr.hpp>
 namespace Hazel {
@@ -54,6 +55,10 @@ namespace Hazel {
 		Ref<Shader> QuadShader;
 		Ref<Shader> CircleShader;
 		Ref<Shader> LineShader;
+
+		//全屏quad的vao和vbo
+		Ref<VertexArray> m_FullscreenQuadVertexArray;
+		Ref<VertexBuffer> m_FullscreenQuadVertexBuffer;
 		//方形资源
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
@@ -63,6 +68,9 @@ namespace Hazel {
 		//线段
 		Ref<VertexArray> LineVertexArray;
 		Ref<VertexBuffer> LineVertexBuffer;
+		
+
+
 		//纹理（通用）
 		Ref<Texture2D> WhiteTexture;
 //实际数据统计（Init）
@@ -111,6 +119,47 @@ namespace Hazel {
 	void Renderer2D::Init()
 	{
 		HZ_PROFILE_FUNCTION();
+
+		// Create fullscreen quad
+		float x = -1;
+		float y = -1;
+		float width = 2, height = 2;
+		//单独定义，不同于之前的
+		struct FullQuadVertex
+		{
+			glm::vec3 Position;
+			glm::vec2 TexCoord;
+		};
+
+		FullQuadVertex* data = new FullQuadVertex[4];
+
+		data[0].Position = glm::vec3(x, y, 0.1f);
+		data[0].TexCoord = glm::vec2(0, 0);
+
+		data[1].Position = glm::vec3(x + width, y, 0.1f);
+		data[1].TexCoord = glm::vec2(1, 0);
+
+		data[2].Position = glm::vec3(x + width, y + height, 0.1f);
+		data[2].TexCoord = glm::vec2(1, 1);
+
+		data[3].Position = glm::vec3(x, y + height, 0.1f);
+		data[3].TexCoord = glm::vec2(0, 1);
+
+		s_Data.m_FullscreenQuadVertexArray = VertexArray::Create();
+		s_Data.m_FullscreenQuadVertexBuffer = VertexBuffer::Create(4 * sizeof(FullQuadVertex));
+		s_Data.m_FullscreenQuadVertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+			});
+		s_Data.m_FullscreenQuadVertexBuffer->SetData(data, 4 * sizeof(FullQuadVertex));
+		uint32_t indices[6] = { 0, 1, 2, 2, 3, 0, };
+		auto quadFullIB = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
+
+		s_Data.m_FullscreenQuadVertexArray->AddVertexBuffer(s_Data.m_FullscreenQuadVertexBuffer);
+		s_Data.m_FullscreenQuadVertexArray->SetIndexBuffer(quadFullIB);
+
+
+
 
 //设置四边形的批处理
 		//创建vao（RendererID）
@@ -231,6 +280,10 @@ namespace Hazel {
 
 //UBO
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DStorge::CameraData), 0);
+
+
+	
+
 	}
 
 
@@ -419,6 +472,16 @@ namespace Hazel {
 		//s_Data.LineWidth = width; }
 		//);
 		s_Data.LineWidth = width;
+	}
+
+	void Renderer2D::DrawFullscreenQuad(const Ref<MaterialInstance>& material)
+	{
+		material->Bind();
+		glDepthFunc(GL_LEQUAL);
+		glDepthMask(GL_FALSE);
+		RendererCommand::DrawIndexed(s_Data.m_FullscreenQuadVertexArray, 6);
+		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
 	}
 
 

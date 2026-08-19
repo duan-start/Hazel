@@ -407,6 +407,7 @@ namespace Hazel {
 							component.Texture = texture;
 						else
 							HZ_WARN("Could not load texture {0}", texturePath.filename().string());
+						
 
 					}
 					

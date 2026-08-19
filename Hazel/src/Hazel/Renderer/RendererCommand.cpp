@@ -26,6 +26,7 @@ namespace Hazel {
 	}
 	void RendererCommand::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
+		
 		s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 	}
 	void RendererCommand::SetLineWidth(float width)

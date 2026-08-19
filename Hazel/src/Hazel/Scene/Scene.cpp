@@ -82,6 +82,8 @@ namespace Hazel {
 
 	Scene::Scene()
 	{
+		SceneRenderer::Init();
+
 #if ENTT_EXAMPLE_CODE
 		entt::entity entity = m_Registry.create();
 		m_Registry.emplace<TransformComponent>(entity, glm::mat4(1.0f));

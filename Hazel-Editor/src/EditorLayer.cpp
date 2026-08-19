@@ -315,8 +315,8 @@ void EditorLayer::OnImGuiRender()
 			{
 				const wchar_t* path = (const wchar_t*)payload->Data;
 				std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-				Ref<TextureCube> texture = TextureCube::Create(texturePath.string());
-				HZ_WARN("Could not load texture {0}", texturePath.filename().string());
+				m_ActiveScene->LoadEnvironmentMap(texturePath.string());
+				//HZ_WARN("Could not load texture {0}", texturePath.filename().string());
 			}
 			ImGui::EndDragDropTarget();
 		}
