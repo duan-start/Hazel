@@ -3,7 +3,8 @@
 
 layout(location = 0) in vec3 a_Position;
 
-layout(std140,binding = 2) uniform Camera
+//因为这个不能冲突BeginScene里面的全局相机的UnformBuffer(binding=0)
+layout(std140,binding = 1) uniform Camera
 {
     mat4 u_InverseVP;
 };
@@ -23,7 +24,7 @@ void main()
 
 layout(location = 0) out vec4 finalColor;
 
-layout(binding = 3) uniform samplerCube u_Texture;
+layout(binding = 0) uniform samplerCube u_Texture;
 
 layout(location=0) in vec3 v_Position;
 

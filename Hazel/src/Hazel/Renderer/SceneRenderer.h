@@ -7,16 +7,13 @@ namespace Hazel
 	class Material;
 	class SceneRenderer
 	{
-		public:
+	public:
 			static void Init();
 			static void BeginScene(const Hazel::Scene* scene, const EditorCamera& camera);
 			static void BeginScene(const Hazel::Scene* scene, const GameCamera* camera, const glm::mat4& transform);
 			static void EndScene();
-			//todo
-			//static void SubmitMesh(const Ref<Mesh>& mesh, const glm::mat4& transform, int entityID = -1);
-			static void SubmitSkyMap(const Ref<Texture>& sky);
 	private:
-		static void RenderScene();
+		//static void RenderScene();
 		static void RenderSky(Ref<Texture> SkyMap);
 	};
 

@@ -4,18 +4,25 @@
 #include "RendererCommand.h"
 #include "Hazel/Renderer/UniformBuffer.h"
 #include "Shader.h"
+#include "Hazel/Renderer/Material.h"
+
 
 #include "glad/glad.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include <glm/gtc/type_ptr.hpp>
 namespace Hazel {
 
+	//针对于2D 渲染的资产，
+	//1. 所有shader 统一使用的binding=0 的cameraProjection
+	//2. 针对QuadMateril shader（跨VAO共享的Texture）,同时由于只有binding和location 去支持更改，这里面用的是location
+	//3. 虽然使用location写法简单，但是每个三角形每个顶点都要传递entityID，是比较浪费的
+	//4. 但是因为批处理的缘故，我们不能每次绘制一个Quad的时候都去设置shader里面的变量（失去了批处理的意义）
+
 	struct LineVertex {
 		glm::vec3 Position;
 		glm::vec4 Color;
 		int EntityID;
 	};
-
 	struct CircleVertex {
 		glm::vec3 WorldPosition;
 		glm::vec3 LocalPosition;
@@ -24,7 +31,6 @@ namespace Hazel {
 		float Fade;
 		int EntityID;
 	};
-
 	//正方形的每个顶点的属性
 	struct QuadVertex
 	{	//（local）位置，颜色，采样的坐标，采样的纹理槽（sampler2d）,采样级别（具体逻辑在shader）
@@ -47,14 +53,16 @@ namespace Hazel {
 		static const uint32_t MaxQuads = 1000;
 		static const uint32_t MaxVertices = MaxQuads * 4;
 		static const uint32_t MaxIndices = MaxQuads * 6;
-		//纹理绑定的卡槽的数量
-		static const uint32_t MaxTextureSlots = 32;
 
 //资产引用
-		//Shader
-		Ref<Shader> QuadShader;
-		Ref<Shader> CircleShader;
-		Ref<Shader> LineShader;
+		//Material
+		Ref<Material> QuadMaterial;
+		Ref<Material> CircleMaterial;
+		Ref<Material> LineMaterial;
+		//MaterialInstance
+		Ref<MaterialInstance> QuadMaterialInstance;
+		Ref<MaterialInstance> CircleMaterialInstance;
+		Ref<MaterialInstance> LineMaterialInstance;
 
 		//全屏quad的vao和vbo
 		Ref<VertexArray> m_FullscreenQuadVertexArray;
@@ -90,10 +98,7 @@ namespace Hazel {
 		LineVertex* LineVertexBufferPtr = nullptr;
 		float LineWidth = 2.f;
 
-		//存储实际纹理的索引（有点小巧合吧）
-		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		//默认初始Index=1，第一个为默认白色纹理
-		uint32_t TextureSlotIndex = 1; 
 
 		//一个初始的正方形
 		glm::vec4 QuadVertexPositions[4];
@@ -258,31 +263,46 @@ namespace Hazel {
 		//Line 的Draw不需要indexBuffer（由drawCall解释就好）
 		//s_Data.LineVertexArray->SetIndexBuffer(quadIB);
 
-//Texture
-		//设置默认纹理
+
+//MaterialInstance
+		//shaderLib;
+		auto& Lib = ShaderLibrary::GetLib();
+
+		//Base Material Init
+		s_Data.QuadMaterial=Material::Create(Lib->Get("Texture"));
+		s_Data.QuadMaterial->SetDepthFunc(DepthFunc::Less);
+		s_Data.QuadMaterial->SetDepthMask(DepthMask::True);
+		s_Data.QuadMaterialInstance = MaterialInstance::Create(s_Data.QuadMaterial);
+
+		s_Data.CircleMaterial = Material::Create(Lib->Get("Circle"));
+		s_Data.CircleMaterial->SetDepthFunc(DepthFunc::Less);
+		s_Data.CircleMaterial->SetDepthMask(DepthMask::True);
+		s_Data.CircleMaterialInstance = MaterialInstance::Create(s_Data.CircleMaterial);
+
+		s_Data.LineMaterial	 = Material::Create(Lib->Get("Line"));
+		s_Data.LineMaterial->SetDepthFunc(DepthFunc::Less);
+		s_Data.LineMaterial->SetDepthMask(DepthMask::True);
+		s_Data.LineMaterialInstance = MaterialInstance::Create(s_Data.LineMaterial);
+
+	//Texture
+				//设置默认纹理
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 		//固定0号槽对应的纹理
-		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
-//Shader
-		//shaderLib;
-		auto& Lib = ShaderLibrary::GetLib();
-		s_Data.QuadShader =Lib->Get("Texture");
-		s_Data.CircleShader = Lib->Get("Circle");
-		s_Data.LineShader = Lib->Get("Line");
+		//
+		s_Data.QuadMaterialInstance->AddTexture(s_Data.WhiteTexture);
 
-//初始顶点位置
+
+		//Quad初始顶点位置
 		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
-//UBO
+		//CameraUniformBuffer(binding=0)
 		s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DStorge::CameraData), 0);
 
-
-	
 
 	}
 
@@ -339,9 +359,6 @@ namespace Hazel {
 	//调用DrawCall
 	void Renderer2D::Flush()
 	{  
-		// 绑定所有的texture（场景共用）
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			s_Data.TextureSlots[i]->Bind(i);
 
 		//Quad
 		if (s_Data.QuadIndexCount)
@@ -350,8 +367,9 @@ namespace Hazel {
 			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
 			//上传数据（按字节）
 			s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
-			//绑定对应shader
-			s_Data.QuadShader->Bind();
+			//绑定对应Material(shader+RenderMode)
+			//Texture+shader
+			s_Data.QuadMaterialInstance->Bind();
 			//调用DrawCall
 			RendererCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
 			s_Data.states.DrawCalls++;
@@ -364,7 +382,7 @@ namespace Hazel {
 			//传输数据
 			s_Data.CircleVertexBuffer->SetData(s_Data.CircleVertexBufferBase, dataSize);
 
-			s_Data.CircleShader->Bind();
+			s_Data.CircleMaterialInstance->Bind();
 			RendererCommand::DrawIndexed(s_Data.CircleVertexArray, s_Data.CircleIndexCount);
 			s_Data.states.DrawCalls++;
 		}
@@ -372,7 +390,7 @@ namespace Hazel {
 		if (s_Data.LineIndexCount) {
 			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.LineVertexBufferPtr - (uint8_t*)s_Data.LineVertexBufferBase);
 			s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
-			s_Data.LineShader->Bind();
+			s_Data.LineMaterialInstance->Bind();
 			RendererCommand::SetLineWidth(s_Data.LineWidth);
 			RendererCommand::DrawLines(s_Data.LineVertexArray, s_Data.LineIndexCount);
 			s_Data.states.DrawCalls++;
@@ -477,11 +495,9 @@ namespace Hazel {
 	void Renderer2D::DrawFullscreenQuad(const Ref<MaterialInstance>& material)
 	{
 		material->Bind();
-		glDepthFunc(GL_LEQUAL);
-		glDepthMask(GL_FALSE);
+
 		RendererCommand::DrawIndexed(s_Data.m_FullscreenQuadVertexArray, 6);
-		glDepthFunc(GL_LESS);
-		glDepthMask(GL_TRUE);
+
 	}
 
 
@@ -498,7 +514,7 @@ namespace Hazel {
 		s_Data.LineIndexCount = 0;
 		s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
 
-		s_Data.TextureSlotIndex = 1;
+		s_Data.QuadMaterialInstance->ResetTexture();
 	}
 
 	//NO Texture
@@ -569,22 +585,8 @@ namespace Hazel {
 		const glm::vec2* textureCoords = subtexture->GetTexCoords();
 		const Ref<Texture2D> texture = subtexture->GetTexture2D();
 
-		float textureIndex = 0.0f;
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-		{
-			if (*s_Data.TextureSlots[i].get() == *texture.get())
-			{
-				textureIndex = (float)i;
-				break;
-			}
-		}
-
-		if (textureIndex == 0.0f)
-		{
-			textureIndex = (float)s_Data.TextureSlotIndex;
-			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-			s_Data.TextureSlotIndex++;
-		}
+	
+		float textureIndex=(float)s_Data.QuadMaterialInstance->AddTexture(texture);
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -644,28 +646,8 @@ namespace Hazel {
 		 //glm::vec3 pos = { tmp.x / tmp.w,tmp.y / tmp.w,tmp.z / tmp.w };
 		 //DrawQuad(pos, size, texture, tilingFactor, tintColor);
 
-		 //查找纹理是否已经添加到
-		 float textureIndex = 0.0f;
-		 if (*texture.get() == *s_Data.TextureSlots[0].get())
-			 textureIndex == 0.0f;
-		 else {
-			 for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-			 {
-				 if (*s_Data.TextureSlots[i].get() == *texture.get())
-				 {
-					 textureIndex = (float)i;
-					 break;
-				 }
-			 }
+		 float textureIndex=(float)s_Data.QuadMaterialInstance->AddTexture(texture);
 
-			 //添加纹理到SLOTIndex对应
-			 if (textureIndex == 0.0f)
-			 {
-				 textureIndex = (float)s_Data.TextureSlotIndex;
-				 s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-				 s_Data.TextureSlotIndex++;
-			 }
-		 }
 
 		 s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[1];
 		 s_Data.QuadVertexBufferPtr->Color = tintColor;
@@ -756,24 +738,8 @@ namespace Hazel {
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor,int Entity)
 	{	
 		//textureIndex
-		float textureIndex = 0.0f;
-		//判断该纹理是否被添加过
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-		{//判断指针指向的数据（而不是指针指向的地址），所以内部进行了一个重载
-			if (*s_Data.TextureSlots[i].get() == *texture.get())
-			{
-				textureIndex = (float)i;
-				break;
-			}
-		}
-		//这个一个新的纹理
-		if (textureIndex == 0.0f)
-		{
-			//添加到纹理槽上
-			textureIndex = (float)s_Data.TextureSlotIndex;
-			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-			s_Data.TextureSlotIndex++;
-		}
+		float textureIndex = (float) s_Data.QuadMaterialInstance->AddTexture(texture);
+		
 
 		//编译已知常量
 		//这是纹理的边界
@@ -828,27 +794,9 @@ namespace Hazel {
 		//DrawQuad(pos, size, texture, tilingFactor, tintColor);
 
 		//查找纹理是否已经添加到
-		float textureIndex = 0.0f;
-		if (*texture.get() == *s_Data.TextureSlots[0].get())
-			textureIndex = 0.0f;
-		else {
-			for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-			{
-				if (*s_Data.TextureSlots[i].get() == *texture.get())
-				{
-					textureIndex = (float)i;
-					break;
-				}
-			}
+		//textureIndex
+		float textureIndex = (float)s_Data.QuadMaterialInstance->AddTexture(texture);
 
-			//添加纹理到SLOTIndex对应
-			if (textureIndex == 0.0f)
-			{
-				textureIndex = (float)s_Data.TextureSlotIndex;
-				s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-				s_Data.TextureSlotIndex++;
-			}
-		}
 		s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[0];
 		s_Data.QuadVertexBufferPtr->Color = tintColor;
 		s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 0.0f };
