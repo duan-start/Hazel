@@ -1,4 +1,4 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 #include "SceneRenderer.h"
 
 
@@ -53,14 +53,14 @@ namespace Hazel
 		}
 
 		Renderer3D::EndScene();
-		//ÓĞÒ»¸öÍ¨ÓÃµÄEditorCamera
-		//¸ù¾İentityµÄ×´Ì¬Ö±½Ó»æÖÆ
+		//æœ‰ä¸€ä¸ªé€šç”¨çš„EditorCamera
+		//æ ¹æ®entityçš„çŠ¶æ€ç›´æ¥ç»˜åˆ¶
 
 
-		//Render 2D,ÂË¾µ,×Ô¶¨ÒåshaderÖ®ÀàµÄ
+		//Render 2D,æ»¤é•œ,è‡ªå®šä¹‰shaderä¹‹ç±»çš„
 		Renderer2D::BeginScene(camera);
 		{
-			//×é¼ş²»ÄÜ±»¶à¸ögroupÍ¬Ê±ÓµÓĞ
+			//ç»„ä»¶ä¸èƒ½è¢«å¤šä¸ªgroupåŒæ—¶æ‹¥æœ‰
 			//auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 		
 			//DrawQuad
@@ -92,7 +92,8 @@ namespace Hazel
 			s_Data.skyBox->ResetAllTexture();
 
 			s_Data.skyBox->AddTexture(s_Data.ActiveScene->m_Environment.Sky);
-			s_Data.skyBox->SetUniformMat4(1, glm::inverse(camera.GetViewProjection()));
+			//binding=3 æ˜¯å¤©ç©ºç›’ä¸“ç”¨æ§½ï¼Œé¿å¼€ Renderer2D/3D ä½¿ç”¨çš„ 0/1/2
+			s_Data.skyBox->SetUniformMat4(3, glm::inverse(camera.GetViewProjection()));
 			Renderer2D::DrawFullscreenQuad(s_Data.skyBox);
 		}
 
@@ -123,7 +124,7 @@ namespace Hazel
 
 		// Draw circles
 		{
-			//Í¬Àí
+			//åŒç†
 			auto group = m_Scene->m_Registry.group<>(entt::get<TransformComponent, CircleRendererComponent>);
 			for (auto entity : group)
 			{

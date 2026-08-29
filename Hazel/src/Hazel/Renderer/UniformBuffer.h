@@ -1,14 +1,15 @@
-#pragma once
+ï»¿#pragma once
 #include "Hazel/Core/Core.h"
 
 namespace Hazel {
-	//×¨ÃÅ´Ócpu¶Ëµ½gpu¶ËµÄ£¬ÓĞbinding(ÕâÊÇvulkanµÄ×ÊÔ´°ó¶¨µÄ·½Ê½£¬·Ç³£¾«È·ÓÖºÃ)
+	//ä¸“é—¨ä»cpuç«¯åˆ°gpuç«¯çš„ï¼Œæœ‰binding(è¿™æ˜¯vulkançš„èµ„æºç»‘å®šçš„æ–¹å¼ï¼Œéå¸¸ç²¾ç¡®åˆå¥½)
 	class UniformBuffer
 	{
 	public:
 		UniformBuffer()=default;
 		virtual ~UniformBuffer()=default;
 		virtual void SetData(const void* data, uint32_t size, uint32_t offset) = 0;
+		virtual void Bind() const = 0;
 		static Ref<UniformBuffer> Create(uint32_t size, uint32_t binding);
 	};
 }

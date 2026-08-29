@@ -1,4 +1,4 @@
-#pragma once  
+ï»¿#pragma once  
 
 #include "Hazel/Core/Core.h"  
 #include "Hazel/Renderer/Shader.h"  
@@ -28,7 +28,7 @@ public:
 	//virtual void SetUniformIntArray(const std::string& name,int* value, uint32_t count)  override;
 	//virtual void SetUniformInt(const std::string& name, int value) const override;
 
-	//ÕâÈıÖÖÀàĞÍÖ±½Ó¸´ÖÆÒ²Ã»ÓĞ¹ØÏµ
+	//è¿™ä¸‰ç§ç±»å‹ç›´æ¥å¤åˆ¶ä¹Ÿæ²¡æœ‰å…³ç³»
 	//void UploadUniformBool(const std::string& name,const bool& value) const;
 	//void UploadUniformInt(const std::string& name, const int& value) const;
 	//void UploadUniformFloat(const std::string& name, const float& value)const;
@@ -40,24 +40,26 @@ public:
 	//void UploadUniformVec2(const std::string& name, const glm::vec2& value) const;
 	//void UploadUniformVec3(const std::string& name, const glm::vec3& value) const;
 	//void UploadUniformVec4(const std::string& name, const glm::vec4& value) const ;
-	//ÓÉÓÚÁ½¸ö¹¹Ôìº¯ÊıÓĞ¹²ÓÃµÄ²¿·Ö£¬ËùÒÔÕâ±ßÒª·â×°³ÉÒ»¸öË½ÓĞµÄº¯Êı
+	//ç”±äºä¸¤ä¸ªæ„é€ å‡½æ•°æœ‰å…±ç”¨çš„éƒ¨åˆ†ï¼Œæ‰€ä»¥è¿™è¾¹è¦å°è£…æˆä¸€ä¸ªç§æœ‰çš„å‡½æ•°
 private:
 	
 	std::string ReadFile(const std::string& filepath);
 
 	std::unordered_map<GLenum,std::string> Process(const std::string& source);
 
-	//¹¹½¨¶ÔÓ¦µÄ¶ş½øÖÆÎÄ¼ş£¨ºÍshader¶ÔÓ¦£©
+	//æ„å»ºå¯¹åº”çš„äºŒè¿›åˆ¶æ–‡ä»¶ï¼ˆå’Œshaderå¯¹åº”ï¼‰
 	void CompileOrGetVulkanBinaries(const std::unordered_map<GLenum, std::string>& shaderSources);
 	void CompileOrGetOpenGLBinaries();
 	
-	//´´½¨³ÌĞòlinkºÍ·´Éä
+	//åˆ›å»ºç¨‹åºlinkå’Œåå°„
 	void CreateProgram();
 	void Reflect(GLenum stage, const std::vector<uint32_t>& shaderData);
 private:  
 	uint32_t m_RenderID;  
 	std::string m_Name;
 	std::string m_FilePath;
+	// ç¼“å­˜ keyï¼šshader æºç å†…å®¹å“ˆå¸Œï¼Œé˜²æ­¢æ”¹äº† .glsl åä»åŠ è½½æ—§ç¼“å­˜
+	std::string m_SourceHash;
 
 	std::unordered_map<GLenum, std::vector<uint32_t>> m_VulkanSPIRV;
 	std::unordered_map<GLenum, std::vector<uint32_t>> m_OpenGLSPIRV;

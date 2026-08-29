@@ -2,6 +2,7 @@
 
 #include "Hazel/Renderer/Shader.h"
 #include "Hazel/Renderer/Texture.h"
+#include "Hazel/Renderer/UniformBuffer.h"
 
 #include <unordered_set>
 
@@ -101,7 +102,7 @@ namespace Hazel {
 		uint32_t AddTexture(const Ref<Texture>& texture);
 		void AddTexture(const Ref<Texture>& texture, int slot) { m_Textures[slot]=texture; }
 	
-		void Bind() const { m_Material->Bind(); BindTextures(); }
+		void Bind() const { m_Material->Bind(); if (m_UniformBuffer) m_UniformBuffer->Bind(); BindTextures(); }
 
 		void UnBind() const { /*m_Material->UnBind();*/ }
 		
@@ -126,6 +127,8 @@ namespace Hazel {
 		std::array<Ref<Texture>,32> m_Textures;
 		int m_TextureSlotIndex = 0; 
 		std::unordered_map<int, float> m_FloatUniforms;
+		Ref<UniformBuffer> m_UniformBuffer;
+		int m_UniformBinding = -1;
 
 	};
 

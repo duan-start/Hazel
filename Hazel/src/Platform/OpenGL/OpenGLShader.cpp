@@ -1,4 +1,4 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 #include "OpenGLShader.h"
 
 #include <fstream>
@@ -17,10 +17,10 @@
 
 
 namespace Hazel {
-	//½«¹¤¾ßÀàµÄº¯ÊıÈ«²¿³é³öÀ´µ¥¶À·Å
+	//å°†å·¥å…·ç±»çš„å‡½æ•°å…¨éƒ¨æŠ½å‡ºæ¥å•ç‹¬æ”¾
 	namespace Utils {
-		//Ò»¸öshaderÀïÃæÖ»ÓĞÁ½¸övertextºÍfragment(»òÕßÈı¸ö)
-		//stirng --¶ÔÓ¦µÄshader£¨GL_enum£©µÄÀàĞÍ
+		//ä¸€ä¸ªshaderé‡Œé¢åªæœ‰ä¸¤ä¸ªvertextå’Œfragment(æˆ–è€…ä¸‰ä¸ª)
+		//stirng --å¯¹åº”çš„shaderï¼ˆGL_enumï¼‰çš„ç±»å‹
 		static GLenum ShaderTypeFromString(const std::string& type) {
 			if (type == "vertex") return GL_VERTEX_SHADER;
 			if (type == "fragment" || type == "pixel") return GL_FRAGMENT_SHADER;
@@ -30,18 +30,18 @@ namespace Hazel {
 			return 0;
 		}
 
-		//¸ù¾İÎÄ¼şµÄÂ·¾¶¶ÁÈ¡¾ßÌåµÄstring stream
+		//æ ¹æ®æ–‡ä»¶çš„è·¯å¾„è¯»å–å…·ä½“çš„string stream
 		static std::string ReadFile(const std::string& filepath) {
 			std::string result;
-			//¶ş½øÖÆ¶ÁÈ¡£¬crlfµÄ»»ĞĞ·ûÊÇ\r\n(windows);LinuxµÄÊÇ\n;£¨´ò¿ªÎÄ¼ş£©
+			//äºŒè¿›åˆ¶è¯»å–ï¼Œcrlfçš„æ¢è¡Œç¬¦æ˜¯\r\n(windows);Linuxçš„æ˜¯\n;ï¼ˆæ‰“å¼€æ–‡ä»¶ï¼‰
 			std::ifstream in(filepath, std::ios::in|std::ios::binary);
 			if (in) {
-				//²éÕÒÄ©Î²£¬Æ«ÒÆÁ¿Îª0
+				//æŸ¥æ‰¾æœ«å°¾ï¼Œåç§»é‡ä¸º0
 				in.seekg(0, std::ios::end);
-				//µ±Ç°µÄÎ»ÖÃ¾ÍÊÇ[0,end),×Ö·ûµÄÊıÁ¿
+				//å½“å‰çš„ä½ç½®å°±æ˜¯[0,end),å­—ç¬¦çš„æ•°é‡
 				result.resize(in.tellg());
 				in.seekg(0, std::ios::beg);
-				//È«²¿¶ÁÈ¡
+				//å…¨éƒ¨è¯»å–
 				in.read(&result[0], result.size());
 				in.close();
 			}
@@ -49,7 +49,7 @@ namespace Hazel {
 			return  result;
 		}
 		
-		//Ñ¡Ôñ±àÒë³ÉÎª¶ÔÓ¦µÄshaderµÄ¶ş½øÖÆÎÄ¼şÀàĞÍ
+		//é€‰æ‹©ç¼–è¯‘æˆä¸ºå¯¹åº”çš„shaderçš„äºŒè¿›åˆ¶æ–‡ä»¶ç±»å‹
 		static shaderc_shader_kind GLShaderStageToShaderC(GLenum stage)
 		{
 			switch (stage)
@@ -71,20 +71,20 @@ namespace Hazel {
 			HZ_CORE_ASSERT(false,"UnKonwen Shader Stage");
 			return nullptr;
 		}
-		//»ñÈ¡»º´æµÄÄ¿Â¼£¬¶ş½øÖÆshader ±àÒëºó´æ·ÅµÄÎ»ÖÃ
+		//è·å–ç¼“å­˜çš„ç›®å½•ï¼ŒäºŒè¿›åˆ¶shader ç¼–è¯‘åå­˜æ”¾çš„ä½ç½®
 		static const char* GetCacheDirectory()
 		{
 			// TODO: make sure the assets directory is valid
 			return "assets/cache/shader/opengl";
 		}
-		//´´½¨»º´æÄ¿Â¼
+		//åˆ›å»ºç¼“å­˜ç›®å½•
 		static void CreateCacheDirectoryIfNeeded()
 		{
 			std::string cacheDirectory = GetCacheDirectory();
 			if (!std::filesystem::exists(cacheDirectory))
 				std::filesystem::create_directories(cacheDirectory);
 		}
-		//ÉèÖÃºÏÊÊµÄºó×ºÀ©Õ¹opengl
+		//è®¾ç½®åˆé€‚çš„åç¼€æ‰©å±•opengl
 		static const char* GLShaderStageCachedOpenGLFileExtension(uint32_t stage)
 		{
 			switch (stage)
@@ -95,7 +95,7 @@ namespace Hazel {
 			HZ_CORE_ASSERT(false,"UnKonwen Shader Stage");
 			return "";
 		}
-		//ÉèÖÃºÏÊÊµÄºó×ºÀ©Õ¹vulkan
+		//è®¾ç½®åˆé€‚çš„åç¼€æ‰©å±•vulkan
 		static const char* GLShaderStageCachedVulkanFileExtension(uint32_t stage)
 		{
 			switch (stage)
@@ -105,6 +105,19 @@ namespace Hazel {
 			}
 			HZ_CORE_ASSERT(false,"UnKonwen Shader Stage");
 			return "";
+		}
+		// FNV-1a 64 ä½å†…å®¹å“ˆå¸Œï¼šæºç ä¸€å˜ï¼Œç¼“å­˜æ–‡ä»¶åå°±å˜ï¼Œé¿å…åŠ è½½é™ˆæ—§ç¼–è¯‘äº§ç‰©
+		static std::string HashString(const std::string& str)
+		{
+			uint64_t hash = 1469598103934665603ull;
+			for (unsigned char c : str)
+			{
+				hash ^= c;
+				hash *= 1099511628211ull;
+			}
+			char buf[17] = {};
+			snprintf(buf, sizeof(buf), "%016llx", (unsigned long long)hash);
+			return std::string(buf);
 		}
 
 	}
@@ -116,6 +129,7 @@ namespace Hazel {
 		Utils::CreateCacheDirectoryIfNeeded();
 
 		std::string source = ReadFile(filepath);
+		m_SourceHash = Utils::HashString(source);
 		auto shaderSources = Process(source);
 
 		{
@@ -127,12 +141,12 @@ namespace Hazel {
 		}
 
 		// Extract name from filepath
-		//ÕÒµ½ \ /ÈÎÒâÒ»¸ö¶¼¿ÉÒÔ
+		//æ‰¾åˆ° \ /ä»»æ„ä¸€ä¸ªéƒ½å¯ä»¥
 		auto lastSlash = filepath.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		//·´Ïò²éÕÒ
+		//åå‘æŸ¥æ‰¾
 		auto lastDot = filepath.rfind('.');
-		//Ì«¿áÁË
+		//å¤ªé…·äº†
 		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
 		m_Name = filepath.substr(lastSlash, count);
 	}
@@ -149,10 +163,11 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 		// Read our shaders into the appropriate buffers
-		//ÎÒÊÇÕæ²»Ô¸Ğ´ÕâÃ´¶à
+		//æˆ‘æ˜¯çœŸä¸æ„¿å†™è¿™ä¹ˆå¤š
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
+		m_SourceHash = Utils::HashString(vertexSrc + fragmentSrc);
 		
 		CompileOrGetVulkanBinaries(sources);
 		CompileOrGetOpenGLBinaries();
@@ -189,7 +204,7 @@ namespace Hazel {
 		return result;
 	}
 
-	//½«Õû¸östring·Ö¸î³ÉÎª¶ÔÓ¦µÄshaderÀàĞÍ
+	//å°†æ•´ä¸ªstringåˆ†å‰²æˆä¸ºå¯¹åº”çš„shaderç±»å‹
 	std::unordered_map<GLenum, std::string> OpenGLShader::Process(const std::string& source)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -197,25 +212,25 @@ namespace Hazel {
 
 		const char* typeToken = "#type";
 		size_t typeTokenLength = strlen(typeToken);
-		//ÕÒµ½µÚÒ»´ÎµÄ#typeÆäÊµÎ»ÖÃ
+		//æ‰¾åˆ°ç¬¬ä¸€æ¬¡çš„#typeå…¶å®ä½ç½®
 		size_t pos = source.find(typeToken, 0); 
-		//½áÊøÔ­Òò£º¶ÁÈ¡Î»ÖÃµ½ÁË×îºóÒ»Î»
+		//ç»“æŸåŸå› ï¼šè¯»å–ä½ç½®åˆ°äº†æœ€åä¸€ä½
 		while (pos != std::string::npos)
-		{	//ÕÒµ½posÎªÆğµãµÄµ±Ç°ÕâĞĞµÄ»»ĞĞ·û
+		{	//æ‰¾åˆ°posä¸ºèµ·ç‚¹çš„å½“å‰è¿™è¡Œçš„æ¢è¡Œç¬¦
 			size_t eol = source.find_first_of("\r\n", pos); 
 			HZ_CORE_ASSERT(eol != std::string::npos, "Syntax error");
 			//Start of shader type name (after "#type " keyword)
 			size_t begin = pos + typeTokenLength + 1;
 			std::string type = source.substr(begin, eol - begin);
 			HZ_CORE_ASSERT(Utils::ShaderTypeFromString(type), "Invalid shader type specified");
-			//´ÓeolÎ»ÖÃ¿ªÊ¼£¬ÕÒµ½µÚÒ»¸ö²»ÊÇ»»ĞĞ·ûµÄÊı¾İ£¨Êµ¼ÊµÄdata£©
+			//ä»eolä½ç½®å¼€å§‹ï¼Œæ‰¾åˆ°ç¬¬ä¸€ä¸ªä¸æ˜¯æ¢è¡Œç¬¦çš„æ•°æ®ï¼ˆå®é™…çš„dataï¼‰
 			size_t nextLinePos = source.find_first_not_of("\r\n", eol); 
-			//Èç¹ûÒÑ¾­½áÊøÁË£¬¾ÍÖ±½Ó±¨´í£¨ÒòÎªshaderÀïÃæ±ØĞëÓĞÊµ¼ÊµÄÊı¾İ£©
+			//å¦‚æœå·²ç»ç»“æŸäº†ï¼Œå°±ç›´æ¥æŠ¥é”™ï¼ˆå› ä¸ºshaderé‡Œé¢å¿…é¡»æœ‰å®é™…çš„æ•°æ®ï¼‰
 			HZ_CORE_ASSERT(nextLinePos != std::string::npos, "Syntax error");
-			//Ñ°ÕÒÏÂÒ»¸ötype,×÷Îª½áÎ²
-			//Èç¹ûÕÒ²»µ½µÄ»°£¬»á·µ»Ønpos;(Ò»¸öÎŞÇî´óµÄÊı)
+			//å¯»æ‰¾ä¸‹ä¸€ä¸ªtype,ä½œä¸ºç»“å°¾
+			//å¦‚æœæ‰¾ä¸åˆ°çš„è¯ï¼Œä¼šè¿”å›npos;(ä¸€ä¸ªæ— ç©·å¤§çš„æ•°)
 			pos = source.find(typeToken, nextLinePos); 
-			//½øĞĞÊµ¼ÊµÄÊı¾İÌî³ä£¬È·±£¾àÀëÓĞÒâÒå
+			//è¿›è¡Œå®é™…çš„æ•°æ®å¡«å……ï¼Œç¡®ä¿è·ç¦»æœ‰æ„ä¹‰
 			shaderSources[Utils::ShaderTypeFromString(type)] = (pos == std::string::npos) ? source.substr(nextLinePos) : source.substr(nextLinePos, pos - nextLinePos);
 		}
 
@@ -236,17 +251,17 @@ namespace Hazel {
 		std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
 		auto& shaderData = m_VulkanSPIRV;
 		shaderData.clear();
-		//½á¹¹»¯ÍêÃÀ°ó¶¨
+		//ç»“æ„åŒ–å®Œç¾ç»‘å®š
 		for (auto&& [stage, source] : shaderSources)
 		{
 			std::filesystem::path shaderFilePath = m_FilePath;
-			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedVulkanFileExtension(stage));
+			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + "." + m_SourceHash + Utils::GLShaderStageCachedVulkanFileExtension(stage));
 
-			//ÒÑ¾­´æÔÚ¸Ä¶ş½øÖÆÎÄ¼ş
+			//å·²ç»å­˜åœ¨æ”¹äºŒè¿›åˆ¶æ–‡ä»¶
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
 			if (in.is_open())
 			{
-				//²éÕÒÎÄ¼şµÄÊµ¼Ê´óĞ¡£¬²¢resize(±ÜÃâ¶à´Îpush)
+				//æŸ¥æ‰¾æ–‡ä»¶çš„å®é™…å¤§å°ï¼Œå¹¶resize(é¿å…å¤šæ¬¡push)
 				in.seekg(0, std::ios::end);
 				auto size = in.tellg();
 				in.seekg(0, std::ios::beg);
@@ -287,65 +302,15 @@ namespace Hazel {
 
 	void OpenGLShader::CompileOrGetOpenGLBinaries()
 	{
-		auto& shaderData = m_OpenGLSPIRV;
-
-		shaderc::Compiler compiler;
-		shaderc::CompileOptions options;
-		options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
-		const bool optimize = false;
-		if (optimize)
-			options.SetOptimizationLevel(shaderc_optimization_level_performance);
-
-		std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
-
-		shaderData.clear();
+		m_OpenGLSPIRV.clear();
 		m_OpenGLSourceCode.clear();
-		//¶à¸östage
+		// ç›´æ¥ä» Vulkan SPIR-V åç¼–è¯‘å› GLSLã€‚
+		// CreateProgram ç°åœ¨ç”¨ç»å…¸ glCompileShader ç¼–è¯‘è¿™æ®µ GLSLï¼Œ
+		// ç»•å¼€ glShaderBinary / ARB_gl_spirv åœ¨è¿™å°æœºå™¨çš„é©±åŠ¨ä¸Šå¯¹ samplerCube é‡‡æ ·å¤±æ•ˆçš„é—®é¢˜ã€‚
 		for (auto&& [stage, spirv] : m_VulkanSPIRV)
 		{
-			std::filesystem::path shaderFilePath = m_FilePath;
-			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedOpenGLFileExtension(stage));
-
-			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
-			//Èç¹û¶ş½øÖÆÎÄ¼ş´æÔÚµÄ»°
-			if (in.is_open())
-			{
-				in.seekg(0, std::ios::end);
-				auto size = in.tellg();
-				in.seekg(0, std::ios::beg);
-
-				auto& data = shaderData[stage];
-				data.resize(size / sizeof(uint32_t));
-				in.read((char*)data.data(), size);
-			}
-			//·´±àÒë»ØÈ¥£¬²¢ÖØĞÂ±àÒë³ÉoepnglÔ´Âë
-			else
-			{
-				//³õÊ¼»¯·´±àÒëÆ÷£¬²¢±àÒë»Øglsl
-				spirv_cross::CompilerGLSL glslCompiler(spirv);
-				m_OpenGLSourceCode[stage] = glslCompiler.compile();
-
-				auto& source = m_OpenGLSourceCode[stage];
-
-				//ÀûÓÃshadercµÄcompile½øĞĞ±àÒë£¬¶ø²»ÊÇÀûÓÃopengl×Ô´øµÄ
-				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), m_FilePath.c_str());
-				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
-				{
-					HZ_CORE_ERROR(module.GetErrorMessage());
-					HZ_CORE_ASSERT(false,"wrong");
-				}
-
-				shaderData[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
-
-				std::ofstream out(cachedPath, std::ios::out | std::ios::binary);
-				if (out.is_open())
-				{
-					auto& data = shaderData[stage];
-					out.write((char*)data.data(), data.size() * sizeof(uint32_t));
-					out.flush();
-					out.close();
-				}
-			}
+			spirv_cross::CompilerGLSL glslCompiler(spirv);
+			m_OpenGLSourceCode[stage] = glslCompiler.compile();
 		}
 	}
 
@@ -356,12 +321,27 @@ namespace Hazel {
 		GLuint program = glCreateProgram();
 
 		std::vector<GLuint> shaderIDs;
-		for (auto&& [stage, spirv] : m_OpenGLSPIRV)
+		for (auto&& [stage, source] : m_OpenGLSourceCode)
 		{
-			GLuint shaderID = shaderIDs.emplace_back(glCreateShader(stage));
-			glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, spirv.data(), spirv.size() * sizeof(uint32_t));
-			glSpecializeShader(shaderID, "main", 0, nullptr, nullptr);
+			GLuint shaderID = glCreateShader(stage);
+			const char* src = source.c_str();
+			glShaderSource(shaderID, 1, &src, nullptr);
+			glCompileShader(shaderID);
+
+			GLint compiled = GL_FALSE;
+			glGetShaderiv(shaderID, GL_COMPILE_STATUS, &compiled);
+			if (compiled == GL_FALSE)
+			{
+				GLint length = 0;
+				glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &length);
+				std::vector<GLchar> log(length > 0 ? length : 1);
+				glGetShaderInfoLog(shaderID, length, &length, log.data());
+				HZ_CORE_ERROR("Shader compile failed ({0} {1}):\n{2}", m_FilePath, Utils::GLShaderStageToString(stage), log.data());
+				HZ_CORE_ASSERT(false, "Shader compile failed");
+			}
+
 			glAttachShader(program, shaderID);
+			shaderIDs.push_back(shaderID);
 		}
 
 		glLinkProgram(program);
@@ -381,6 +361,7 @@ namespace Hazel {
 
 			for (auto id : shaderIDs)
 				glDeleteShader(id);
+			HZ_CORE_ASSERT(false, "Shader link failed");
 		}
 
 		for (auto id : shaderIDs)

@@ -36,9 +36,14 @@ namespace Hazel {
 		//glColorMask((m_WriteMask & (uint32_t)WriteMask::R) != 0, (m_WriteMask & (uint32_t)WriteMask::G) != 0, (m_WriteMask & (uint32_t)WriteMask::B) != 0, (m_WriteMask & (uint32_t)WriteMask::A) != 0);
 		
 		switch (m_DepthFunc) {
-		case (uint32_t)DepthFunc::Less:glDepthFunc(GL_LESS);break;
-		case (uint32_t)DepthFunc::Equal:glDepthFunc(GL_EQUAL);break;
-		case (uint32_t)DepthFunc::Greater:glDepthFunc(GL_GREATER);break;
+		case (uint32_t)DepthFunc::Less:        glDepthFunc(GL_LESS);        break;
+		case (uint32_t)DepthFunc::LessEqual:   glDepthFunc(GL_LEQUAL);      break;
+		case (uint32_t)DepthFunc::Greater:     glDepthFunc(GL_GREATER);     break;
+		case (uint32_t)DepthFunc::GreaterEqual:glDepthFunc(GL_GEQUAL);      break;
+		case (uint32_t)DepthFunc::Equal:       glDepthFunc(GL_EQUAL);       break;
+		case (uint32_t)DepthFunc::NotEqual:    glDepthFunc(GL_NOTEQUAL);    break;
+		case (uint32_t)DepthFunc::Always:      glDepthFunc(GL_ALWAYS);      break;
+		case (uint32_t)DepthFunc::Never:       glDepthFunc(GL_NEVER);       break;
 		default:
 			// 默认回退，最常用小于
 			glDepthFunc(GL_LESS);
@@ -69,8 +74,14 @@ namespace Hazel {
 	{
 		//还是得用Uniform的方式来设置shader的uniform变量
 		//因为vk根本不支持用location设置Uniform变量
-		Ref<UniformBuffer> uniformBuffer = UniformBuffer::Create(sizeof(glm::mat4), locatiion);
-		uniformBuffer->SetData(&value, sizeof(glm::mat4),0);
+		//UBO 必须作为成员长期持有：局部 Ref 在函数结束时会 glDeleteBuffers，
+		//导致 binding 点被解绑，shader 读到零矩阵（天空盒 u_InverseVP 之前就是这样丢的）
+		if (!m_UniformBuffer || m_UniformBinding != locatiion)
+		{
+			m_UniformBuffer = UniformBuffer::Create(sizeof(glm::mat4), locatiion);
+			m_UniformBinding = locatiion;
+		}
+		m_UniformBuffer->SetData(&value, sizeof(glm::mat4), 0);
 	}
 
 	uint32_t MaterialInstance::AddTexture(const Ref<Texture>& texture)

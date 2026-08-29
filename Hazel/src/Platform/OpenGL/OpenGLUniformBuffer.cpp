@@ -1,4 +1,4 @@
-#include "hzpch.h"
+ï»¿#include "hzpch.h"
 #include "OpenGLUniformBuffer.h"
 
 #include <glad/glad.h>
@@ -6,8 +6,9 @@
 namespace Hazel {
 
 	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size, uint32_t binding)
+		: m_Binding(binding)
 	{
-		//´´½¨uniformbuffer ,ÉèÖÃ´óĞ¡£¬ÉèÖÃ°ó¶¨µÄshader½Ó¿Ú
+		//åˆ›å»ºuniformbuffer ,è®¾ç½®å¤§å°ï¼Œè®¾ç½®ç»‘å®šçš„shaderæ¥å£
 		glCreateBuffers(1, &m_RendererID);
 		glNamedBufferData(m_RendererID, size, nullptr, GL_DYNAMIC_DRAW); // TODO: investigate usage hint
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding, m_RendererID);
@@ -20,7 +21,13 @@ namespace Hazel {
 
 	void OpenGLUniformBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
 	{
-		//ÉÏ´«Êı¾İ
+		//ä¸Šä¼ æ•°æ®
 		glNamedBufferSubData(m_RendererID, offset, size, data);
+	}
+
+	void OpenGLUniformBuffer::Bind() const
+	{
+		// ç»˜åˆ¶å‰é‡æ–°æŒ‚åˆ° binding ç‚¹ï¼Œé˜²æ­¢è¢«å…¶ä»–ä¸´æ—¶ UBO é¡¶æ‰
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_Binding, m_RendererID);
 	}
 }

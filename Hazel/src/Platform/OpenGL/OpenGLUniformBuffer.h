@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Hazel/Renderer/UniformBuffer.h"
 
 namespace Hazel {
@@ -6,15 +6,17 @@ namespace Hazel {
 	class OpenGLUniformBuffer:public UniformBuffer
 	{
 	public:
-		//size	UBO Êı¾İ´óĞ¡£¬µ¥Î»×Ö½Ú
-		//binding	UBO °ó¶¨µã£¬ºÍ GLSL layout(binding = X) ¶ÔÓ¦
+		//size	UBO æ•°æ®å¤§å°ï¼Œå•ä½å­—èŠ‚
+		//binding	UBO ç»‘å®šç‚¹ï¼Œå’Œ GLSL layout(binding = X) å¯¹åº”
 		OpenGLUniformBuffer(uint32_t size, uint32_t binding);
 		virtual ~OpenGLUniformBuffer();
-		//´Ócpu¶ËÏògpu¶Ë½øĞĞÊı¾İ´«Êä£¨void* ´«Êäsizeµ½gpuBufferÀïÃæÆ«ÒÆoffsetÀïÃæ£©
+		//ä»cpuç«¯å‘gpuç«¯è¿›è¡Œæ•°æ®ä¼ è¾“ï¼ˆvoid* ä¼ è¾“sizeåˆ°gpuBufferé‡Œé¢åç§»offseté‡Œé¢ï¼‰
 		virtual void SetData(const void* data, uint32_t size, uint32_t offset)override;
+		virtual void Bind() const override;
 	private:
-		//m_RendererIDÊÇcpu ¶Ë´´½¨µÄÒ»¸öhandle,ÔÚgpuÉÏ´´½¨ÁË¶ÔÓ¦µÄÄÚ´æ£¬ĞèÒªÓÃÕâ¸ö½øĞĞÊı¾İµÄ´«Êä
+		//m_RendererIDæ˜¯cpu ç«¯åˆ›å»ºçš„ä¸€ä¸ªhandle,åœ¨gpuä¸Šåˆ›å»ºäº†å¯¹åº”çš„å†…å­˜ï¼Œéœ€è¦ç”¨è¿™ä¸ªè¿›è¡Œæ•°æ®çš„ä¼ è¾“
 		uint32_t m_RendererID=0;
+		uint32_t m_Binding=0;
 	};
 }
 
