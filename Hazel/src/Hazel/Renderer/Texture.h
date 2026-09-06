@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Hazel/Core/Core.h"
 #include <unordered_map>
 namespace Hazel {
@@ -7,9 +7,11 @@ namespace Hazel {
 		None = 0,
 		RGB = 1,
 		RGBA = 2,
+		RGB16F = 3,
+		RGBA16F = 4,
 	};
 
-	//½øĞĞÎÆÀí·â×°
+	//è¿›è¡Œçº¹ç†å°è£…
 	class Texture
 	{
 	public:
@@ -25,7 +27,7 @@ namespace Hazel {
 		virtual ~Texture() = default;
 	};
 
-	//2dÎÆÀí
+	//2dçº¹ç†
 	class Texture2D : public Texture {
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);

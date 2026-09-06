@@ -29,6 +29,8 @@ namespace Hazel {
 		unsigned int m_Width, m_Height;
 
 		unsigned char* m_ImageData;
+		float* m_ImageDataFloat;
+		bool m_IsHDR;
 
 		std::string m_FilePath;
 	};
