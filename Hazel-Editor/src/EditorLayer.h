@@ -54,6 +54,8 @@ private:
 	glm::vec2 m_ViewportBounds[2];
 
 	Ref<Framebuffer> m_Framebuffer;
+	Ref<Framebuffer> m_ViewportFramebuffer;
+	float m_Exposure = 1.0f;
 
 	Ref<Scene> m_ActiveScene;
 	Ref<Scene> m_EditorScene;

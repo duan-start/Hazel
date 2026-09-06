@@ -5,6 +5,8 @@
 #include "Hazel/Renderer/Renderer3D.h"
 #include "Hazel/Renderer/Renderer2D.h"
 #include "Hazel/Renderer/Material.h"
+#include "Hazel/Renderer/UniformBuffer.h"
+#include "Hazel/Renderer/RendererCommand.h"
 
 #include "Hazel/Scene/Components.h"
 namespace Hazel
@@ -13,6 +15,8 @@ namespace Hazel
 	{
 		const Scene* ActiveScene;
 		Ref<MaterialInstance> skyBox;
+		Ref<MaterialInstance> postProcess;
+		Ref<UniformBuffer> postProcessUniformBuffer;
 		const GameCamera* mainCamera;
 		const EditorCamera* editorCamera;
 	};
@@ -28,6 +32,17 @@ namespace Hazel
 		//skyMaterial->SetCullMode(CullMode::Back);
 		//Init SkyBoxMaterial
 		s_Data.skyBox=MaterialInstance::Create(skyMaterial);
+
+		// Post-process fullscreen material (loaded by ShaderLibrary)
+		if (!s_Data.postProcess)
+		{
+			auto postMaterial = Material::Create(ShaderLibrary::GetLib()->Get("PostProcess"));
+			// Fullscreen pass: never touch the depth buffer
+			postMaterial->SetDepthMask(DepthMask::False);
+			s_Data.postProcess = MaterialInstance::Create(postMaterial);
+			// Binding 4 is reserved for post-process settings (std140 vec4 = 16 bytes)
+			s_Data.postProcessUniformBuffer = UniformBuffer::Create(sizeof(glm::vec4), 4);
+		}
 	
 	};
 	void SceneRenderer::BeginScene(const Hazel::Scene* scene, const EditorCamera& camera)
@@ -87,18 +102,13 @@ namespace Hazel
 		}
 		
 		//skybox
-		if (s_Data.ActiveScene->m_Environment.Sky) {
-			//	//std::cout << s_Data.ActiveScene->m_Environment.Sky->GetPath();
-			s_Data.skyBox->ResetAllTexture();
-
-			s_Data.skyBox->AddTexture(s_Data.ActiveScene->m_Environment.Sky);
-			//binding=3 是天空盒专用槽，避开 Renderer2D/3D 使用的 0/1/2
-			s_Data.skyBox->SetUniformMat4(3, glm::inverse(camera.GetViewProjection()));
-			Renderer2D::DrawFullscreenQuad(s_Data.skyBox);
-		}
-
+		SceneRenderer::RenderSky(camera);
 
 		Renderer2D::EndScene();
+
+		//tonemapping, bloom, etc
+
+
 	}
 
 	void SceneRenderer::BeginScene(const Hazel::Scene* scene, const GameCamera* mainCamera, const glm::mat4& transform)
@@ -137,15 +147,44 @@ namespace Hazel
 		Renderer2D::EndScene();
 	}
 
+	void SceneRenderer::PostProcess(const Ref<Framebuffer>& source, const Ref<Framebuffer>& target, float exposure)
+	{
+		if (!source || !target)
+			return;
+
+		target->Bind();
+
+		// Bind the HDR scene color attachment to unit 0, matching
+		// layout(binding = 0) uniform sampler2D u_SceneColor in PostProcess.glsl.
+		RendererCommand::BindTexture(0, source->GetColorAttachmentRendererID(0));
+
+		// Upload exposure (kept in the x component of a vec4; std140 block is 16 bytes)
+		glm::vec4 settings(exposure, 0.0f, 0.0f, 0.0f);
+		s_Data.postProcessUniformBuffer->SetData(&settings, sizeof(glm::vec4), 0);
+		s_Data.postProcessUniformBuffer->Bind();
+
+		Renderer2D::DrawFullscreenQuad(s_Data.postProcess);
+
+		target->Unbind();
+	}
+
 	 void SceneRenderer::EndScene() {
 		s_Data.ActiveScene = nullptr;
 		s_Data.mainCamera = nullptr;
 	}
 
-	 void SceneRenderer::RenderSky(Ref<Texture> SkyMap)
+	 void SceneRenderer::RenderSky(const EditorCamera& camera)
 	 {
 		
-		 //s_Data.skyBox->SetMat3(glm::inverse(s_Data.Camera));
+		 if (s_Data.ActiveScene->m_Environment.Sky) {
+			 //	//std::cout << s_Data.ActiveScene->m_Environment.Sky->GetPath();
+			 s_Data.skyBox->ResetAllTexture();
+
+			 s_Data.skyBox->AddTexture(s_Data.ActiveScene->m_Environment.Sky);
+			 //binding=3 是天空盒专用槽，避开 Renderer2D/3D 使用的 0/1/2
+			 s_Data.skyBox->SetUniformMat4(3, glm::inverse(camera.GetViewProjection()));
+			 Renderer2D::DrawFullscreenQuad(s_Data.skyBox);
+		 }
 	 }
 
 

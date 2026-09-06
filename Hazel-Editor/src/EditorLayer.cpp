@@ -2,6 +2,7 @@
 #include "EditorLayer.h"
 
 #include "Hazel/Scene/SceneSerializer.h"
+#include "Hazel/Renderer/SceneRenderer.h"
 
 #include "Hazel/Utils/PlatformUtils.h"
 
@@ -44,15 +45,21 @@ void EditorLayer::OnAttach()
 
 	//参数设定
 	m_FramebufferSize = { 1280,720 };
+	//分别是场景buffer和显示buffer
 	Hazel::FramebufferSpecification fbSpec;
-	//设定3个附件
-	fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
-	fbSpec.Width = 1280;
-	fbSpec.Height = 720;
+	Hazel::FramebufferSpecification viewSpec;
+	//设定3个附件,
+	fbSpec.Attachments = { FramebufferTextureFormat::RGBA16F, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
+	fbSpec.Width = m_FramebufferSize.x;
+	fbSpec.Height = m_FramebufferSize.y;
+	
+	viewSpec.Attachments = { FramebufferTextureFormat::RGBA8 };
+	viewSpec.Width = m_FramebufferSize.x;
+	viewSpec.Height = m_FramebufferSize.y;
 
 	//正式创建
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
-
+	m_ViewportFramebuffer = Hazel::Framebuffer::Create(viewSpec);
 	//创建摄像机（固定）
 	m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 	//创建场景并进行初始化设定
@@ -209,10 +216,14 @@ void EditorLayer::OnUpdate(Timestep ts)
 	//可视化渲染（类似UI(Post)后处理）
 	OnOverlayRender();
 
+	//解绑buffer的同时要bind后处理的buffer
 	m_Framebuffer->Unbind();
+	//后处理：把 HDR 场景 tonemap 进 LDR 显示缓冲
+	SceneRenderer::PostProcess(m_Framebuffer, m_ViewportFramebuffer, m_Exposure);
+
 }
 
-//使用Imgui正式绘制
+//使用Imgui正式绘制,取出前面buffer的颜色附件，显示在imgui的窗口上（做完后处理的buffer）
 void EditorLayer::OnImGuiRender()
 {
 	HZ_PROFILE_FUNCTION();
@@ -308,6 +319,7 @@ void EditorLayer::OnImGuiRender()
 		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
 
 		ImGui::Button("skyBox", ImVec2(100.0f, 0.0f));
+		ImGui::SliderFloat("Exposure", &m_Exposure, 0.05f, 5.0f);
 		if (ImGui::BeginDragDropTarget())
 		{
 			//接受资产拖拽（CONTENT_BROWSER_ITEM是暗号）
@@ -342,6 +354,7 @@ void EditorLayer::OnImGuiRender()
 		//帧缓冲的（Textre重新创建，glViewport会在绑定的时候每一帧都重新绘制）
 		m_FramebufferSize = { SpaceAvil.x, SpaceAvil.y };
 		m_Framebuffer->Resize(SpaceAvil.x, SpaceAvil.y);
+		m_ViewportFramebuffer->Resize(SpaceAvil.x, SpaceAvil.y);
 		//Camera重新设置
 		m_CameralController.OnResize(SpaceAvil.x, SpaceAvil.y);
 		//Editor
@@ -350,7 +363,7 @@ void EditorLayer::OnImGuiRender()
 		m_ActiveScene->OnViewportResize((uint32_t)SpaceAvil.x, (uint32_t)SpaceAvil.y);
 	}
 	//获取TextureID
-	uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
+	uint32_t textureID = m_ViewportFramebuffer->GetColorAttachmentRendererID();
 	//y轴flip
 	ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 

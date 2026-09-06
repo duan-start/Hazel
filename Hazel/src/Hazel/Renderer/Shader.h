@@ -54,6 +54,8 @@ namespace Hazel {
 			Load("assets/shaders/Line.glsl");
 			//sky
 			Load("assets/shaders/SkyBox.glsl");
+			//post process
+			Load("assets/shaders/PostProcess.glsl");
 			//无光的
 			Load("assets/shaders/Mesh.glsl");
 			//blinn

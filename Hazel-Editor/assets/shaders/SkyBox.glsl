@@ -32,6 +32,4 @@ layout(location=0) in vec3 v_Position;
 void main()
 {
     finalColor = texture(u_Texture, v_Position);
-    // 调试用红色叠加，方便确认天空盒在渲染
-    finalColor += vec4(0.3f, 0.1f, 0.1f, 1.0f);
 }

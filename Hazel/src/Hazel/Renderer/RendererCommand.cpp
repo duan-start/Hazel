@@ -24,6 +24,10 @@ namespace Hazel {
 	{
 		s_RendererAPI->SetClearColor(color);
 	}
+	void RendererCommand::BindTexture(uint32_t slot, uint32_t rendererID)
+	{
+		s_RendererAPI->BindTexture(slot, rendererID);
+	}
 	void RendererCommand::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
 	{
 		

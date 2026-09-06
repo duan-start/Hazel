@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 
 #include "entt.hpp"
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
 #include "Hazel/Renderer/Texture.h"
-//Ç°ÏòÉùÃ÷,½µµÍ±àÒëÖ®¼äµÄÒÀÀµ
+//å‰å‘å£°æ˜,é™ä½ç¼–è¯‘ä¹‹é—´çš„ä¾èµ–
 class b2World;	
 
 
@@ -28,57 +28,56 @@ namespace Hazel {
 
 
 	class Entity;
-	//ÊµÌåµÄÈİÆ÷,äÖÈ¾µÄ×î´óµ¥Î»£¨==level£©
+	//å®ä½“çš„å®¹å™¨,æ¸²æŸ“çš„æœ€å¤§å•ä½ï¼ˆ==levelï¼‰
 	class Scene
 	{
 	public:
 		Scene();
 		~Scene();
 
-//Copy Scene()ÊµÏÖÉî¶È¿½±´
+//Copy Scene()å®ç°æ·±åº¦æ‹·è´
 		static Ref<Scene> Copy(Ref<Scene> other);
 
-//ÊµÌå²Ù×÷
-		//ÊµÌåµÄ¸´ÖÆ
+//å®ä½“æ“ä½œ
+		//å®ä½“çš„å¤åˆ¶
 		void DuplicateEntity(Entity entity);
-		//´´½¨ÊµÌå
+		//åˆ›å»ºå®ä½“
 		Entity CreateEntity(const std::string& name= "");
-		//´´½¨ÓµÓĞÌØ¶¨idµÄÊµÌå
+		//åˆ›å»ºæ‹¥æœ‰ç‰¹å®šidçš„å®ä½“
 		Entity CreateEntityWithUUID(UUID uuid, const std::string& name = std::string());
-		//É¾³ıÊµÌå
+		//åˆ é™¤å®ä½“
 		void DestroyEntity(Entity entity);
-//²éÕÒÊµÌå
-		//»ñÈ¡Ä³Ğ©ÌØÕ÷µÄÊµÌå
+//æŸ¥æ‰¾å®ä½“
+		//è·å–æŸäº›ç‰¹å¾çš„å®ä½“
 		template<typename... Components>
 		auto GetAllEntitiesWith()
 		{
 			return m_Registry.group<>(entt::get<Components...>);
 		}
-		//»ñÈ¡Ö÷Ïà»úÊµÌå
+		//è·å–ä¸»ç›¸æœºå®ä½“
 		Entity GetPrimaryCameraEntity();
 //Set
 		//RuntimeSet
 		void OnRuntimeStart();
 		void OnRuntimeStop();
-		//Ä£ÄâSet
+		//æ¨¡æ‹ŸSet
 		void OnSimulationStart();
 		void OnSimulationStop();
 
 //Tick
-		//Ä£Äâtick(ÎïÀítick)
+		//æ¨¡æ‹Ÿtick(ç‰©ç†tick)
 		void OnUpdateSimulation(Timestep ts,EditorCamera& camera);
-		//ÓÎÏ·ÔËĞĞµÄtick(ÉãÏñ»úÓÉ¿Í»§¶Ë½øĞĞÉèÖÃ)
+		//æ¸¸æˆè¿è¡Œçš„tick(æ‘„åƒæœºç”±å®¢æˆ·ç«¯è¿›è¡Œè®¾ç½®)
 		void OnUpdateRuntime(Timestep ts);
-		//±à¼­Æ÷½øĞĞ±à¼­µÄtick£¨ÉãÏñ»úÓÉÒıÇæ¶Ë½øĞĞÖ¸¶¨£©
+		//ç¼–è¾‘å™¨è¿›è¡Œç¼–è¾‘çš„tickï¼ˆæ‘„åƒæœºç”±å¼•æ“ç«¯è¿›è¡ŒæŒ‡å®šï¼‰
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
 
 //Viewport
-		//Õâ¸öÊÇuiµÄ´óĞ¡£¬×îºóäÖÈ¾³öÎÆÀíÖ®ºóÔÙÖØĞÂ·Ö²¼µ½uiÉÏ£¬ÄÜ¹»±£Ö¤ÍêÈ«²»±äĞÍ
+		//è¿™ä¸ªæ˜¯uiçš„å¤§å°ï¼Œæœ€åæ¸²æŸ“å‡ºçº¹ç†ä¹‹åå†é‡æ–°åˆ†å¸ƒåˆ°uiä¸Šï¼Œèƒ½å¤Ÿä¿è¯å®Œå…¨ä¸å˜å‹
 		void OnViewportResize(uint32_t width, uint32_t height);
-
 		void LoadEnvironmentMap(const std::string& filePath) { m_Environment = Environment::Load(filePath); }
 	private:
-		//ÊµÌå×é¼şÌí¼Ó
+		//å®ä½“ç»„ä»¶æ·»åŠ 
 		template<typename T>
 		void OnComponentAdded(Entity entity,T& component);
 
@@ -87,7 +86,7 @@ namespace Hazel {
 		void OnPhysics2DStop();
 
 	private:
-		//ÊµÌå×¢²á±í
+		//å®ä½“æ³¨å†Œè¡¨
 		entt::registry m_Registry;
 		//UI
 		uint32_t m_ViewportWidth=0, m_ViewportHeight=0;
@@ -95,10 +94,10 @@ namespace Hazel {
 		//cubeMap
 		Environment m_Environment;
 	private:
-		//ÎïÀíÊÀ½ç
+		//ç‰©ç†ä¸–ç•Œ
 		b2World* m_PhysicsWorld = nullptr;
 
-		//ÉùÃ÷ÎŞĞè¶¨Òå£¬ÉõÖÁ²»ĞèÒªÇ°ÃæÉùÃ÷(Ã»ÓĞ±àÒëÖ®¼äµÄÄÚ´æÒÀÀµ)
+		//å£°æ˜æ— éœ€å®šä¹‰ï¼Œç”šè‡³ä¸éœ€è¦å‰é¢å£°æ˜(æ²¡æœ‰ç¼–è¯‘ä¹‹é—´çš„å†…å­˜ä¾èµ–)
 		friend class Entity;
 		friend class SceneHierarchyPanel;
 		friend class SceneSerializer;

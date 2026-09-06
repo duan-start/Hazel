@@ -1,7 +1,8 @@
-#pragma once
+ï»¿#pragma once
 #include <Hazel/Scene/Scene.h>
+#include "Hazel/Renderer/Framebuffer.h"
 
-//ÓÃÀ´äÖÈ¾³¡¾°µÄÀà£¬Ö÷ÒªÊÇ¶ÔRenderer3DµÄ·â×°£¬Ìá¹©¸ü¸ß²ã´ÎµÄ½Ó¿Ú
+//ç”¨æ¥æ¸²æŸ“åœºæ™¯çš„ç±»ï¼Œä¸»è¦æ˜¯å¯¹Renderer3Dçš„å°è£…ï¼Œæä¾›æ›´é«˜å±‚æ¬¡çš„æ¥å£
 namespace Hazel
 {
 	class Material;
@@ -11,10 +12,13 @@ namespace Hazel
 			static void Init();
 			static void BeginScene(const Hazel::Scene* scene, const EditorCamera& camera);
 			static void BeginScene(const Hazel::Scene* scene, const GameCamera* camera, const glm::mat4& transform);
+			// Reads the source framebuffer's color attachment and writes the
+			// tonemapped result into the target framebuffer (display chain).
+			static void PostProcess(const Ref<Framebuffer>& source, const Ref<Framebuffer>& target, float exposure);
 			static void EndScene();
 	private:
 		//static void RenderScene();
-		static void RenderSky(Ref<Texture> SkyMap);
+		static void RenderSky(const EditorCamera& camera);
 	};
 
 }

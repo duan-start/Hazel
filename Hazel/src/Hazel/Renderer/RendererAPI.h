@@ -20,6 +20,8 @@ namespace Hazel {
 		virtual void Init() = 0;
 		virtual void Clear() = 0;
 		virtual void SetClearColor(const glm::vec4& color) = 0;
+		// Bind a texture object to a texture unit so samplers can read it.
+		virtual void BindTexture(uint32_t slot, uint32_t rendererID) = 0;
 
 		virtual void SetLineWidth(float width)=0 ;
 		virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)=0;

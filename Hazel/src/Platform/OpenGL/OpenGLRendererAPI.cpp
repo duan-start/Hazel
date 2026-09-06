@@ -42,6 +42,11 @@ namespace Hazel {
 		glClearColor(color.x, color.y, color.z, color.w);
 	}
 
+	void OpenGLRendererAPI::BindTexture(uint32_t slot, uint32_t rendererID)
+	{
+		glBindTextureUnit(slot, rendererID);
+	}
+
 	void OpenGLRendererAPI::SetLineWidth(float width)
 	{
 		glLineWidth(width);
