@@ -76,8 +76,11 @@ private:
 
 
 	bool m_Running = true;
-	//layer的容器
+
+	//layer的容器，属于我们的观察者
 	LayerStack m_LayerStack;
+
+	//同样是观察者者模式，但是这里实际依赖了具体，违反了开闭原则
 	ImGuiLayer* m_ImGuiLayer;
 
 	ApplicationCommandLineArgs m_CommandLineArgs;

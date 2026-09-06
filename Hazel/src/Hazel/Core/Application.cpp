@@ -127,6 +127,7 @@ namespace Hazel {
 			//逻辑，动画，渲染的离屏更新
 			if (!m_Minimized) {
 			HZ_PROFILE_SCOPE("LayerStack Update");
+			//通知附件去更新对应的状态
 			for (Layer* layer : m_LayerStack) 
 				layer->OnUpdate(timestep);
 			}
