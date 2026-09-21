@@ -319,7 +319,6 @@ void EditorLayer::OnImGuiRender()
 		ImGui::Checkbox("Show physics colliders", &m_ShowPhysicsColliders);
 
 		ImGui::Button("skyBox", ImVec2(100.0f, 0.0f));
-		ImGui::SliderFloat("Exposure", &m_Exposure, 0.05f, 5.0f);
 		if (ImGui::BeginDragDropTarget())
 		{
 			//接受资产拖拽（CONTENT_BROWSER_ITEM是暗号）
@@ -332,6 +331,9 @@ void EditorLayer::OnImGuiRender()
 			}
 			ImGui::EndDragDropTarget();
 		}
+		//NOTE: must come after EndDragDropTarget, otherwise the drop target
+		//would attach to this slider instead of the skyBox button above.
+		ImGui::SliderFloat("Exposure", &m_Exposure, 0.05f, 5.0f);
 
 		ImGui::End();
 	}
