@@ -100,7 +100,6 @@ namespace Hazel {
 		return textureIndex;
 	}
 
-
 	void MaterialInstance::ReplaceTexture(const Ref<Texture>& texture, int index)
 	{
 		if(index < 0 || index >= m_Textures.size())
