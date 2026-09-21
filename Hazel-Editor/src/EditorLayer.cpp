@@ -11,6 +11,58 @@
 #include "Hazel/Math/Math.h"
 
 #include <chrono>
+#include <fstream>
+#include <sstream>
+
+namespace
+{
+	// Fullscreen triangle/quad vertex shader used by every ShaderToy pass.
+	const char* s_ShaderToyVertexSource = R"(#version 450
+layout(location = 0) in vec3 a_Position;
+void main()
+{
+	gl_Position = vec4(a_Position.xy, 0.0, 1.0);
+}
+)";
+
+	// ShaderToy protocol -> engine UBO (binding 5). User shaders reference the
+	// ShaderToy names; the macros map them onto our uniform block.
+	const char* s_ShaderToyFragmentPrelude = R"(#version 450
+layout(location = 0) out vec4 finalColor;
+
+layout(std140, binding = 5) uniform ShaderToyData
+{
+	vec4 u_Resolution;   // xy = viewport size in pixels
+	vec4 u_Time;         // x = iTime, y = iTimeDelta, z = iFrame, w = unused
+	vec4 u_Mouse;        // xy = current pixel, zw = click pixel (negative when up)
+	vec4 u_Date;         // y, month, day, seconds
+};
+
+#define iResolution (u_Resolution.xyz)
+#define iTime       (u_Time.x)
+#define iTimeDelta  (u_Time.y)
+#define iFrame      (int(u_Time.z))
+#define iMouse      (u_Mouse)
+#define iDate       (u_Date)
+
+layout(binding = 8)  uniform sampler2D iChannel0;
+layout(binding = 9)  uniform sampler2D iChannel1;
+layout(binding = 10) uniform sampler2D iChannel2;
+layout(binding = 11) uniform sampler2D iChannel3;
+
+)";
+
+	// Wrapper appended after the user's source: ShaderToy shaders only define
+	// mainImage(), the real entry point is injected here.
+	const char* s_ShaderToyFragmentWrapper = R"(
+void main()
+{
+	vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+	mainImage(color, gl_FragCoord.xy);
+	finalColor = color;
+}
+)";
+}
 
 //这行的逻辑其实是：
 //using namespace Hazel; 先把 Hazel 命名空间“引入当前作用域”；
@@ -60,6 +112,18 @@ void EditorLayer::OnAttach()
 	//正式创建
 	m_Framebuffer = Hazel::Framebuffer::Create(fbSpec);
 	m_ViewportFramebuffer = Hazel::Framebuffer::Create(viewSpec);
+
+	//ShaderToy viewport: own framebuffer + its own uniform block (binding 5)
+	{
+		Hazel::FramebufferSpecification toySpec;
+		toySpec.Attachments = { FramebufferTextureFormat::RGBA8 };
+		toySpec.Width = (uint32_t)m_ShaderToySize.x;
+		toySpec.Height = (uint32_t)m_ShaderToySize.y;
+		m_ShaderToyFramebuffer = Hazel::Framebuffer::Create(toySpec);
+		m_ShaderToyUniformBuffer = UniformBuffer::Create(sizeof(glm::vec4) * 4, 5);
+		ShaderToyReload(m_ShaderToyPath);
+	}
+
 	//创建摄像机（固定）
 	m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 	//创建场景并进行初始化设定
@@ -221,6 +285,9 @@ void EditorLayer::OnUpdate(Timestep ts)
 	//后处理：把 HDR 场景 tonemap 进 LDR 显示缓冲
 	SceneRenderer::PostProcess(m_Framebuffer, m_ViewportFramebuffer, m_Exposure);
 
+	//独立的 ShaderToy 视口（不参与场景渲染）
+	ShaderToyRender(ts);
+
 }
 
 //使用Imgui正式绘制,取出前面buffer的颜色附件，显示在imgui的窗口上（做完后处理的buffer）
@@ -337,6 +404,7 @@ void EditorLayer::OnImGuiRender()
 
 		ImGui::End();
 	}
+	UI_ShaderToy();
 //渲染主要视图
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
 	ImGui::Begin("ViewPort");
@@ -789,4 +857,143 @@ bool EditorLayer::OnMouseButtonPressed(MouseButtonPressed& e)
 			m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 	}
 	return false;
+}
+
+// ============================ ShaderToy viewport ============================
+
+void EditorLayer::ShaderToyReload(const std::string& path)
+{
+	std::ifstream in(path, std::ios::in | std::ios::binary);
+	if (!in)
+	{
+		HZ_CORE_ERROR("ShaderToy: failed to open shader source '{0}'", path);
+		return;
+	}
+
+	std::stringstream buffer;
+	buffer << in.rdbuf();
+	const std::string userSource = buffer.str();
+
+	// fragment = protocol prelude + user mainImage() + injected main()
+	const std::string fragmentSource =
+		std::string(s_ShaderToyFragmentPrelude) + userSource + s_ShaderToyFragmentWrapper;
+
+	m_ShaderToyShader = Shader::Create("ShaderToy", s_ShaderToyVertexSource, fragmentSource);
+	m_ShaderToyMaterial = MaterialInstance::Create(m_ShaderToyShader);
+	m_ShaderToyPath = path;
+	m_ShaderToyTime = 0.0f;
+	m_ShaderToyFrame = 0;
+}
+
+void EditorLayer::ShaderToyRender(Timestep ts)
+{
+	if (!m_ShowShaderToy || !m_ShaderToyMaterial || !m_ShaderToyFramebuffer)
+		return;
+
+	const float delta = ts.GetSeconds();
+	m_ShaderToyDelta = m_ShaderToyPlaying ? delta : 0.0f;
+	if (m_ShaderToyPlaying)
+	{
+		m_ShaderToyTime += delta;
+		++m_ShaderToyFrame;
+	}
+
+	// Map the ImGui cursor into viewport pixels; GL's origin is bottom-left,
+	// so the Y axis is flipped here.
+	const ImVec2 mousePos = ImGui::GetMousePos();
+	const float localX = mousePos.x - m_ShaderToyBounds[0].x;
+	const float localY = m_ShaderToyBounds[1].y - mousePos.y;
+	const bool inside = localX >= 0.0f && localY >= 0.0f &&
+		localX < m_ShaderToySize.x && localY < m_ShaderToySize.y;
+
+	if (inside)
+	{
+		m_ShaderToyMouse.x = localX;
+		m_ShaderToyMouse.y = localY;
+
+		const bool down = Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT);
+		if (down && !m_ShaderToyMouseDown)
+			m_ShaderToyMouseClick = glm::vec2(localX, localY);
+
+		if (down)
+		{
+			m_ShaderToyMouse.z = m_ShaderToyMouseClick.x;
+			m_ShaderToyMouse.w = m_ShaderToyMouseClick.y;
+			m_ShaderToyMouseDown = true;
+		}
+		else if (m_ShaderToyMouseDown)
+		{
+			// ShaderToy convention: negative click position once released
+			m_ShaderToyMouse.z = -m_ShaderToyMouseClick.x;
+			m_ShaderToyMouse.w = -m_ShaderToyMouseClick.y;
+			m_ShaderToyMouseDown = false;
+		}
+	}
+
+	struct ShaderToyData
+	{
+		glm::vec4 Resolution;
+		glm::vec4 Time;
+		glm::vec4 Mouse;
+		glm::vec4 Date;
+	};
+
+	ShaderToyData data;
+	data.Resolution = glm::vec4(m_ShaderToySize.x, m_ShaderToySize.y, 0.0f, 0.0f);
+	data.Time = glm::vec4(m_ShaderToyTime, m_ShaderToyDelta, (float)m_ShaderToyFrame, 0.0f);
+	data.Mouse = m_ShaderToyMouse;
+	data.Date = glm::vec4(0.0f);
+
+	m_ShaderToyUniformBuffer->SetData(&data, sizeof(ShaderToyData), 0);
+	m_ShaderToyUniformBuffer->Bind();
+
+	m_ShaderToyFramebuffer->Bind();
+	Renderer2D::DrawFullscreenQuad(m_ShaderToyMaterial);
+	m_ShaderToyFramebuffer->Unbind();
+}
+
+void EditorLayer::UI_ShaderToy()
+{
+	if (!m_ShowShaderToy)
+		return;
+
+	ImGui::Begin("ShaderToy", &m_ShowShaderToy);
+
+	ImGui::Text("Source: %s", m_ShaderToyPath.c_str());
+	if (ImGui::Button("Reload"))
+		ShaderToyReload(m_ShaderToyPath);
+	ImGui::SameLine();
+	ImGui::Checkbox("Play", &m_ShaderToyPlaying);
+	ImGui::SameLine();
+	ImGui::Text("t=%.2fs  frame=%d", m_ShaderToyTime, m_ShaderToyFrame);
+
+	// Keep the render target in sync with the window content area
+	const ImVec2 avail = ImGui::GetContentRegionAvail();
+	if (avail.x >= 16.0f && avail.y >= 16.0f &&
+		glm::distance(m_ShaderToySize, glm::vec2(avail.x, avail.y)) > 1.0f)
+	{
+		m_ShaderToySize = glm::vec2(avail.x, avail.y);
+		m_ShaderToyFramebuffer->Resize((uint32_t)avail.x, (uint32_t)avail.y);
+	}
+
+	const ImVec2 topLeft = ImGui::GetCursorScreenPos();
+	m_ShaderToyBounds[0] = glm::vec2(topLeft.x, topLeft.y);
+	m_ShaderToyBounds[1] = glm::vec2(topLeft.x + m_ShaderToySize.x, topLeft.y + m_ShaderToySize.y);
+
+	ImGui::Image((void*)m_ShaderToyFramebuffer->GetColorAttachmentRendererID(),
+		ImVec2{ m_ShaderToySize.x, m_ShaderToySize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+
+	// The image itself is the drop target: dropping a .glsl loads it as source
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+		{
+			const wchar_t* path = (const wchar_t*)payload->Data;
+			std::filesystem::path shaderPath = std::filesystem::path(g_AssetPath) / path;
+			ShaderToyReload(shaderPath.string());
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	ImGui::End();
 }
