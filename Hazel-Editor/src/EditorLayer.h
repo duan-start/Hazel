@@ -4,6 +4,8 @@
 #include "../Panels/SceneHierarchyPanel.h"
 #include "../Panels/ContentBrowserPanel.h"
 #include "Hazel/Renderer/EditorCamera.h"
+#include "Hazel/Renderer/Material.h"
+#include "Hazel/Renderer/UniformBuffer.h"
 
 using namespace Hazel;
 
@@ -38,6 +40,11 @@ private:
 	void OnDuplicateEntity();
 
 	void OnOverlayRender();
+
+	// ShaderToy viewport
+	void ShaderToyReload(const std::string& path);
+	void ShaderToyRender(Timestep ts);
+	void UI_ShaderToy();
 private:
 	enum class SceneState
 	{
@@ -56,6 +63,23 @@ private:
 	Ref<Framebuffer> m_Framebuffer;
 	Ref<Framebuffer> m_ViewportFramebuffer;
 	float m_Exposure = 1.0f;
+
+	// ShaderToy viewport state
+	bool m_ShowShaderToy = true;
+	bool m_ShaderToyPlaying = true;
+	Ref<Framebuffer> m_ShaderToyFramebuffer;
+	Ref<Shader> m_ShaderToyShader;
+	Ref<MaterialInstance> m_ShaderToyMaterial;
+	Ref<UniformBuffer> m_ShaderToyUniformBuffer;
+	std::string m_ShaderToyPath = "assets/shaders/ShaderToy/default.glsl";
+	glm::vec2 m_ShaderToySize{ 512.0f, 512.0f };
+	glm::vec2 m_ShaderToyBounds[2];
+	float m_ShaderToyTime = 0.0f;
+	float m_ShaderToyDelta = 0.0f;
+	int m_ShaderToyFrame = 0;
+	glm::vec4 m_ShaderToyMouse{ 0.0f };
+	glm::vec2 m_ShaderToyMouseClick{ 0.0f };
+	bool m_ShaderToyMouseDown = false;
 
 	Ref<Scene> m_ActiveScene;
 	Ref<Scene> m_EditorScene;
